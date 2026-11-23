@@ -24,6 +24,8 @@ from pathlib import Path
 
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 IMG_EXT = {".jpg", ".jpeg", ".png", ".tif", ".tiff"}
 
 
@@ -38,6 +40,18 @@ def sha256(path: Path, chunk: int = 1 << 20) -> str:
 def read_csv_any(path: Path) -> pd.DataFrame:
     # Ayırıcı belirsiz (virgül / boşluk / sekme) — pandas'a tahmin ettir.
     return pd.read_csv(path, sep=None, engine="python")
+
+
+def bounds_diff_m(csv_box, ras_box) -> list[float]:
+    """Koordinat CSV'si ile raster sınırları arasındaki fark (m): [sol, üst, sağ, alt]."""
+    import math
+
+    lat_t, lon_l, lat_b, lon_r = csv_box
+    left, bottom, right, top = ras_box
+    k = 111_320.0
+    c = math.cos(math.radians((lat_t + lat_b) / 2))
+    return [round((lon_l - left) * k * c, 2), round((lat_t - top) * k, 2),
+            round((lon_r - right) * k * c, 2), round((lat_b - bottom) * k, 2)]
 
 
 def raster_info(path: Path) -> dict:
@@ -72,9 +86,20 @@ def check_region(rdir: Path) -> dict:
 
     tifs = sorted(rdir.glob("satellite*.tif"))
     out["satellite"] = [t.name for t in tifs]
-    if len(tifs) != 1:
-        out["problems"].append(f"{len(tifs)} uydu tif'i bulundu (1 bekleniyor)")
-    out["raster"] = raster_info(tifs[0]) if tifs else None
+    out["raster"] = None
+    if not tifs:
+        out["problems"].append("uydu tif'i yok")
+    elif len(tifs) == 1:
+        out["raster"] = raster_info(tifs[0])
+    else:
+        # Parçalı harita (tam pakette 09): VRT mozaiği tek harita olarak doğrulanır.
+        from guvenloc.io_visloc import satellite_source
+
+        try:
+            out["raster"] = raster_info(satellite_source(rdir))
+            out["raster"]["tiles"] = len(tifs)
+        except (ValueError, OSError) as e:
+            out["problems"].append(f"{len(tifs)} parçalı harita birleştirilemedi: {e!r}")
     if out["raster"] and "error" in out["raster"]:
         out["problems"].append(f"tif okunamadı: {out['raster']['error']}")
 
@@ -91,6 +116,15 @@ def check_region(rdir: Path) -> dict:
     out["head"] = df.head(3).astype(str).to_dict(orient="records")
     num = df.select_dtypes("number")
     out["numeric_range"] = {c: [float(num[c].min()), float(num[c].max())] for c in num.columns}
+    out["has_heading"] = "Phi1" in df.columns and bool(df["Phi1"].notna().any())
+
+    ras = out["raster"] or {}
+    if "bounds" in ras and {"lat", "lon"} <= set(df.columns):
+        left, bottom, right, top = ras["bounds"]
+        outside = (df.lat > top) | (df.lat < bottom) | (df.lon < left) | (df.lon > right)
+        out["frames_outside_map"] = int(outside.sum())
+        if outside.any():
+            out["outside_map_files"] = df.loc[outside, df.columns[1]].astype(str).tolist()[:20]
 
     # CSV'deki dosya adları ile diskteki kareleri eşle
     name_col = next((c for c in df.columns if re.search(r"file|name|img", str(c), re.IGNORECASE)), df.columns[0])
@@ -108,6 +142,8 @@ def check_region(rdir: Path) -> dict:
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):  # Windows konsolu (cp1252) Türkçe karakterde çöker
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("root", type=Path)
     ap.add_argument("--expect-frames", type=int)
@@ -132,12 +168,21 @@ def main() -> int:
     rng = next(iter(sorted(root.glob("satellite*coordinates*range*.csv"))), None)
     if rng is not None:
         report["satellite_coordinates_range_file"] = rng.name
-        report["satellite_coordinates_range"] = read_csv_any(rng).astype(str).to_dict(orient="records")
+        rdf = read_csv_any(rng)
+        report["satellite_coordinates_range"] = rdf.astype(str).to_dict(orient="records")
+        cols = {"LT_lat_map", "LT_lon_map", "RB_lat_map", "RB_lon_map", "mapname"}
+        if cols <= set(rdf.columns):
+            for _, row in rdf.iterrows():
+                rid = re.sub(r"\D", "", str(row["mapname"])).zfill(2)
+                reg = next((r for r in report["regions"] if r["region"] == rid), None)
+                if reg and reg["raster"] and "bounds" in reg["raster"]:
+                    box = (row.LT_lat_map, row.LT_lon_map, row.RB_lat_map, row.RB_lon_map)
+                    reg["range_csv_vs_raster_m"] = bounds_diff_m(box, reg["raster"]["bounds"])
     else:
         report["satellite_coordinates_range"] = None
 
     n_frames = sum(r["n_frames"] for r in report["regions"])
-    n_maps = sum(len(r["satellite"]) for r in report["regions"])
+    n_maps = sum(1 for r in report["regions"] if r["satellite"])
     report["totals"] = {"regions": len(regions), "frames": n_frames, "maps": n_maps}
 
     problems = [f"{r['region']}: {p}" for r in report["regions"] for p in r["problems"]]
@@ -155,7 +200,18 @@ def main() -> int:
     for r in report["regions"]:
         ras = r.get("raster") or {}
         size = f"{ras.get('width')}x{ras.get('height')}" if "width" in ras else "-"
-        print(f"  {r['region']}: {r['n_frames']:5d} kare, CSV {r.get('n_rows', '-')} satır, harita {size}, CRS {ras.get('crs')}")
+        extra = []
+        if ras.get("tiles"):
+            extra.append(f"{ras['tiles']} parça→VRT")
+        if not r.get("has_heading", True):
+            extra.append("YÖN YOK")
+        if r.get("frames_outside_map"):
+            extra.append(f"{r['frames_outside_map']} kare harita dışı")
+        d = r.get("range_csv_vs_raster_m")
+        if d and max(map(abs, d)) > 1:
+            extra.append(f"CSV↔tif sınır farkı {d} m")
+        print(f"  {r['region']}: {r['n_frames']:5d} kare, CSV {r.get('n_rows', '-')} satır, "
+              f"harita {size}, CRS {ras.get('crs')}" + (f"  [{'; '.join(extra)}]" if extra else ""))
     cols = {tuple(r.get("columns", [])) for r in report["regions"]}
     print("CSV sütunları:", *[list(c) for c in cols], sep="\n  ")
     for r in report["regions"]:
@@ -174,7 +230,8 @@ def main() -> int:
         ck_dir = Path("docs/checksums")
         ck_dir.mkdir(parents=True, exist_ok=True)
         ck = ck_dir / f"{args.root.name}.sha256"
-        files = sorted(p for p in root.rglob("*") if p.is_file())
+        # Türetilmiş VRT mozaikleri listeye girmez: checksum'lar yalnızca indirilen dosyalar.
+        files = sorted(p for p in root.rglob("*") if p.is_file() and not p.name.endswith("_mosaic.vrt"))
         with ck.open("w", encoding="utf-8", newline="\n") as f:
             for i, p in enumerate(files, 1):
                 f.write(f"{sha256(p)}  {p.relative_to(root).as_posix()}\n")

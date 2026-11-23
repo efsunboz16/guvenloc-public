@@ -65,3 +65,36 @@ def test_crop_outside_map_is_zero(tmp_path):
     reg = load_region(tmp_path, "03")
     crop = crop_square_m(reg, 33.5, 120.05, size_m=500, out_px=16)
     assert crop.max() == 0
+
+
+def test_mosaic_vrt_tiles_match_single_raster(tmp_path):
+    """Parçalı harita (tam pakette 09): 2x2 parçanın VRT'si tek tif ile aynı pikselleri vermeli."""
+    rdir = tmp_path / "09"
+    (rdir / "drone").mkdir(parents=True)
+    rng = np.random.default_rng(0)
+    full = rng.integers(0, 255, (3, H, W), dtype="uint8")
+    tf = from_bounds(LT_LON, RB_LAT, RB_LON, LT_LAT, W, H)
+    xs, ys = (0, 250, W), (0, 100, H)       # eşit olmayan parçalar
+    for i in range(2):
+        for j in range(2):
+            y0, y1, x0, x1 = ys[i], ys[i + 1], xs[j], xs[j + 1]
+            with rasterio.open(
+                rdir / f"satellite09_{i + 1:02d}-{j + 1:02d}.tif", "w", driver="GTiff",
+                height=y1 - y0, width=x1 - x0, count=3, dtype="uint8", crs="EPSG:4326",
+                transform=rasterio.windows.transform(
+                    rasterio.windows.Window(x0, y0, x1 - x0, y1 - y0), tf),
+            ) as ds:
+                ds.write(full[:, y0:y1, x0:x1])
+    (rdir / "09.csv").write_text(
+        "num,filename,date,lat,lon,height,Omega,Kappa,Phi1,Phi2\n"
+        "1,09_0001.JPG,2023-01-01,32.35,120.05,466,0,0,10,10\n")
+    # CSV sınırları bilerek kaydırılmış: georeferans raster'dan okunmalı
+    (tmp_path / "satellite_coordinates_range.csv").write_text(
+        "mapname,LT_lat_map,LT_lon_map,RB_lat_map,RB_lon_map,region\n"
+        f"satellite09.tif,{LT_LAT + 0.01},{LT_LON},{RB_LAT},{RB_LON},Huzhou-3\n")
+    reg = load_region(tmp_path, "09")
+    assert reg.sat_path.suffix == ".vrt"
+    assert (reg.georef.width_px, reg.georef.height_px) == (W, H)
+    assert reg.georef.lat_top == pytest.approx(LT_LAT)
+    with rasterio.open(reg.sat_path) as ds:
+        np.testing.assert_array_equal(ds.read(), full)

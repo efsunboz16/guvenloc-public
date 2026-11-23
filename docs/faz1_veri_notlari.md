@@ -36,3 +36,38 @@ Checksum listesi: `docs/checksums/uav_visloc_sample.sha256`
    → Ölçek `s`, kamera iç parametrelerinden hesaplanamaz. MIMARI.md §1B'deki yedek yol
    uygulanacak: eğitim bölgelerinde RoMa v2 homografisinden ölçülen ölçek,
    `height`'a karşı regresyonla bağlanır (`GSD_drone = k · height`).
+
+## Tam paket (`UAV_VisLoc_dataset`, 16,4 GB) — 1A doğrulaması
+
+Doğrulama: `python scripts/11_verify_data.py data/UAV_VisLoc_dataset --expect-frames 6774 --expect-maps 11 --checksums`
+Checksum listesi: `docs/checksums/UAV_VisLoc_dataset.sha256` (6801 dosya; türetilmiş `*_mosaic.vrt` hariç).
+Paket kökü `UAV_VisLoc_dataset/` adıyla geliyor; betikler kök yolunu argüman olarak alır.
+
+| Bölge | Ad | Kare | Harita (px) | İrtifa `height` (m) | Not |
+|---|---|---|---|---|---|
+| 01 | Changjiang-20 | 817 | 9774 × 26762 | 403–409 | |
+| 02 | Changjiang-23 | 1071 | 11482 × 34291 | 402–408 | |
+| 03 | Taizhou-1 | 768 | 35092 × 24308 | 465–468 | |
+| 04 | Taizhou-6 | 738 | 18093 × 38408 | 539–547 | |
+| 05 | Yunnan | 473 | 9394 × 6144 | 2307–2319 | `height` büyük olasılıkla deniz seviyesine göre |
+| 06 | Zhuxi | 344 | 8082 × 9780 | 499–842 | 6 kare harita dışında |
+| 07 | Donghuayuan | 30 | 3000 × 170 | 689–690 | **Yön/poz sütunu yok**; harita ≈ 50 m yüksekliğinde; 2 kare harita dışında |
+| 08 | Huzhou-3 | 1033 | 43421 × 16294 | 545–553 | İlk kareler su üstünde |
+| 09 | Huzhou-3 | 766 | 44800 × 33280 (2×2 parça) | 546–547 | Koordinat CSV'si tif'ten 52 m'ye kadar sapıyor |
+| 10 | Huailai | 144 | 6593 × 5077 | 772–774 | |
+| 11 | Shandan | 590 | 29592 × 16582 | 1971–2575 | `height` deniz seviyesine göre görünüyor; pitch 23°'ye kadar |
+
+Bulgular:
+1. **Toplam kare 6.774**, rapor/makaledeki 6.742 değil (+32). Her bölgede kare sayısı = CSV satırı = CSV'deki
+   dosya adları; eksik/fazla dosya yok. Fark makale ile paket sürümü arasında.
+2. **Yön (Phi1/Phi2) yalnızca 07'de yok** (sütunlar hiç yok). Yunnan (05) ve Shandan (11)'da Phi1 tam dolu.
+   Raporda "Phi iki bölgede yok — Yunnan, Shandan" deniyordu; bu, tam pakette doğru değil.
+   → `configs/split.yaml` için kalibrasyon bölgesi seçiminin gerekçesi ("yön etiketi yok") geçersiz;
+   ayrım yeniden konuşulmalı (1C).
+3. **09 dört parça** (`satellite09_RR-CC.tif`, aynı CRS ve çözünürlük, bitişik). `io_visloc.satellite_source`
+   bölge klasörüne `satellite09_mosaic.vrt` yazar ve bölge tek harita olarak okunur.
+4. **Georeferans tif'ten okunur.** 09 dışında CSV ile tif sınırları birebir aynı; 09'da CSV
+   [sol, üst, sağ, alt] = [+30,7, −52,6, −25,7, +1,4] m kayık. CSV kullanılsaydı 09'daki GT konumları kayardı.
+5. **08 ve 09 aynı bölge adını taşıyor (Huzhou-3)** ve haritaları üst üste biniyor
+   (08: 120,136–120,253° D; 09: 120,030–120,150° D). Bölge ayrık protokolde 08 ve 09 aynı kümede olmalı.
+6. **07 pratikte kullanılamaz**: 30 kare, yön yok, harita bandı ≈ 50 m. Ayrımda dışarıda bırakılması önerilir.

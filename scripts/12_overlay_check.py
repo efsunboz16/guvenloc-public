@@ -41,11 +41,15 @@ def rotate_ccw(img: np.ndarray, deg: float) -> np.ndarray:
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("root", type=Path)
     ap.add_argument("--regions", nargs="*", help="örn. 03 04; verilmezse hepsi")
     ap.add_argument("--per-region", type=int, default=3)
     ap.add_argument("--footprint-m", type=float, default=600.0)
+    ap.add_argument("--footprint-k", type=float, default=None,
+                    help="verilirse karo kenarı = k × irtifa (m); irtifası farklı bölgeler için")
     ap.add_argument("--tile-px", type=int, default=384)
     ap.add_argument("--out", type=Path, default=Path("results/overlay"))
     args = ap.parse_args()
@@ -61,8 +65,8 @@ def main() -> int:
             phi = reg.yaw(row)
             if np.isnan(phi):
                 print(f"{rid} {row['filename']}: Phi1/Phi2 boş, yalnız kuzey-yukarı çiziliyor")
-            tile = crop_square_m(reg, float(row["lat"]), float(row["lon"]),
-                                 args.footprint_m, args.tile_px)
+            fp = args.footprint_m if args.footprint_k is None else args.footprint_k * float(row["height"])
+            tile = crop_square_m(reg, float(row["lat"]), float(row["lon"]), fp, args.tile_px)
             drone = cv2.imread(str(reg.frame_path(str(row["filename"]))))
             panels = [("drone", None if drone is None else cv2.cvtColor(drone, cv2.COLOR_BGR2RGB)),
                       ("uydu, kuzey yukarı", tile)]
@@ -77,7 +81,7 @@ def main() -> int:
                 ax.set_title(title, fontsize=9)
                 ax.axis("off")
             fig.suptitle(f"{rid} #{row['num']} {row['filename']}  yaw={phi:.1f}  "
-                         f"h={row.get('height', float('nan'))}  footprint={args.footprint_m:.0f} m",
+                         f"h={row.get('height', float('nan'))}  footprint={fp:.0f} m",
                          fontsize=9)
             fig.tight_layout()
             path = args.out / f"{rid}_{int(row['num']):04d}.jpg"

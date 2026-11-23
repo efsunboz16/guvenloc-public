@@ -10,6 +10,7 @@ matplotlib==3.11.2
 pandas==3.1.1
 rasterio==1.5.2
 gdown==6.5.2
+pyyaml
 # geliştirme
 ruff
 pytest
