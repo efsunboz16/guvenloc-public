@@ -197,10 +197,54 @@ def crop_square_m(
     """(lat, lon) merkezli, kenarı `size_m` metre olan KARE karoyu out_px x out_px'e örnekler.
 
     Uydu pikseli metrede kare olmadığından (EPSG:4326) pencere eksen başına metreden
-    hesaplanır ve rasterio çıktıyı kare ızgaraya yeniden örnekler; sonuçta
-    1 piksel = size_m / out_px metre, iki eksende de aynı. Harita dışı kalan yer 0 olur.
+    hesaplanır ve kare ızgaraya yeniden örneklenir; sonuçta 1 piksel = size_m / out_px
+    metre, iki eksende de aynı. Harita dışı kalan yer 0 olur.
+    Yöntem: harita sınırına kırpılmış ham pencere okuma (rasterio boundless/resampling
+    yolu 25-50 kat yavaş) → INTER_AREA küçültme → alt-piksel afin hizalama.
+    Koordinat kuralı: piksel kenarı = 0 (GeoRef.latlon_to_px ile aynı).
     Döndürür: (out_px, out_px, bant) uint8.
     """
+    import math
+
+    import cv2
+    import rasterio
+    from rasterio.windows import Window
+
+    mx, my = region.georef.meters_per_px()
+    cx, cy = region.georef.latlon_to_px(lat, lon)
+    w_px, h_px = size_m / mx, size_m / my
+    x0, y0 = cx - w_px / 2, cy - h_px / 2
+    sx, sy = out_px / w_px, out_px / h_px
+    ix0, iy0 = math.floor(x0) - 1, math.floor(y0) - 1
+    ix1, iy1 = math.ceil(x0 + w_px) + 1, math.ceil(y0 + h_px) + 1
+    with rasterio.open(region.sat_path) as ds:
+        buf = np.zeros((iy1 - iy0, ix1 - ix0, ds.count), dtype=ds.dtypes[0])
+        rx0, ry0 = max(ix0, 0), max(iy0, 0)
+        rx1, ry1 = min(ix1, ds.width), min(iy1, ds.height)
+        if rx1 > rx0 and ry1 > ry0:
+            arr = ds.read(window=Window(rx0, ry0, rx1 - rx0, ry1 - ry0))
+            buf[ry0 - iy0:ry1 - iy0, rx0 - ix0:rx1 - ix0] = np.moveaxis(arr, 0, -1)
+    W1 = max(1, round((ix1 - ix0) * sx))
+    H1 = max(1, round((iy1 - iy0) * sy))
+    small = cv2.resize(buf, (W1, H1), interpolation=cv2.INTER_AREA) if sx < 1 or sy < 1 else         cv2.resize(buf, (W1, H1), interpolation=cv2.INTER_LINEAR)
+    if small.ndim == 2:
+        small = small[..., None]
+    ex, ey = W1 / (ix1 - ix0), H1 / (iy1 - iy0)
+    # çıkış pikseli j'nin merkezi: kaynak x = x0 + (j + 0,5)/sx → small'da (merkez kuralı)
+    M = np.array([[ex / sx, 0.0, (x0 - ix0) * ex + 0.5 * ex / sx - 0.5],
+                  [0.0, ey / sy, (y0 - iy0) * ey + 0.5 * ey / sy - 0.5]])
+    out = cv2.warpAffine(small, M, (out_px, out_px),
+                         flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
+                         borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    if out.ndim == 2:
+        out = out[..., None]
+    return out
+
+
+def crop_square_m_rasterio(
+    region: Region, lat: float, lon: float, size_m: float, out_px: int
+) -> np.ndarray:
+    """Eski (yavaş) başvuru uygulaması: rasterio boundless okuma + yeniden örnekleme."""
     import rasterio
     from rasterio.enums import Resampling
     from rasterio.windows import Window
