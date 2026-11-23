@@ -1,0 +1,31 @@
+# Çift üretimi (MIMARI.md 1C). GEÇİCİ değerler "danışmanla belirlenecek" diye işaretli.
+seed: 0
+version: pairs_v1
+
+# Uydu karosu: kuzey-yukarı, kare-metrik (io_visloc.crop_square_m).
+tile_size_m: 1400        # GEÇİCİ. En geniş ayak izi (11: ≈ 772 × 515 m, yarı köşegen ≈ 464 m)
+                         # + kaydırma (200 m) → yarı kenar ≥ 664 m → 1330 m, yuvarlandı.
+tile_px: 1024            # 1,37 m/px; RoMa zaten 640–800'e küçültüyor
+tile_offset_m: 200       # GEÇİCİ (danışman). Karo merkezi GT'den diskte düzgün, yarıçap ≤ 200 m
+                         # ("GNSS kesildiğinde son bilinen konum + IMU sapması").
+
+# Negatifler: pozitif başına 1 zor + 1 kolay.
+hard_neg_per_pos: 1
+easy_neg_per_pos: 1
+hard_neg_min_dist_m: 2800      # = 2 × karo; harita küçükse aşağıdakine düşülür
+hard_neg_fallback_dist_m: 1400 # = 1 × karo (karo GT ayak izini içermez); o da sığmazsa zor negatif yok
+neg_min_tile_in_map: 0.9       # negatif karonun en az %90'ı harita içinde
+max_tries: 2000
+
+# Ölçek s (drone px → karo px). Faz 1B'de RoMa v2 ile ölçüldü (13_roma_heading_scale.py):
+#   drone m/px = footprint_over_agl × (height − ground_elevation_m) / image_width_px
+camera:
+  image_width_px: 3976
+  footprint_over_agl: 0.980    # 01/03/04/08/09 medyanı, yayılım %3 (yatay görüş açısı ≈ 53°)
+# `height` bu bölgelerde deniz seviyesine göre; RoMa ile ölçülen zemin yüksekliği (medyan, m).
+# Diğer bölgelerde ölçülen ofset |h0| ≤ 50 m (gürültü düzeyi) → 0.
+ground_elevation_m:
+  "05": 1804
+  "06": 525
+  "10": 386
+  "11": 1786

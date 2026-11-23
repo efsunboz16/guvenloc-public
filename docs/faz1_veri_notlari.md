@@ -107,3 +107,24 @@ Sonuçlar (geo.py docstring'ine işlendi):
 4. GT konumları RoMa ile 10–40 m içinde tutarlı (karo merkezi kayması). 06'da üç karede ≈ 350 m kayma
    var (tekrarlayan desen ya da yanlış eşleşme; incelenecek).
 5. 02 (tarım arazisi) ve 10'da eşleşme zayıf: görüntüler arasında mevsim farkı olabilir. Zor bölge adayı.
+
+## 1C — Bölge ayrımı ve çift üretimi
+
+`configs/split.yaml` (dondurulmuş, v1): train 01, 04, 08, 09, 10 (3.498 kare) | calib 05, 11 (1.063) |
+test 02, 03, 06 (2.177). 07 dışarıda; 06_0093–0098 (bozuk GPS, harita dışı) dışarıda; 08+09 tek grup.
+Rapordaki 6/2/3 yerine 5/2/3 (07 kullanılamadığı için).
+
+`python scripts/14_make_pairs.py data/UAV_VisLoc_dataset --check 50` → `data/pairs/pairs_v1.csv`, 19.778 satır,
+sha256 `docs/checksums/pairs_v1.sha256`; iki koşuda birebir aynı.
+
+| Küme | pos | hard | easy |
+|---|---|---|---|
+| train | 3.498 | 3.354 | 3.498 |
+| calib | 1.063 | 868 | 1.063 |
+| test | 2.177 | 2.080 | 2.177 |
+
+- Küçük haritalı bölgelerde zor negatif eksik: 05 (195 eksik), 06 (97), 10 (hepsi; harita ≈ 1,6 × 1,5 km,
+  1,4 km karodan uzak nokta yok). Harita kenarındaki karelerde pozitif karonun bir kısmı harita dışında
+  (05 ve 10'da medyan %70 harita içi).
+- 50 rastgele çiftin görsel kontrolü: `results/faz1/pairs_check/` — GT ayak izi, yön ve ölçek tutarlı.
+- Kalibrasyonun iki bölgesi de "tarım" → Mondrian (arazi türüne göre) kalibrasyonda tek grup verir.
