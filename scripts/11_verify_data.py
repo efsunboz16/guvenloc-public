@@ -128,8 +128,10 @@ def main() -> int:
         return 1
 
     report: dict = {"root": str(root), "regions": [check_region(r) for r in regions]}
-    rng = root / "satellite_coordinates_range.csv"
-    if rng.exists():
+    # Örnek pakette dosya adı "satellite_ coordinates_range.csv" (boşluklu) — esnek ara.
+    rng = next(iter(sorted(root.glob("satellite*coordinates*range*.csv"))), None)
+    if rng is not None:
+        report["satellite_coordinates_range_file"] = rng.name
         report["satellite_coordinates_range"] = read_csv_any(rng).astype(str).to_dict(orient="records")
     else:
         report["satellite_coordinates_range"] = None
