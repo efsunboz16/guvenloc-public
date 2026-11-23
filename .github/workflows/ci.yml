@@ -18,4 +18,10 @@ jobs:
       - name: Ruff
         run: ruff check .
       - name: Tests
-        run: pytest -m "not gpu"
+        shell: bash
+        run: |
+          if find tests -type f -name 'test_*.py' -print -quit 2>/dev/null | grep -q .; then
+            pytest -m "not gpu"
+          else
+            echo "No tests yet; skipping pytest."
+          fi
