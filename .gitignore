@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Local configuration and secrets
+.env
+.env.*
+
+# Project data and generated outputs
+data/*
+cache/*
+results/*
+!results/.gitkeep
+
+# Local tooling
+.idea/
+.vscode/
+Thumbs.db
