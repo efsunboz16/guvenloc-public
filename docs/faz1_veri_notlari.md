@@ -71,3 +71,39 @@ Bulgular:
 5. **08 ve 09 aynı bölge adını taşıyor (Huzhou-3)** ve haritaları üst üste biniyor
    (08: 120,136–120,253° D; 09: 120,030–120,150° D). Bölge ayrık protokolde 08 ve 09 aynı kümede olmalı.
 6. **07 pratikte kullanılamaz**: 30 kare, yön yok, harita bandı ≈ 50 m. Ayrımda dışarıda bırakılması önerilir.
+
+## 1B — Yön (Phi) tanımı ve ölçek: RoMa v2 ile sayısal sağlama
+
+Betik: `python scripts/13_roma_heading_scale.py data/UAV_VisLoc_dataset` (ayar `base`, bölge başına 12 kare,
+1000 m kuzey-yukarı karo, drone 4 yönde denenir, RANSAC benzerlik dönüşümü). Süre ≈ 7 dk (RTX 5050 8 GB).
+Ham sonuç: `results/faz1/roma_heading_scale.csv`. Özet (yalnızca ≥ 500 inlier'lı kareler):
+
+| Bölge | Güvenilir / 12 | bearing − Phi1 (dairesel ort.) | yayılım (medyan) | m/px (tam çöz.) | ayak izi genişliği | ayak izi / height | merkez kayması (medyan) |
+|---|---|---|---|---|---|---|---|
+| 01 | 7 | −7,0° | 4,1° | 0,10 | 383 m | 0,95 | 17 m |
+| 02 | 3 | (güvenilmez) | 28° | 0,09 | 362 m | 0,89 | 53 m |
+| 03 | 10 | −4,0° | 2,7° | 0,11 | 457 m | 0,98 | 15 m |
+| 04 | 9 | −1,6° | 3,1° | 0,13 | 535 m | 0,98 | 41 m |
+| 05 | 5 | −0,8° | 2,9° | 0,12 | 374 m | 0,16 | 27 m |
+| 06 | 11 | +0,4° | 5,2° | 0,08 | 307 m | 0,37 | 22 m |
+| 07 | 3 | – (yön yok) | – | 0,01 | 27 m | – | 8 m |
+| 08 | 4 | −4,7° | 20° | 0,14 | 540 m | 0,98 | 14 m |
+| 09 | 3 | +0,6° | 2,2° | 0,14 | 560 m | 1,03 | 12 m |
+| 10 | 2 | (az örnek) | 10° | 0,10 | 286 m | 0,37 | 28 m |
+| 11 | 11 | −2,0° | 1,7° | 0,19 | 772 m | 0,30 | 30 m |
+
+Sonuçlar (geo.py docstring'ine işlendi):
+1. **Phi1 = görüntü üst kenarının pusula yönü** (kuzey 0, saat yönünde pozitif). İşaret ters değil,
+   180° kayma yok. Kuzey-yukarı kare için görüntü saat yönünde Phi1 döndürülür
+   (`geo.north_up_rotation_cw_deg`). İlk bindirme görsellerinde 01/02 için "+Phi+180" gibi görünen
+   eşleşme göz yanılgısıydı; RoMa ölçümü 01'de de +Phi'yi veriyor.
+2. Fark çoğu bölgede birkaç derece, ama **uçuş bacağına bağlı**: 01'de kuzeydoğuya giden bacaklarda
+   −10…−14°, güneye gidenlerde −3°; 08'de bacaklara göre −26° / +13…+19°. Muhtemelen rüzgâr kaynaklı
+   sapma (crab) veya gimbal. → M1 etiket gürültüsü (MIMARI 2A) için önemli; etiket olarak Phi1 mi
+   yoksa RoMa ölçümü mü kullanılacağı Faz 2'de karar verilecek.
+3. **`height` her bölgede yere göre değil.** 01/03/04/08/09'da ayak izi ≈ 1,0 × height (yatay görüş
+   açısı ≈ 53°) → yere göre. 05/06/10/11'de oran 0,16–0,37 → deniz seviyesine göre. → Ölçek `s`
+   bölge başına RoMa ölçümünden (veya bölge başına height ofsetiyle) bağlanmalı; `configs/pairs.yaml`.
+4. GT konumları RoMa ile 10–40 m içinde tutarlı (karo merkezi kayması). 06'da üç karede ≈ 350 m kayma
+   var (tekrarlayan desen ya da yanlış eşleşme; incelenecek).
+5. 02 (tarım arazisi) ve 10'da eşleşme zayıf: görüntüler arasında mevsim farkı olabilir. Zor bölge adayı.

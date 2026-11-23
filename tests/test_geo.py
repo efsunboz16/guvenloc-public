@@ -25,3 +25,18 @@ def test_angular_error_wraps():
     assert angular_error_deg(10, 350) == 20
     assert angular_error_deg(180, 0) == 180
     assert math.isclose(angular_error_deg(90, 90), 0)
+
+
+def test_north_up_rotation_moves_heading_to_north():
+    import numpy as np
+
+    from guvenloc.geo import north_up_rotation_cw_deg
+
+    for phi in (-91.0, -39.3, 0.0, 45.0, 164.0):
+        rot = math.radians(north_up_rotation_cw_deg(phi))
+        # Görüntü 'yukarısı' (0,-1) haritada pusula yönü phi'ye bakar: (sin φ, -cos φ) y-aşağı
+        up_in_map = np.array([math.sin(math.radians(phi)), -math.cos(math.radians(phi))])
+        # Haritadaki bu yönü görüntü çerçevesine geri al ve kare saat yönünde 'rot' döndür:
+        # sonuç görüntü yukarısı tekrar kuzey olmalı → harita çerçevesi = kuzey-yukarı kare.
+        R_cw = np.array([[math.cos(rot), -math.sin(rot)], [math.sin(rot), math.cos(rot)]])
+        np.testing.assert_allclose(R_cw @ np.array([0.0, -1.0]), up_in_map, atol=1e-9)

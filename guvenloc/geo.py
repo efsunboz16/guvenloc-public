@@ -1,12 +1,20 @@
 """Coğrafi dönüşümler: uydu pikseli <-> enlem/boylam <-> metre.
 
-Uydu haritasının sol-üst ve sağ-alt köşe koordinatları (satellite_coordinates_range.csv)
-bilindiğinde, küçük alanlar için doğrusal (eşdikdörtgen) eşleme kullanılır. Bölge
-birkaç yüz km² olduğundan hata ihmal edilebilir; gerçek georeferans (rasterio) ile
-`scripts/12_overlay_check.py` aşamasında karşılaştırılacaktır.
+Georeferans uydu raster'ının kendisinden okunur (io_visloc.load_region); EPSG:4326
+ızgarasında küçük alanlar için doğrusal (eşdikdörtgen) eşleme kullanılır.
 
-DOĞRULANMADI: UAV-VisLoc'taki yön (Phi) sütununun işareti, referansı ve birimi.
-Bindirme kontrolünden sonra buraya yazılacaktır (MIMARI.md 1B).
+YÖN TANIMI — Faz 1B'de RoMa v2 ile doğrulandı (scripts/13_roma_heading_scale.py,
+10 bölge × 12 kare, docs/faz1_veri_notlari.md):
+  Phi1 = drone görüntüsünün ÜST kenarının pusula yönü: derece, kuzey = 0, doğu = 90
+  (saat yönünde pozitif), aralık [-180, 180). İşaret ters değil, 180° kayma yok.
+  RoMa ölçümüyle fark tipik olarak −2…−4° (yayılım ≈ 3°); bazı uçuş bacaklarında
+  (01, 08) 25°'ye kadar çıkıyor. Phi2 daha gürültülü.
+  Kuzey-yukarı kanonik kare: görüntü SAAT YÖNÜNDE Phi1 kadar döndürülür
+  (`north_up_rotation_cw_deg`). cv2.getRotationMatrix2D saat yönü tersini pozitif
+  aldığından ona `-north_up_rotation_cw_deg(phi1)` verilir.
+ÖLÇEK: `height` 01/03/04/08/09'da yere göre (ayak izi genişliği ≈ 1,0 × height, yatay
+  görüş açısı ≈ 53°), 05/06/10/11'de deniz seviyesine göre → ölçek s height'tan değil
+  bölge başına RoMa ölçümünden bağlanır.
 """
 from __future__ import annotations
 
@@ -48,3 +56,12 @@ def angular_error_deg(pred: float, gt: float) -> float:
     """Dairesel yön hatası: min(|θ̂ − φ|, 360° − |θ̂ − φ|)."""
     d = abs(pred - gt) % 360.0
     return min(d, 360.0 - d)
+
+
+def north_up_rotation_cw_deg(phi1: float) -> float:
+    """Drone karesini kuzey-yukarı yapmak için gereken SAAT YÖNÜ dönme (derece, [0, 360)).
+
+    Phi1, görüntü üst kenarının pusula yönüdür; görüntüyü saat yönünde Phi1 döndürmek
+    üst kenarı kuzeye getirir (MIMARI.md 2A'daki φ etiketi budur).
+    """
+    return phi1 % 360.0
