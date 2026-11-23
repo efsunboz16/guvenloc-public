@@ -1,0 +1,9 @@
+# Python 3.12. Önce PyTorch (RTX 50 serisi / Blackwell için cu128 şart):
+#   pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
+# Sonra:  pip install -r requirements.txt
+# Tam sürüm listesi: requirements.lock.txt
+romav2==2.0.1
+opencv-python==5.1.0.95
+numpy==2.5.4
+scipy==1.18.1
+matplotlib==3.11.2
