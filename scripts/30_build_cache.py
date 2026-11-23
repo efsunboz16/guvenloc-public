@@ -4,6 +4,7 @@ Kullanım:
   python scripts/30_build_cache.py data/UAV_VisLoc_dataset                 # hepsi
   python scripts/30_build_cache.py data/UAV_VisLoc_dataset --split calib   # tek küme
   python scripts/30_build_cache.py data/UAV_VisLoc_dataset --limit 20      # hız ölçümü
+  python scripts/30_build_cache.py data/UAV_VisLoc_dataset --split train --per-region 60
   python scripts/30_build_cache.py data/UAV_VisLoc_dataset --seq           # ardışık kareler
   python scripts/30_build_cache.py data/UAV_VisLoc_dataset --finalize      # yalnızca manifest
 
@@ -49,6 +50,8 @@ def main() -> int:
     ap.add_argument("--setting", default=None, help="varsayılan: romav2.setting_cache")
     ap.add_argument("--split", nargs="*", default=None)
     ap.add_argument("--limit", type=int, default=None, help="ilk N drone karesi")
+    ap.add_argument("--per-region", type=int, default=None,
+                    help="bölge başına eşit aralıklı N drone karesi (ör. eşik seçimi alt kümesi)")
     ap.add_argument("--seq", action="store_true", help="ardışık drone kareleri (Modül 4)")
     ap.add_argument("--finalize", action="store_true")
     args = ap.parse_args()
@@ -68,6 +71,13 @@ def main() -> int:
     df = pd.read_csv(args.pairs, dtype={"region": str, "tile_region": str})
     if args.split:
         df = df[df.split.isin(args.split)]
+    if args.per_region:
+        keep = []
+        for _, g in df.groupby("region"):
+            paths = sorted(g.drone_path.unique())
+            idx = np.unique(np.linspace(0, len(paths) - 1, args.per_region).round().astype(int))
+            keep += [paths[i] for i in idx]
+        df = df[df.drone_path.isin(keep)]
     regions: dict = {}
 
     def region(rid):

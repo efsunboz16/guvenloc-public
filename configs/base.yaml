@@ -16,4 +16,5 @@ eval:
   accept_error_m: 25
   bootstrap_B: 2000
   alpha_sig: 0.05
+  alpha_far: 0.05             # hedef yanlış kabul (FAR-neg); taban çizgisi τ seçimi + M3
   multiple_comparison: holm

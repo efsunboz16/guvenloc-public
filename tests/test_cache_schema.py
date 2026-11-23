@@ -1,4 +1,4 @@
-"""Önbellek şema testi (MIMARI.md 1E): cache/v1 varsa rastgele 100 dosya doğrulanır.
+"""Önbellek şema testi (MIMARI.md 1E): cache/ altındaki her sürümde rastgele 100 dosya.
 
 Önbellek yoksa (CI, önbelleği olmayan makine) atlanır. Şema mantığı ayrıca sentetik
 dosyalarla test edilir (her ortamda koşar).
@@ -13,7 +13,8 @@ import pytest
 from guvenloc.cache import finalize_manifest, validate_npz
 from guvenloc.matcher import MatchSet
 
-CACHE = Path(__file__).resolve().parents[1] / "cache" / "v1"
+CACHE_ROOT = Path(__file__).resolve().parents[1] / "cache"
+CACHES = sorted(p for p in CACHE_ROOT.glob("*") if p.is_dir()) if CACHE_ROOT.exists() else []
 META = {"setting": "base", "romav2": "2.0.1", "rot_deg": 0.0, "drone_wh": [100, 80],
         "sat_wh": [64, 64], "grid_wh": [640, 640], "sigma_scale": 1.0, "bidirectional": False,
         "coords": "opencv", "cov_units": "px2"}
@@ -59,11 +60,14 @@ def test_manifest_dedup_and_missing(tmp_path):
     assert len(rows) == 3   # başlık + a + b (gone.npz düştü)
 
 
-@pytest.mark.skipif(not CACHE.exists(), reason="cache/v1 yok")
-def test_real_cache_random_100():
-    files = sorted(CACHE.glob("*.npz")) + sorted((CACHE / "seq").glob("*.npz"))
+@pytest.mark.parametrize("cache", CACHES or [None], ids=lambda p: p.name if p else "yok")
+def test_real_cache_random_100(cache):
+    if cache is None:
+        pytest.skip("cache/ altında önbellek yok")
+    files = sorted(cache.glob("*.npz")) + sorted((cache / "seq").glob("*.npz"))
+    files = [f for f in files if not f.name.endswith(".tmp.npz")]
     if not files:
-        pytest.skip("cache/v1 boş")
+        pytest.skip(f"{cache} boş")
     sample = random.Random(0).sample(files, min(100, len(files)))
     bad = {f.name: e for f in sample if (e := validate_npz(f))}
     assert not bad, bad

@@ -28,3 +28,7 @@ vis/
 .idea/
 .vscode/
 Thumbs.db
+
+# Benchmark indirmeleri (wxbs_benchmark çalışma klasörüne iner)
+.WxBS/
+.EVD/
