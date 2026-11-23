@@ -1,0 +1,18 @@
+seed: 0
+device: cuda
+paths:
+  data: data/
+  cache: cache/v1/
+  results: results/
+romav2:
+  version: "2.0.1"
+  setting_cache: mega1500     # sunucu önbelleği
+  setting_laptop: base        # 8 GB dizüstü
+  n_matches: 10000
+  rotations: [0, 90, 180, 270]
+eval:
+  success_thresholds_m: [10, 25, 50]
+  accept_error_m: 25
+  bootstrap_B: 2000
+  alpha_sig: 0.05
+  multiple_comparison: holm
