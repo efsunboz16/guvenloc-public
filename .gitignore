@@ -18,6 +18,12 @@ cache/*
 results/*
 !results/.gitkeep
 
+# Model weights and visualizations
+*.pt
+*.pth
+*.ckpt
+vis/
+
 # Local tooling
 .idea/
 .vscode/
