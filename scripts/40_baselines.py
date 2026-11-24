@@ -218,8 +218,7 @@ def cmd_eval(a, cfg, pairs):
         return rows_
 
     lines += breakdown(None, "yön dilimi (°)",
-                       lambda x: (M.heading_bin(x.gt_heading) * 45).astype(str) + "–"
-                       + (M.heading_bin(x.gt_heading) * 45 + 45).astype(str))
+                       lambda x: [f"{b * 45:03d}–{b * 45 + 45:03d}" for b in M.heading_bin(x.gt_heading)])
     lines += breakdown(None, "AGL irtifa (m)", lambda x: pd.cut(
         x.agl_m, [0, 400, 800, 1200, 2000, 5000],
         labels=["<400", "400–800", "800–1200", "1200–2000", ">2000"]).astype(str))
