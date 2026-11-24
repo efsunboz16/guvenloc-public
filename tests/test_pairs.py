@@ -16,7 +16,9 @@ from guvenloc.pairs import (
     load_split,
     make_pairs,
     offset_latlon,
+    select_per_region,
     tile_in_map_fraction,
+    tile_size_for,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -103,3 +105,32 @@ def test_seed_changes_pairs():
     b = make_pairs(REGIONS, SPLIT, {**CFG, "seed": 1})
     assert not np.allclose(a.tile_lat.to_numpy(), b.tile_lat.to_numpy())
     assert math.isclose(len(a), len(b))
+
+
+def test_adaptive_tile_contains_footprint_and_keeps_offsets():
+    cfg = {**CFG, "tile_mode": "adaptive",
+           "camera": {**CFG["camera"], "image_height_px": 3000}}
+    assert tile_size_for(400, CFG) == 400                     # fixed: config değeri
+    # ayak izi 400 x 300 m → köşegen 500 + 2 × 100 kaydırma
+    assert tile_size_for(400, cfg) == pytest.approx(700)
+    a, b = make_pairs(REGIONS, SPLIT, CFG), make_pairs(REGIONS, SPLIT, cfg)
+    pa, pb = (x[x.neg_type == "pos"].set_index("pair_id") for x in (a, b))
+    # aynı RNG → pozitif karo merkezleri aynı (eşleştirilmiş K2 karşılaştırması)
+    np.testing.assert_allclose(pa.tile_lat, pb.tile_lat)
+    np.testing.assert_allclose(pa.tile_lon, pb.tile_lon)
+    # karo, en kötü yönde bile drone ayak izini içerir: yarım kenar ≥ kaydırma + yarım köşegen
+    for r in pb.itertuples():
+        w = r.agl_m
+        half_diag = math.hypot(w, w * 0.75) / 2
+        assert r.tile_size_m / 2 >= r.tile_offset_m + half_diag - 1e-6
+        mpp = r.tile_size_m / r.tile_px
+        de, _dn = enu_offset_m(r.tile_lat, r.tile_lon, r.drone_lat, r.drone_lon)
+        assert r.gt_x == pytest.approx(r.tile_px / 2 + de / mpp, abs=0.05)
+
+
+def test_select_per_region_even_spacing():
+    df = pd.DataFrame({"region": ["01"] * 10 + ["02"] * 4,
+                       "drone_path": [f"01/{i:02d}" for i in range(10)] + [f"02/{i}" for i in range(4)]})
+    got = select_per_region(df, 3)
+    assert list(got.drone_path) == ["01/00", "01/04", "01/09", "02/0", "02/2", "02/3"]
+

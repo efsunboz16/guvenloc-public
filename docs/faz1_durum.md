@@ -74,7 +74,11 @@ RoMa'nın ölçek farkı büyüyor (30 karelik denemede 1000 m biraz daha iyiydi
   (≈ 750–1330 m; ölçek oranı bölgeler arasında benzer, drone karesi her zaman sığar).
   Önbellekten önce deney: sabit 1400 m vs uyarlamalı, eğitimden 300 kare, önbellekle aynı RoMa ayarı,
   başarı@25 (mega1500 ≈ 3 sa, base ≈ 0,5 sa). Eğitimde iyi olan seçilir; test/calib'e dokunulmaz. Sonuçla danışmana gidilir.
-- Gerekli kod (henüz yok): `pairs.py`'ye uyarlamalı karo seçeneği + deney betiği.
+- Kod: `configs/pairs.yaml: tile_mode` (`fixed` | `adaptive`), `scripts/15_tile_experiment.py`.
+- **Sonuç (24.11, eğitim, 300 kare, `base`, retsiz):** uyarlamalı karo (medyan 1040 m) satır 2 başarı@25'i
+  0,170 → **0,213** (+0,043 [0,000, 0,089], McNemar 22'ye 9, p = 0,029); satır 1'de 0,100 → 0,160 (p = 0,0005).
+  5 eğitim bölgesinin 4'ünde iyileşme (10'da 0,12 → 0,08). Kural sonucu: **uyarlamalı**.
+  Tablo: [sonuclar/faz1/k2_tile.md](sonuclar/faz1/k2_tile.md). Uygulanması ve önbellek: ekip onayı.
 
 ### K3. INTERFACES §1–2 değişiklikleri
 Σ float32 (P yerine; fp16 gerçek dosyalarda taştı/bozuldu), çift listesine ek sütunlar (geriye uyumlu).

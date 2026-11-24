@@ -125,13 +125,28 @@ def drone_m_per_px(height: float, region: str, cfg: dict) -> tuple[float, float]
     return agl, cam["footprint_over_agl"] * agl / cam["image_width_px"]
 
 
-def _sample_far_point(ref, lat, lon, min_dist, cfg, rng):
+def tile_size_for(agl_m: float, cfg: dict) -> float:
+    """Karo kenarı (m). tile_mode:
+    fixed    — cfg.tile_size_m (pairs_v1)
+    adaptive — ayak izi köşegeni + 2 × tile_offset_m: kaydırma ≤ tile_offset_m ve her yönde
+               drone karesi karoya tam sığar; ölçek oranı (karo/ayak izi) irtifadan bağımsızlaşır.
+    """
+    mode = cfg.get("tile_mode", "fixed")
+    if mode == "fixed":
+        return float(cfg["tile_size_m"])
+    if mode == "adaptive":
+        cam = cfg["camera"]
+        w = cam["footprint_over_agl"] * agl_m
+        h = w * cam["image_height_px"] / cam["image_width_px"]
+        return math.hypot(w, h) + 2 * float(cfg["tile_offset_m"])
+    raise ValueError(f"tile_mode: {mode}")
+
+
+def _sample_far_point(ref, lat, lon, min_dist, cfg, rng, size_m):
     for _ in range(int(cfg["max_tries"])):
         p = random_point_in_map(ref, rng)
         d = math.hypot(*enu_offset_m(lat, lon, *p))
-        if d >= min_dist and tile_in_map_fraction(ref, *p, cfg["tile_size_m"]) >= cfg[
-            "neg_min_tile_in_map"
-        ]:
+        if d >= min_dist and tile_in_map_fraction(ref, *p, size_m) >= cfg["neg_min_tile_in_map"]:
             return p, d
     return None, None
 
@@ -139,8 +154,7 @@ def _sample_far_point(ref, lat, lon, min_dist, cfg, rng):
 def make_pairs(regions: dict[str, RegionInfo], split: Split, cfg: dict) -> pd.DataFrame:
     """Tüm kümeler için çift tablosu (PAIR_COLUMNS)."""
     seed = int(cfg["seed"])
-    size_m, tile_px = float(cfg["tile_size_m"]), int(cfg["tile_px"])
-    tile_mpp = size_m / tile_px
+    tile_px = int(cfg["tile_px"])
     rows = []
     for rid in sorted(regions):
         if rid in split.excluded_regions or rid not in split.region_split:
@@ -158,6 +172,8 @@ def make_pairs(regions: dict[str, RegionInfo], split: Split, cfg: dict) -> pd.Da
             lat, lon, height = float(fr["lat"]), float(fr["lon"]), float(fr["height"])
             heading = float(fr["Phi1"]) if "Phi1" in fr and pd.notna(fr["Phi1"]) else np.nan
             agl, mpp = drone_m_per_px(height, rid, cfg)
+            size_m = tile_size_for(agl, cfg)
+            tile_mpp = size_m / tile_px
             base = {
                 "drone_path": f"{rid}/drone/{fname}", "region": rid, "split": sp,
                 "gt_heading": heading, "scale_s": mpp / tile_mpp,
@@ -180,10 +196,11 @@ def make_pairs(regions: dict[str, RegionInfo], split: Split, cfg: dict) -> pd.Da
 
             # zor negatif: aynı bölge, uzak
             for k in range(int(cfg["hard_neg_per_pos"])):
-                p, d = _sample_far_point(info.georef, lat, lon, cfg["hard_neg_min_dist_m"], cfg, rng)
+                p, d = _sample_far_point(info.georef, lat, lon, cfg["hard_neg_min_dist_m"], cfg,
+                                         rng, size_m)
                 if p is None:
                     p, d = _sample_far_point(info.georef, lat, lon,
-                                             cfg["hard_neg_fallback_dist_m"], cfg, rng)
+                                             cfg["hard_neg_fallback_dist_m"], cfg, rng, size_m)
                 if p is None:
                     continue
                 rows.append({**base, "pair_id": f"{stem}_hard{k}", "label": "neg",
@@ -214,3 +231,15 @@ def make_pairs(regions: dict[str, RegionInfo], split: Split, cfg: dict) -> pd.Da
     df = pd.DataFrame(rows)
     df["tile_path"] = "tiles/" + df["pair_id"] + ".jpg"
     return df[PAIR_COLUMNS]
+
+
+def select_per_region(df: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Bölge başına eşit aralıklı n drone karesinin (sıralı drone_path) bütün çiftleri.
+    30_build_cache --per-region ve 15_tile_experiment aynı kareleri seçsin diye ortak."""
+    keep = []
+    for _, g in df.groupby("region"):
+        paths = sorted(g.drone_path.unique())
+        idx = np.unique(np.linspace(0, len(paths) - 1, n).round().astype(int))
+        keep += [paths[i] for i in idx]
+    return df[df.drone_path.isin(keep)]
+

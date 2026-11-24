@@ -66,9 +66,14 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=Path("data/pairs"))
     ap.add_argument("--check", type=int, default=0)
     ap.add_argument("--cut-tiles", action="store_true")
+    ap.add_argument("--set", nargs="*", default=[], metavar="ANAHTAR=DEĞER",
+                    help="config üstüne yaz, ör. tile_mode=adaptive version=pairs_k2_adaptive")
     args = ap.parse_args()
 
     cfg = yaml.safe_load(args.config.read_text(encoding="utf-8"))
+    for kv in args.set:
+        k, v = kv.split("=", 1)
+        cfg[k] = yaml.safe_load(v)
     split = load_split(args.split)
     root = find_root(args.root)
     regs = {r: load_region(root, r) for r in list_regions(root)
@@ -92,7 +97,7 @@ def main() -> int:
 
     for (sp, nt), g in df.groupby(["split", "neg_type"]):
         log_run("14_make_pairs.py", args.config, int(cfg["seed"]), sp, f"n_pairs_{nt}", len(g),
-                notes=f"{cfg['version']} sha256={digest[:16]}")
+                notes=f"{cfg['version']} sha256={digest[:16]} set={args.set}")
 
     if args.check:
         out = Path("results/faz1/pairs_check")

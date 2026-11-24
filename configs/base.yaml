@@ -6,7 +6,7 @@ paths:
   results: results/
 romav2:
   version: "2.0.1"
-  setting_cache: mega1500     # sunucu önbelleği
+  setting_cache: base         # K6 (24.11.2026): tam mega1500 Kaggle kotasına sığmıyor → dizüstünde base (640 px); mega1500 yalnızca tekrarlamada
   setting_laptop: base        # 8 GB dizüstü
   n_matches: 10000
   rotations: [0, 90, 180, 270]   # drone karesine saat yönü

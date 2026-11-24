@@ -32,6 +32,7 @@ from guvenloc.cache import append_manifest, finalize_manifest, pair_file, partia
 from guvenloc.io_visloc import crop_square_m, find_root, load_region
 from guvenloc.matcher import Matcher
 from guvenloc.metrics import log_run
+from guvenloc.pairs import select_per_region
 
 
 def read_rgb(path: Path) -> np.ndarray:
@@ -54,6 +55,8 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=None, help="ilk N drone karesi")
     ap.add_argument("--per-region", type=int, default=None,
                     help="bölge başına eşit aralıklı N drone karesi (ör. eşik seçimi alt kümesi)")
+    ap.add_argument("--neg-types", nargs="*", default=None, choices=["pos", "hard", "easy"],
+                    help="yalnızca bu çift türleri (ör. K2 deneyi: pos)")
     ap.add_argument("--seq", action="store_true", help="ardışık drone kareleri (Modül 4)")
     ap.add_argument("--finalize", action="store_true")
     ap.add_argument("--shard", default="0/1",
@@ -78,12 +81,9 @@ def main() -> int:
     if args.split:
         df = df[df.split.isin(args.split)]
     if args.per_region:
-        keep = []
-        for _, g in df.groupby("region"):
-            paths = sorted(g.drone_path.unique())
-            idx = np.unique(np.linspace(0, len(paths) - 1, args.per_region).round().astype(int))
-            keep += [paths[i] for i in idx]
-        df = df[df.drone_path.isin(keep)]
+        df = select_per_region(df, args.per_region)
+    if args.neg_types:
+        df = df[df.neg_type.isin(args.neg_types)]
     regions: dict = {}
 
     def region(rid):

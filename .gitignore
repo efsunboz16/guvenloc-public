@@ -34,3 +34,6 @@ Thumbs.db
 # Benchmark indirmeleri (wxbs_benchmark çalışma klasörüne iner)
 .WxBS/
 .EVD/
+
+# Uzun koşuların günlükleri
+logs/

@@ -71,3 +71,24 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-24T12:16:46,23_speed.py,2303cecdf095,0,f87654a,speed,fast_matcher_s,0.457,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=2.73
 2026-11-24T12:17:02,23_speed.py,2303cecdf095,0,f87654a,speed,base_matcher_s,0.618,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=3.57
 2026-11-24T12:17:27,23_speed.py,2303cecdf095,0,f87654a,speed,mega1500_matcher_s,4.374,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=7.27
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_easy,1063,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_hard,868,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_pos,1063,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_easy,2177,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_hard,2080,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_pos,2177,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_easy,3498,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_hard,3354,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_pos,3498,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_easy,1063,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_hard,972,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_pos,1063,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_easy,2177,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_hard,2171,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_pos,2177,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_easy,3498,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_hard,3354,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_pos,3498,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T16:12:29,30_build_cache.py,1a2474bf9316,0,b59c24c,train,sec_per_file,0.877,setting=base seq=False n=10000 shard=0/1
+2026-11-24T16:13:22,15_tile_experiment.py,1a2474bf9316,0,b59c24c,train,k2_fixed_row2_success@25_all,0.17,per_region=60 px=3
+2026-11-24T16:13:22,15_tile_experiment.py,1a2474bf9316,0,b59c24c,train,k2_adaptive_row2_success@25_all,0.21333333333333335,per_region=60 px=3
