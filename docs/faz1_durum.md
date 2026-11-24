@@ -96,6 +96,9 @@ Hata değil: eşleşme ya tutuyor (5–50 m) ya tamamen kaçıyor (tarım/su, me
 3090 müsait değil. Sıra ve komutlar: [faz1_kalan_isler.md](faz1_kalan_isler.md). Kaggle'a özgü
 adımlar: [faz1_kaggle.md](faz1_kaggle.md).
 
+**Ölçüm (Kaggle T4, 24.11):** MegaDepth 7,0 s/çift (dizüstü mega1500 önbelleği 4,4 s/dosya) → tam mega1500
+önbelleği iki T4'te ≈ 70 sa ≈ 2–3 haftalık kota; MegaDepth + C4 (10 tohum) ≈ 15 sa = 2 oturum.
+
 **Yeni karar K6 — önbellek ayarı.** Tam mega1500 önbelleği (≈ 105 GPU-sa) Kaggle'ın ≈ 30 sa/hafta
 kotasına büyük olasılıkla sığmaz. **Öneri:** Kaggle'da T4 hızı ölçülür. Tam önbellek 30 sa'i aşıyorsa
 önbellek dizüstünde `base` ayarıyla üretilir (≈ 17 sa; bütün kümelerde aynı ayar). mega1500

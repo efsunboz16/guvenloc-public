@@ -21,6 +21,12 @@
 - Süre: 32 çift ≈ 2 dk.
 
 **MegaDepth-1500 / C4 (sunucu için hazır)**
+- **Kaggle T4 duman testi (24.11.2026, `--limit 5` = 25 çift, tohum 0):** AUC@5/10/20 = 57,63 / 73,19 / 84,11;
+  romav2'nin kendi `Mega1500.benchmark`'ı aynı alt kümede **birebir aynı** (57,626 / 73,188 / 84,111).
+  Alt küme sayıları hedefle (tam 1500 çift) karşılaştırılamaz. Hız: 7,0 s/çift → tam tohum ≈ 2,9 sa.
+  Ortam: Tesla T4 (sm_75, bf16 öykünmeli), Python 3.13, torch 2.11.0+cu130 (Kaggle'ın hazır sürümü), numpy 2.5.4.
+- romav2 2.0.1 `pose_auc`, NumPy 2.5'te kaldırılan `np.trapz`'ı çağırıyor → `guvenloc/repro.py` uyum yaması
+  (`np.trapz = np.trapezoid`, aynı fonksiyon; `tests/test_repro.py`).
 - `20_repro_mega1500.py`, romav2 `Mega1500.benchmark` döngüsünün birebir kopyasıdır; `--check-original`
   aynı alt kümede orijinali de koşup sonucun aynı olduğunu doğrular (C4'ün 0° yolu = orijinal).
 - C4: i. çiftin ikinci görüntüsü `np.rot90(·, i mod 4)`; K ve poz aynı dönmeyle güncellenir
