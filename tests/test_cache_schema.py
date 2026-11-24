@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from guvenloc.cache import finalize_manifest, validate_npz
+from guvenloc.cache import finalize_manifest, partial_name, validate_npz
 from guvenloc.matcher import MatchSet
 
 CACHE_ROOT = Path(__file__).resolve().parents[1] / "cache"
@@ -71,3 +71,15 @@ def test_real_cache_random_100(cache):
     sample = random.Random(0).sample(files, min(100, len(files)))
     bad = {f.name: e for f in sample if (e := validate_npz(f))}
     assert not bad, bad
+
+
+def test_manifest_merges_shards(tmp_path):
+    head = "file,kind,pair_id,rot,n,bytes,sha256,setting\n"
+    (tmp_path / partial_name(0, 2)).write_text(head + "a.npz,pair,a,0,1,1,x,base\n", encoding="utf-8")
+    (tmp_path / partial_name(1, 2)).write_text(head + "b.npz,pair,b,0,1,1,y,base\n", encoding="utf-8")
+    (tmp_path / "MANIFEST.partial.csv").write_text(head + "c.npz,pair,c,0,1,1,z,base\n",
+                                                   encoding="utf-8")
+    for f in "abc":
+        (tmp_path / f"{f}.npz").write_bytes(b"1")
+    rows = finalize_manifest(tmp_path).read_text(encoding="utf-8").splitlines()
+    assert [r.split(",")[0] for r in rows[1:]] == ["a.npz", "b.npz", "c.npz"]

@@ -1,4 +1,8 @@
-# Faz 1 — kalan işler (RTX 3090 makinesi için çalışma kılavuzu)
+# Faz 1 — kalan işler (çalışma kılavuzu)
+
+> **Güncelleme:** 3090 müsait değil. GPU işleri **Kaggle (T4 ×2) + dizüstü** arasında bölündü.
+> Kaggle'a özgü adımlar, kısıtlar ve önbellek ayarı kararı için: [faz1_kaggle.md](faz1_kaggle.md).
+> Aşağıdaki komutlar her makinede aynıdır.
 
 Bu işler model **eğitmez**; RoMa v2 donuktur. İki ayrı iş var:
 
@@ -33,7 +37,7 @@ py -3.12 -m venv .venv               # Linux: python3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1         # Linux: source .venv/bin/activate
 pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
 pip install -r requirements.txt
-python scripts/00_check_env.py       # RTX 3090: sm_86, 24 GB
+python scripts/00_check_env.py       # Kaggle: iki T4, sm_75 (bf16 uyarısı beklenir)
 python -m pytest -q                  # GPU testleri dahil hepsi yeşil olmalı
 ```
 
@@ -59,7 +63,7 @@ python scripts/20_repro_mega1500.py --data data/megadepth --limit 5 --check-orig
 python scripts/20_repro_mega1500.py --data data/megadepth --seeds 0 1 2 3 4            # hedef 62,8 / 77,0 / 86,6 ± 1
 python scripts/20_repro_mega1500.py --data data/megadepth --c4 --seeds 0 1 2 3 4       # hedef AUC@5 düşüşü (60,0 → 53,45)
 ```
-Süre: RTX 5050 Laptop'ta ≈ 4 sa/tohum; 3090'da daha kısa (önce 23_speed ile ölçün).
+Süre: RTX 5050 Laptop'ta ≈ 4 sa/tohum; Kaggle T4'te önce `--limit 5` ile ölçün; iki GPU'da paralel ve tohum bazında devam ettirilebilir (faz1_kaggle.md §4).
 Sonuç: `results/faz1/repro_mega1500.json`, `repro_c4.json` + `results/runs.csv`. Sapma > 1 puan ise
 MIMARI 1D'deki B planı (çözünürlük, RANSAC eşiği, sürüm, 5 tohum raporlanır).
 
@@ -76,7 +80,7 @@ python scripts/31_verify_cache.py cache/v1 --delete-bad                    # her
 python -m pytest -q tests/test_cache_schema.py
 ```
 - Boyut: 19.778 çift × 4 yön + ≈ 6,7 bin ardışık kare ≈ 86 bin dosya, ≈ 20–22 GB.
-- Süre: mega1500, RTX 5050 Laptop'ta ≈ 4,4 s/dosya (≈ 105 sa); 3090'da ölçülen hıza göre hesaplayın.
+- Süre: mega1500, RTX 5050 Laptop'ta ≈ 4,4 s/dosya (≈ 105 sa); Kaggle'da yapılıp yapılmayacağı ölçülen hıza bağlı (faz1_kaggle.md §3); iki GPU için `--shard 0/2`, `--shard 1/2`.
 - **Kesinti güvenli:** betik var olan dosyaları atlar; elektrik kesilir / durdurulursa önce
   `31_verify_cache.py --delete-bad`, sonra aynı komut. Bilgisayarı uyku moduna almayın.
 - Dağıtım: `cache/v1/` klasörü (MANIFEST.csv dahil) diğer makinelere kopyalanır; alan kişi

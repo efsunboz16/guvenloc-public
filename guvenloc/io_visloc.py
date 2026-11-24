@@ -127,9 +127,12 @@ def build_mosaic_vrt(tifs: list[Path], out: Path) -> Path:
         for t, bd, _, w, h, *_ in infos:
             xo = round((bd.left - left) / res[0])
             yo = round((top - bd.top) / res[1])
+            # VRT tif'lerin yanındaysa göreli yol (taşınabilir), değilse mutlak yol
+            rel = t.resolve().parent == out.resolve().parent
+            src = escape(t.name if rel else t.resolve().as_posix())
             lines += [
                 "    <SimpleSource>",
-                f'      <SourceFilename relativeToVRT="1">{escape(t.name)}</SourceFilename>',
+                f'      <SourceFilename relativeToVRT="{int(rel)}">{src}</SourceFilename>',
                 f"      <SourceBand>{b}</SourceBand>",
                 f'      <SrcRect xOff="0" yOff="0" xSize="{w}" ySize="{h}"/>',
                 f'      <DstRect xOff="{xo}" yOff="{yo}" xSize="{w}" ySize="{h}"/>',
@@ -148,10 +151,24 @@ def satellite_source(rdir: Path) -> Path:
         raise FileNotFoundError(f"{rdir}: uydu tif'i yok")
     if len(tifs) == 1:
         return tifs[0]
+    newest = max(t.stat().st_mtime for t in tifs)
     vrt = rdir / f"satellite{rdir.name}_mosaic.vrt"
-    if not vrt.exists() or vrt.stat().st_mtime < max(t.stat().st_mtime for t in tifs):
-        build_mosaic_vrt(tifs, vrt)
-    return vrt
+    if vrt.exists() and vrt.stat().st_mtime >= newest:
+        return vrt
+    try:
+        return build_mosaic_vrt(tifs, vrt)
+    except OSError:
+        # veri klasörü salt okunur (ör. Kaggle /kaggle/input) → VRT başka yere, mutlak yollarla
+        import hashlib
+        import os
+
+        base = Path(os.environ.get("GUVENLOC_VRT_DIR", Path.home() / ".cache" / "guvenloc" / "vrt"))
+        key = hashlib.sha1(str(rdir.resolve()).encode()).hexdigest()[:10]
+        vrt = base / f"satellite{rdir.name}_mosaic_{key}.vrt"
+        vrt.parent.mkdir(parents=True, exist_ok=True)
+        if not vrt.exists() or vrt.stat().st_mtime < newest:
+            build_mosaic_vrt(tifs, vrt)
+        return vrt
 
 
 def load_region(

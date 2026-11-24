@@ -7,9 +7,11 @@ Kullanım:
   python scripts/30_build_cache.py data/UAV_VisLoc_dataset --split train --per-region 60
   python scripts/30_build_cache.py data/UAV_VisLoc_dataset --seq           # ardışık kareler
   python scripts/30_build_cache.py data/UAV_VisLoc_dataset --finalize      # yalnızca manifest
+  CUDA_VISIBLE_DEVICES=0 python scripts/30_build_cache.py ROOT --shard 0/2 & # iki GPU (Kaggle T4 x2)
+  CUDA_VISIBLE_DEVICES=1 python scripts/30_build_cache.py ROOT --shard 1/2
 
 Yeniden başlatılabilir: var olan .npz atlanır. Manifest (sha256 dahil) yazım sırasında
-MANIFEST.partial.csv'ye eklenir, sonda (veya --finalize ile) MANIFEST.csv üretilir.
+MANIFEST.partial.csv'ye (parçalıysa MANIFEST.partial.I.csv) eklenir, sonda (veya --finalize ile) MANIFEST.csv üretilir.
 Ayar ve n configs/base.yaml (romav2.setting_cache, n_matches, rotations) içinden okunur.
 """
 from __future__ import annotations
@@ -26,7 +28,7 @@ import pandas as pd
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from guvenloc.cache import append_manifest, finalize_manifest, pair_file, seq_file
+from guvenloc.cache import append_manifest, finalize_manifest, pair_file, partial_name, seq_file
 from guvenloc.io_visloc import crop_square_m, find_root, load_region
 from guvenloc.matcher import Matcher
 from guvenloc.metrics import log_run
@@ -54,13 +56,17 @@ def main() -> int:
                     help="bölge başına eşit aralıklı N drone karesi (ör. eşik seçimi alt kümesi)")
     ap.add_argument("--seq", action="store_true", help="ardışık drone kareleri (Modül 4)")
     ap.add_argument("--finalize", action="store_true")
+    ap.add_argument("--shard", default="0/1",
+                    help="I/N: işin yalnızca I. parçası (paralel GPU'lar için; drone karesi bazında)")
     args = ap.parse_args()
 
     cfg = yaml.safe_load(args.config.read_text(encoding="utf-8"))
     rc = cfg["romav2"]
     cache = args.cache or Path(cfg["paths"]["cache"])
     cache.mkdir(parents=True, exist_ok=True)
-    partial = cache / "MANIFEST.partial.csv"
+    shard, n_shards = (int(x) for x in args.shard.split("/"))
+    assert 0 <= shard < n_shards, "--shard I/N, 0 <= I < N"
+    partial = cache / partial_name(shard, n_shards)
     if args.finalize:
         print("manifest:", finalize_manifest(cache))
         return 0
@@ -98,6 +104,7 @@ def main() -> int:
             for (a, pa), (b, pb) in zip(zip(nums, paths), zip(nums[1:], paths[1:]), strict=False):
                 jobs.append((rid, a, b, pa, pb))
         jobs = jobs[: args.limit] if args.limit else jobs
+        jobs = jobs[shard::n_shards]
         for rid, a, b, pa, pb in jobs:
             out = seq_file(cache, rid, a, b)
             if out.exists():
@@ -114,6 +121,7 @@ def main() -> int:
     else:
         groups = list(df.groupby("drone_path", sort=True))
         groups = groups[: args.limit] if args.limit else groups
+        groups = groups[shard::n_shards]
 
         def prepare(item):
             dpath, g = item
@@ -157,7 +165,7 @@ def main() -> int:
     if done:
         log_run("30_build_cache.py", args.config, int(cfg["seed"]),
                 ",".join(args.split or ["all"]), "sec_per_file", round(el / done, 3),
-                notes=f"setting={setting} seq={args.seq} n={n}")
+                notes=f"setting={setting} seq={args.seq} n={n} shard={args.shard}")
     return 0
 
 

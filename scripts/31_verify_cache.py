@@ -15,7 +15,7 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from guvenloc.cache import append_manifest, finalize_manifest, validate_npz
+from guvenloc.cache import append_manifest, finalize_manifest, partial_files, validate_npz
 from guvenloc.matcher import MatchSet
 
 
@@ -47,9 +47,9 @@ def main() -> int:
 
     partial = a.cache / "MANIFEST.partial.csv"
     known = set()
-    if partial.exists():
-        with partial.open(encoding="utf-8") as f:
-            known = {r["file"] for r in csv.DictReader(f)}
+    for pf in partial_files(a.cache):
+        with pf.open(encoding="utf-8") as f:
+            known |= {r["file"] for r in csv.DictReader(f)}
     bad_set = {f for f, _ in bad}
     added = 0
     for f in files:

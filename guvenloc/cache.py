@@ -101,12 +101,21 @@ def append_manifest(partial: Path, path: Path, kind: str, pair_id: str, rot: int
                     "sha256": sha256_file(path), "setting": ms.meta.get("setting", "")})
 
 
+def partial_name(shard: int = 0, n_shards: int = 1) -> str:
+    """Kısmi manifest adı; paralel parçalar (ör. iki GPU) ayrı dosyaya yazar."""
+    return "MANIFEST.partial.csv" if n_shards <= 1 else f"MANIFEST.partial.{shard}.csv"
+
+
+def partial_files(cache_dir: str | Path) -> list[Path]:
+    return sorted(Path(cache_dir).glob("MANIFEST.partial*.csv"))
+
+
 def finalize_manifest(cache_dir: str | Path) -> Path:
-    """MANIFEST.partial.csv'yi tekilleştirip sıralar, eksik dosyaları düşürür → MANIFEST.csv."""
+    """MANIFEST.partial*.csv'leri birleştirip tekilleştirir, sıralar, eksik dosyaları düşürür
+    → MANIFEST.csv."""
     cache_dir = Path(cache_dir)
-    partial = cache_dir / "MANIFEST.partial.csv"
     rows: dict[str, dict] = {}
-    if partial.exists():
+    for partial in partial_files(cache_dir):
         with partial.open(encoding="utf-8") as f:
             for r in csv.DictReader(f):
                 if (cache_dir / r["file"]).exists():

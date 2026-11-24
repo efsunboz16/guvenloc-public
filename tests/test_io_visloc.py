@@ -67,8 +67,10 @@ def test_crop_outside_map_is_zero(tmp_path):
     assert crop.max() == 0
 
 
-def test_mosaic_vrt_tiles_match_single_raster(tmp_path):
-    """Parçalı harita (tam pakette 09): 2x2 parçanın VRT'si tek tif ile aynı pikselleri vermeli."""
+@pytest.mark.parametrize("readonly", [False, True], ids=["yazilabilir", "salt_okunur"])
+def test_mosaic_vrt_tiles_match_single_raster(tmp_path, monkeypatch, readonly):
+    """Parçalı harita (tam pakette 09): 2x2 parçanın VRT'si tek tif ile aynı pikselleri vermeli.
+    salt_okunur: veri klasörüne yazılamıyorsa (Kaggle /kaggle/input) VRT GUVENLOC_VRT_DIR'e."""
     rdir = tmp_path / "09"
     (rdir / "drone").mkdir(parents=True)
     rng = np.random.default_rng(0)
@@ -92,8 +94,21 @@ def test_mosaic_vrt_tiles_match_single_raster(tmp_path):
     (tmp_path / "satellite_coordinates_range.csv").write_text(
         "mapname,LT_lat_map,LT_lon_map,RB_lat_map,RB_lon_map,region\n"
         f"satellite09.tif,{LT_LAT + 0.01},{LT_LON},{RB_LAT},{RB_LON},Huzhou-3\n")
+    if readonly:
+        import guvenloc.io_visloc as iov
+
+        real = iov.build_mosaic_vrt
+
+        def fake(tifs, out):
+            if out.parent == rdir:
+                raise PermissionError(out)
+            return real(tifs, out)
+
+        monkeypatch.setattr(iov, "build_mosaic_vrt", fake)
+        monkeypatch.setenv("GUVENLOC_VRT_DIR", str(tmp_path / "vrtcache"))
     reg = load_region(tmp_path, "09")
     assert reg.sat_path.suffix == ".vrt"
+    assert (reg.sat_path.parent == tmp_path / "vrtcache") is readonly
     assert (reg.georef.width_px, reg.georef.height_px) == (W, H)
     assert reg.georef.lat_top == pytest.approx(LT_LAT)
     with rasterio.open(reg.sat_path) as ds:

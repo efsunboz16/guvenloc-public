@@ -72,8 +72,8 @@ Sabit 1400 m'yi yalnızca bölge 11 gerektiriyor; alçak bölgelerde drone ayak 
 RoMa'nın ölçek farkı büyüyor (30 karelik denemede 1000 m biraz daha iyiydi, anlamlı değil).
 - **Öneri:** Kaydırma ±200 m kalır. Karo kareye göre uyarlanır: `karo = ayak izi köşegeni + 2 × kaydırma`
   (≈ 750–1330 m; ölçek oranı bölgeler arasında benzer, drone karesi her zaman sığar).
-  Önbellekten önce 3090'da deney: sabit 1400 m vs uyarlamalı, eğitimden 300 kare, mega1500, başarı@25
-  (≈ 1–2 sa). Eğitimde iyi olan seçilir; test/calib'e dokunulmaz. Sonuçla danışmana gidilir.
+  Önbellekten önce deney: sabit 1400 m vs uyarlamalı, eğitimden 300 kare, önbellekle aynı RoMa ayarı,
+  başarı@25 (mega1500 ≈ 3 sa, base ≈ 0,5 sa). Eğitimde iyi olan seçilir; test/calib'e dokunulmaz. Sonuçla danışmana gidilir.
 - Gerekli kod (henüz yok): `pairs.py`'ye uyarlamalı karo seçeneği + deney betiği.
 
 ### K3. INTERFACES §1–2 değişiklikleri
@@ -91,9 +91,15 @@ Hata değil: eşleşme ya tutuyor (5–50 m) ya tamamen kaçıyor (tarım/su, me
 - **Öneri:** Tablo mega1500 önbelleğiyle yenilenir; bölge başına drone/uydu tarih farkı belgelenir;
   Faz 1 raporuna "zor durumlar" paragrafı. Düşük taban M2–M4'ün katkısını göstermek için iyi başlangıç.
 
-## 4. Kalanlar (3090 makinesi)
+## 4. Kalanlar (Kaggle T4 ×2 + dizüstü)
 
-Sıra ve komutlar: [faz1_kalan_isler.md](faz1_kalan_isler.md).
+3090 müsait değil. Sıra ve komutlar: [faz1_kalan_isler.md](faz1_kalan_isler.md). Kaggle'a özgü
+adımlar: [faz1_kaggle.md](faz1_kaggle.md).
+
+**Yeni karar K6 — önbellek ayarı.** Tam mega1500 önbelleği (≈ 105 GPU-sa) Kaggle'ın ≈ 30 sa/hafta
+kotasına büyük olasılıkla sığmaz. **Öneri:** Kaggle'da T4 hızı ölçülür. Tam önbellek 30 sa'i aşıyorsa
+önbellek dizüstünde `base` ayarıyla üretilir (≈ 17 sa; bütün kümelerde aynı ayar). mega1500
+yalnızca MegaDepth/C4 tekrarlamasında kalır. Raporda donanım kısıtı olarak belirtilir.
 
 1. K1–K5 kararları (özellikle **K2 önbellekten önce**)
 2. MegaDepth-1500 + C4 tekrarlaması (karar beklemez, hemen)
