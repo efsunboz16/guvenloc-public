@@ -13,6 +13,12 @@ from __future__ import annotations
 
 import numpy as np
 
+# romav2 2.0.1 geometry.pose_auc, NumPy 2.5'te kaldırılan np.trapz'ı çağırıyor (requirements: numpy 2.5.4).
+# np.trapz = np.trapezoid'in eski adı (aynı fonksiyon) → romav2'nin hem kendi Mega1500.benchmark'ı hem
+# bizim döngümüz için geri eklenir. Sayısal sonuç değişmez.
+if not hasattr(np, "trapz"):
+    np.trapz = np.trapezoid
+
 RZ90 = np.array([[0.0, 1.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
 
 

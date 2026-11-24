@@ -35,3 +35,21 @@ def test_rot90_points_matches_numpy():
     q = rot90_points(centers, W, H, 1) - 0.5
     np.testing.assert_array_equal(r[q[:, 1].round().astype(int), q[:, 0].round().astype(int)],
                                   img.ravel())
+
+
+def test_pose_auc_runs_on_numpy2():
+    """romav2.geometry.pose_auc np.trapz kullanır; guvenloc.repro uyum yamasıyla çalışmalı."""
+    from romav2.geometry import pose_auc
+
+    err = np.array([0.5, 1.0, 3.0, 7.0, 15.0, 30.0])
+    auc = pose_auc(err, [5, 10, 20])
+    # elle: ölçü eğrisinin trapez integrali
+    ref = []
+    for t in (5, 10, 20):
+        e = np.sort(err)
+        r = (np.arange(len(e)) + 1) / len(e)
+        e, r = np.r_[0.0, e], np.r_[0.0, r]
+        i = np.searchsorted(e, t)
+        x, y = np.r_[e[:i], t], np.r_[r[:i], r[i - 1]]
+        ref.append(np.trapezoid(y, x=x) / t)
+    np.testing.assert_allclose(auc, ref, rtol=1e-12)
