@@ -17,6 +17,8 @@ data/*
 cache/*
 results/*
 !results/.gitkeep
+# MIMARI §3.2: deney kaydı (results/runs.csv) git'te tutulur
+!results/runs.csv
 
 # Model weights and visualizations
 *.pt

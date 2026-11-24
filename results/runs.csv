@@ -1,0 +1,73 @@
+timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
+2026-11-23T20:28:54,13_roma_heading_scale.py,277689aeaab4,0,ddbb118,region01,d_phi1_spread_deg,0.0,tile_m=800.0 setting=base
+2026-11-23T20:28:54,13_roma_heading_scale.py,277689aeaab4,0,ddbb118,region03,d_phi1_spread_deg,1.97,tile_m=800.0 setting=base
+2026-11-23T20:30:58,13_roma_heading_scale.py,277689aeaab4,0,ddbb118,region01,d_phi1_spread_deg,46.47,tile_m=2000.0 setting=base
+2026-11-23T20:30:58,13_roma_heading_scale.py,277689aeaab4,0,ddbb118,region02,d_phi1_spread_deg,32.53,tile_m=2000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region01,d_phi1_spread_deg,4.08,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region02,d_phi1_spread_deg,27.69,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region03,d_phi1_spread_deg,2.71,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region04,d_phi1_spread_deg,3.13,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region05,d_phi1_spread_deg,2.85,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region06,d_phi1_spread_deg,5.16,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region08,d_phi1_spread_deg,20.48,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region09,d_phi1_spread_deg,2.22,tile_m=1000.0 setting=base
+2026-11-23T20:39:52,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region10,d_phi1_spread_deg,9.95,tile_m=1000.0 setting=base
+2026-11-23T20:39:52,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region11,d_phi1_spread_deg,1.74,tile_m=1000.0 setting=base
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_easy,1063,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_hard,868,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_pos,1063,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_easy,2177,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_hard,2080,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_pos,2177,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_easy,3498,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_hard,3354,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_pos,3498,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_easy,1063,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_hard,868,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_pos,1063,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_easy,2177,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_hard,2080,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_pos,2177,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_easy,3498,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_hard,3354,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_pos,3498,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:55:04,02_precision_units.py,277689aeaab4,0,850a4d7,train,precision_median_m_imgB,0.083,setting=base
+2026-11-23T20:57:02,02_precision_units.py,277689aeaab4,0,850a4d7,train,precision_median_m_hr,0.1073,setting=mega1500
+2026-11-23T21:04:25,30_build_cache.py,34c9025716d1,0,850a4d7,all,sec_per_file,3.783,setting=base seq=False n=10000
+2026-11-23T21:24:56,30_build_cache.py,34c9025716d1,0,850a4d7,all,sec_per_file,0.787,setting=base seq=False n=10000
+2026-11-23T21:28:19,30_build_cache.py,34c9025716d1,0,850a4d7,all,sec_per_file,0.864,setting=base seq=False n=10000
+2026-11-23T21:30:51,30_build_cache.py,34c9025716d1,0,850a4d7,all,sec_per_file,0.867,setting=base seq=False n=10000
+2026-11-24T11:13:58,30_build_cache.py,2303cecdf095,0,f87654a,calib,sec_per_file,0.777,setting=base seq=False n=10000
+2026-11-24T11:54:15,30_build_cache.py,2303cecdf095,0,f87654a,train,sec_per_file,0.709,setting=base seq=False n=10000
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_success@10,0.04421,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_success@25,0.19755,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_success@50,0.4064,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_success@25_all,0.20226,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_median_err_m_accepted,29.37077,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_auroc,0.95013,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_far_neg,0.04247,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_far_loc,0.29915,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_median_heading_err,4.1714,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_success@10,0.06961,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_success@25,0.29069,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_success@50,0.53716,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_success@25_all,0.3048,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_median_err_m_accepted,26.55323,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_auroc,0.93484,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_far_neg,0.02641,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_far_loc,0.32643,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_median_heading_err,4.05369,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_success@10,0.02916,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_success@25,0.15146,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_success@50,0.29351,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_success@25_all,0.15334,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_median_err_m_accepted,31.74937,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_auroc,0.96769,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_far_neg,0.04764,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_far_loc,0.27563,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_median_heading_err,6.99968,cache=dev_base px=3
+2026-11-24T12:13:51,21_repro_wxbs.py,2303cecdf095,0,f87654a,wxbs,mAA@10px,55.912,"setting=wxbs seeds=[0, 1, 2, 3, 4]"
+2026-11-24T12:16:33,23_speed.py,2303cecdf095,0,f87654a,speed,turbo_matcher_s,0.333,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=2.1
+2026-11-24T12:16:46,23_speed.py,2303cecdf095,0,f87654a,speed,fast_matcher_s,0.457,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=2.73
+2026-11-24T12:17:02,23_speed.py,2303cecdf095,0,f87654a,speed,base_matcher_s,0.618,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=3.57
+2026-11-24T12:17:27,23_speed.py,2303cecdf095,0,f87654a,speed,mega1500_matcher_s,4.374,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=7.27

@@ -75,7 +75,7 @@ flowchart LR
 guvenloc/
 ├── configs/
 │   ├── base.yaml              # yollar, seed, cihaz, RoMa ayarı
-│   ├── split.yaml             # 11 bölgenin 6/2/3 ayrımı — DONDURULMUŞ
+│   ├── split.yaml             # bölge ayrımı 5/2/3 (07 dışarıda) — DONDURULMUŞ
 │   ├── pairs.yaml             # karo boyutu, kaydırma, negatif üretimi
 │   ├── m1.yaml m2.yaml m3.yaml m4.yaml
 ├── guvenloc/
@@ -182,7 +182,7 @@ gantt
 | 0.1 | Diğer 3 makinede kurulum + `01_roma_single_pair.py --setting mega1500` | Üye B, Üye C, Efsun | Dört `report.json` paylaşıldı, köşe hataları < 1 px |
 | 0.2 | GitHub deposu, ilk commit, ekip üyeleri eklendi | Efsun | Herkes push yapabiliyor |
 | 0.3 | Üniversite GPU sunucusu erişimi | Üye C | SSH ile girilip `00_check_env.py` koştu |
-| 0.4 | **Hassasiyet biriminin çözülmesi** (bkz. INTERFACES.md açık soru) | Üye B | `matcher.py` Σ'yı piksel biriminde döndürüyor; sentetik çiftte σ ile gerçek hata aynı mertebede |
+| 0.4 | **Hassasiyet biriminin çözülmesi** (bkz. INTERFACES.md açık soru) | Üye B | `matcher.py` Σ'yı piksel biriminde döndürüyor; sentetik çiftte σ ile gerçek hata aynı mertebede — **✅ Faz 1'de çözüldü:** P son refiner aşamasının ızgara pikselinde (`docs/faz1_matcher_onbellek.md`) |
 | 0.5 | CI kurulumu (ruff + pytest) | Üye A | PR'larda yeşil tik |
 
 **0.4 için yöntem:** `romav2/geometry.py::prec_mat_from_prec_params` ve `RoMaV2.prec_map_coordinates` okunur. Hassasiyetin tanımlandığı koordinat sistemi (normalize mi, `anchor_width=512` ölçeğinde piksel mi, çıkış çözünürlüğünde piksel mi) belirlenir. Doğrulama: sentetik çiftte gerçek hatalar `e_i` için `e_iᵀ P_i e_i` dağılımı ~χ²(2) civarında olmalı (tam kalibrasyon beklenmez, mertebe tutmalı).
@@ -202,14 +202,14 @@ gantt
 | UAV-VisLoc örnek (2,04 GB) | GitHub `IntelliSensing/UAV-VisLoc` README | `data/uav_visloc_sample/` | Yalnızca 03 klasörü; geliştirme için |
 | UAV-VisLoc tam (16,4 GB) | Aynı README, Google Drive | `data/uav_visloc/` | Sunucuda bir kez indirilir, kopyalanır. Zenodo'daki 197 GB sürüm **değil** |
 | MegaDepth-1500 test | `romav2` deposu `scripts/eval_prep.sh` (yalnızca MegaDepth satırları) veya LoFTR bölmesi | `data/megadepth/` | ScanNet indirilmez |
-| WxBS v1.1 | `romav2.benchmarks.wxbs` otomatik indirir (`wxbs_benchmark` paketi gerekir) | `data/WxBS/` | 34 çift |
+| WxBS v1.1 | `romav2.benchmarks.wxbs` otomatik indirir (`wxbs_benchmark` paketi gerekir) | `data/WxBS/` | 32 çift (test alt kümesi; Faz 1'de sayıldı) |
 | MegaDepth-C4 | İndirilmez, kodla türetilir (1D) | – | – |
 
 Betikler:
 - `scripts/10_download_data.ps1` / `.sh` — indirme komutları (gdown, wget).
 - `scripts/11_verify_data.py` — kontroller:
   - UAV-VisLoc: **6.742** drone karesi, **11** uydu haritası, her bölgede CSV var.
-  - CSV sütunlarının listesi yazdırılır; enlem, boylam, irtifa, yön (Phi) sütunlarının adı ve **hangi bölgelerde boş olduğu** raporlanır (rapora göre Phi iki bölgede yok — Yunnan, Shandan; doğrulanacak).
+  - CSV sütunlarının listesi yazdırılır; enlem, boylam, irtifa, yön (Phi) sütunlarının adı ve **hangi bölgelerde boş olduğu** raporlanır (rapora göre Phi iki bölgede yok — Yunnan, Shandan; doğrulanacak). **Faz 1 bulgusu:** tam pakette Phi yalnızca 07'de (Donghuayuan) yok; Yunnan ve Shandan'da tam dolu. Toplam kare 6.774 (6.742 değil); 09'un haritası 4 parça (`docs/faz1_veri_notlari.md`).
   - Her dosyanın sha256'sı → `docs/checksums/uav_visloc.sha256`.
 
 **Bitti sayılır:** dört makinede/sunucuda `11_verify_data.py` aynı sayıları ve aynı checksum'ları veriyor.
@@ -230,7 +230,7 @@ heading_to_north_angle(frame) -> φ          # kareyi kuzeye hizalayan açı
 Ayrıntılar:
 - Uydu haritasının coğrafi referansı: `satellite_coordinates_range.csv` (sol üst / sağ alt enlem-boylam) ve/veya tif'in kendi georeferansı (`rasterio`). İkisi karşılaştırılır.
 - Büyük tif'ler belleğe tümüyle yüklenmez; `rasterio` pencere okuma kullanılır.
-- **Ölçek s:** `s = GSD_drone / GSD_uydu`, `GSD_drone = irtifa × piksel_boyutu / odak_uzaklığı`. Kamera iç parametreleri veri setinde/makalede yoksa: eğitim bölgelerinde RoMa v2 homografisinden ölçülen ölçek, irtifaya karşı doğrusal regresyonla bağlanır (`s = k · irtifa`) ve `configs/pairs.yaml`'a yazılır.
+- **Ölçek s:** `s = GSD_drone / GSD_uydu`, `GSD_drone = irtifa × piksel_boyutu / odak_uzaklığı`. Kamera iç parametreleri veri setinde/makalede yoksa: eğitim bölgelerinde RoMa v2 homografisinden ölçülen ölçek, irtifaya karşı doğrusal regresyonla bağlanır (`s = k · irtifa`) ve `configs/pairs.yaml`'a yazılır. **Faz 1 bulgusu:** EXIF yok; RoMa ile ölçüldü: ayak izi genişliği = 0,980 × AGL. `height` 05/06/10/11'de deniz seviyesine göre → bölge başına zemin yüksekliği (`ground_elevation_m`) çıkarılır. Phi1 = görüntü üst kenarının pusula yönü (saat yönü).
 - **Sağlama (en kritik adım):** `scripts/12_overlay_check.py` her bölgeden 2–3, toplam 20–30 kareyi gerçek konum, ölçek ve yönle uydu haritasına bindirir → `results/overlay/*.jpg`. Yön sütununun işareti (saat yönü mü), referansı (kuzey mi) ve birimi (derece mi) burada kesinleşir ve `geo.py` docstring'ine yazılır.
 
 Testler (`tests/test_geo.py`): enlem/boylam → piksel → enlem/boylam gidiş-dönüş hatası < 1 cm; karo kesme sınır durumları.
@@ -244,6 +244,9 @@ Testler (`tests/test_geo.py`): enlem/boylam → piksel → enlem/boylam gidiş-d
 train: [6 bölge]            # yön etiketli
 calib: [Yunnan, Shandan]    # yön etiketi yok → M1 eğitiminde kullanılmaz
 test:  [tarım, kent, dağlık] # yön etiketli, farklı arazi türleri
+# Faz 1'de uygulanan (configs/split.yaml v1): train [01, 04, 08, 09, 10] | calib [05, 11] |
+# test [02, 03, 06]; 07 kullanılamaz (30 kare, yön yok) → 5/2/3. 08+09 aynı bölge (Huzhou-3),
+# aynı kümede. Calib'de yön etiketi aslında VAR; yine de M1 eğitiminde kullanılmaz.
 terrain: {bölge_id: tarım|kent|dağlık, ...}   # Mondrian ve kırılımlar için
 ```
 Arazi türü etiketleri bindirme görsellerine bakılarak ekipçe verilir. Dosya bir kez yazılır, dört kişinin onayıyla değişir.
@@ -275,7 +278,7 @@ Arazi türü etiketleri bindirme görsellerine bakılarak ekipçe verilir. Dosya
 | MegaDepth-C4 | `scripts/22_repro_c4.py` | `mega1500` | AUC@5 düşüşünün gösterilmesi (rapor: 60,0 → 53,45) |
 | Hız/bellek | `scripts/23_speed.py` | `mega1500`, `base` | Kendi kartımızda ms/çift, GB |
 
-- Ağır koşular sunucuda (8 GB'ta `precise` sığmıyor; `mega1500` 7,1 GB sınırda).
+- Ağır koşular sunucuda (8 GB'ta `precise` sığmıyor; `mega1500` 7,1 GB sınırda). **Faz 1 bulgusu:** bu tepenin kaynağı romav2 `sample()`'ın KDE'si; `matcher.balanced_sample` ile mega1500 7,3 GB / 4,4 s (RTX 5050). WxBS ±1 içinde tekrarlandı (55,91); `docs/faz1_tekrarlama.md`.
 - **C4 türetimi:** i. çiftin ikinci görüntüsü `(i mod 4)·90°` döndürülür; GT pozu ve iç parametre matrisi K **aynı dönmeyle** güncellenir (rot90 için K'da fx↔fy, cx/cy yer değiştirir; R'ye z ekseni etrafında dönme eklenir). Kontrol: 0° çiftlerde sonuç orijinalle birebir aynı olmalı.
 - Sapma > 1 puan olursa: çözünürlük, RANSAC eşiği, sürüm, rastgelelik (5 seed) raporlanır; karşılaştırmalar kendi tekrarımıza göre yapılır (rapordaki B planı).
 

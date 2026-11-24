@@ -41,8 +41,15 @@ Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
 
 ## Durum
 
-İlk depo iskeleti oluşturulmuştur. Veri, önbellek ve sonuç dosyaları
-`.gitignore` ile dışarıda tutulur; veri lisansları doğrulanmadan paylaşılmaz.
+- **Faz 0** tamam (ortam, RoMa v2 tek çift testi). Hassasiyet birimi (0.4) Faz 1'de çözüldü.
+- **Faz 1** (`faz1/altyapi`, PR #2): veri doğrulama, coğrafi altyapı, bölge ayrımı + çiftler, `matcher.py` +
+  önbellek, metrikler/istatistik, taban çizgileri (calib) ve WxBS tekrarlaması tamam.
+  Kalan: MegaDepth-1500/C4 tekrarlaması ve tam `mega1500` önbelleği (güçlü GPU'lu makinede) → `v0.0`.
+  Ayrıntı ve komutlar: [docs/faz1_tekrarlama.md](docs/faz1_tekrarlama.md),
+  [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
+
+Veri, önbellek ve sonuç dosyaları `.gitignore` ile dışarıda tutulur (`results/runs.csv` hariç);
+veri lisansları doğrulanmadan paylaşılmaz.
 
 ## Lisans
 
