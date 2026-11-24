@@ -7,6 +7,8 @@ Bu işler model **eğitmez**; RoMa v2 donuktur. İki ayrı iş var:
 | A. RoMa v2 tekrarlaması (MegaDepth-1500, C4) | Makaledeki sayıların bizim kurulumumuzda çıktığını gösterir | **Hayır** — standart benchmark, hemen koşulabilir |
 | B. Önbellek `cache/v1` | Bizim drone↔uydu çiftlerimiz için RoMa eşleşmelerini bir kez hesaplar; M1–M4 bunları okur | **Evet** — karonun boyutu/konumu eşleşmeyi değiştirir |
 
+> Bekleyen kararlar ve önerilen varsayılanlar: [faz1_durum.md](faz1_durum.md) §3 (K1–K5).
+
 ## 0. Önbellekten ÖNCE verilmesi gereken karar
 
 Önbellekteki her dosya "bu drone karesi ↔ şu uydu karosu" eşleşmesidir. Karonun nasıl kesildiği

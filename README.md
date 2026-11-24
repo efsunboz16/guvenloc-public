@@ -45,6 +45,7 @@ Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
 - **Faz 1** (`faz1/altyapi`, PR #2): veri doğrulama, coğrafi altyapı, bölge ayrımı + çiftler, `matcher.py` +
   önbellek, metrikler/istatistik, taban çizgileri (calib) ve WxBS tekrarlaması tamam.
   Kalan: MegaDepth-1500/C4 tekrarlaması ve tam `mega1500` önbelleği (güçlü GPU'lu makinede) → `v0.0`.
+  **Özet, sorunlar ve bekleyen kararlar: [docs/faz1_durum.md](docs/faz1_durum.md).**
   Ayrıntı ve komutlar: [docs/faz1_tekrarlama.md](docs/faz1_tekrarlama.md),
   [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
 
