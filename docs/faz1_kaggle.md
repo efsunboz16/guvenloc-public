@@ -1,3 +1,6 @@
+> **Not (24.11):** Kaggle denendi (duman testi başarılı) ama kalan işler 3090'da yapılacak:
+> [faz1_kalan_isler.md](faz1_kalan_isler.md). Bu belge yedek yol olarak duruyor.
+
 # Faz 1 — kalan işler Kaggle'da (3090 yerine)
 
 > 3090 müsait değil; kalan GPU işleri Kaggle'a taşındı. İşlerin listesi ve sırası değişmedi:

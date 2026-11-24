@@ -10,15 +10,16 @@
 |---|---|---|
 | 1A | Tam paket doğrulandı (11 bölge, 6.774 kare), checksum listesi | [faz1_veri_notlari.md](faz1_veri_notlari.md) |
 | 1B | Coğrafi altyapı (`io_visloc`, `geo`); yön tanımı ve ölçek RoMa ile sayısal olarak doğrulandı | aynı belge |
-| 1C | `configs/split.yaml` v1 (dondurulmuş), `pairs_v1.csv` (19.778 çift, birebir yeniden üretilebilir) | aynı belge |
+| 1C | `configs/split.yaml` v1 (dondurulmuş), `pairs_v1.csv` (uyarlamalı karo, 19.973 çift, birebir yeniden üretilebilir) | aynı belge |
 | 0.4 | Hassasiyet birimi çözüldü: P son refiner aşamasının ızgara pikselinde | [faz1_matcher_onbellek.md](faz1_matcher_onbellek.md) |
 | 1E | `matcher.py`, `cache.py`, önbellek üretimi (kesintiye dayanıklı), doğrulama/onarım | aynı belge |
 | 1F | Metrikler, istatistik testleri, taban çizgileri 1–3 (calib tablosu, `base` önbelleğiyle) | [faz1_tekrarlama.md](faz1_tekrarlama.md) |
-| 1D | WxBS v1.1 mAA@10px **55,91** (rapor 55,4 ✅); hız/bellek ölçümü | aynı belge |
+| 1D | WxBS v1.1 mAA@10px **55,91** (rapor 55,4 ✅); hız/bellek ölçümü; MegaDepth duman testi (Kaggle T4) orijinalle birebir | aynı belge |
+| K2 | Karo deneyi: uyarlamalı karo kazandı ve uygulandı | §3 K2 |
 
-Testler: 66 test (5'i GPU), CI'da ruff + pytest yeşil.
+Testler: 73 test (GPU'lular dahil), CI'da ruff + pytest yeşil.
 
-**Calib taban çizgisi tablosu (özet, `base` önbelleği):**
+**Calib taban çizgisi tablosu (özet, eski `dev_base` önbelleği, sabit 1400 m karo — 3090'da `cache/v1` ile yenilenecek):**
 
 | Satır | Yöntem | başarı@25 | AUROC | FAR-neg |
 |---|---|---|---|---|
@@ -54,9 +55,9 @@ Testler: 66 test (5'i GPU), CI'da ruff + pytest yeşil.
 | Bilgisayar çöktü, önbellek yarıda kaldı | Kaldığı yerden devam + `31_verify_cache.py` (2 bozuk dosya temizlendi) |
 | `runs.csv` git dışındaydı, geçersiz satırlar vardı | Git'e alındı, temizlendi |
 
-## 3. Ekip kararı bekleyenler — önerilerle
+## 3. Kararlar
 
-İtiraz gelmezse önerilen varsayılan uygulanır.
+K2 ve K6 karara bağlandı (24.11). K1 kuralı 3090'da uygulanacak. K3 PR #2'de onay bekliyor. K4 ve K5'te itiraz gelmezse önerilen uygulanır.
 
 ### K1. GT konumu görüntü merkezi değil (15–40 m sistematik kayma)
 CSV `lat/lon` drone'un GPS konumu; görüntü merkezi kamera eğimi kadar kayık (yanal ↔ Omega r = −0,88,
@@ -67,7 +68,7 @@ ileri ↔ Kappa r = +0,58). Başarı@10'u düşürüyor.
   ikincil sonuç olarak (`pairs_v2`) raporlanır; azaltmazsa konu kapanır.
 - Önbelleği ETKİLEMEZ.
 
-### K2. Karo boyutu (1400 m) ve kaydırma (±200 m) — ÖNBELLEKTEN ÖNCE
+### K2. Karo boyutu — KARAR: uyarlamalı (uygulandı)
 Sabit 1400 m'yi yalnızca bölge 11 gerektiriyor; alçak bölgelerde drone ayak izi karonun 1/3'ü kalıyor ve
 RoMa'nın ölçek farkı büyüyor (30 karelik denemede 1000 m biraz daha iyiydi, anlamlı değil).
 - **Öneri:** Kaydırma ±200 m kalır. Karo kareye göre uyarlanır: `karo = ayak izi köşegeni + 2 × kaydırma`
@@ -78,7 +79,15 @@ RoMa'nın ölçek farkı büyüyor (30 karelik denemede 1000 m biraz daha iyiydi
 - **Sonuç (24.11, eğitim, 300 kare, `base`, retsiz):** uyarlamalı karo (medyan 1040 m) satır 2 başarı@25'i
   0,170 → **0,213** (+0,043 [0,000, 0,089], McNemar 22'ye 9, p = 0,029); satır 1'de 0,100 → 0,160 (p = 0,0005).
   5 eğitim bölgesinin 4'ünde iyileşme (10'da 0,12 → 0,08). Kural sonucu: **uyarlamalı**.
-  Tablo: [sonuclar/faz1/k2_tile.md](sonuclar/faz1/k2_tile.md). Uygulanması ve önbellek: ekip onayı.
+  Tablo: [sonuclar/faz1/k2_tile.md](sonuclar/faz1/k2_tile.md).
+- **Uygulandı (24.11):** `tile_mode: adaptive`, `pairs_v1.csv` yeniden üretildi (19.973 çift; checksum güncel).
+  Gerekçe: MIMARI §1C'deki karo kuralının (ayak izi + 2 × kaydırma) kare başına uygulanması; yalnızca eğitimde,
+  önceden konan kuralla seçildi. Danışman özetinde belirtilecek.
+
+### K6. Önbellek ayarı — KARAR: `base`
+Tam mega1500 önbelleği dizüstünde ≈ 105 sa, Kaggle T4'te ≈ 70 sa. `base` ile bütün kümelerde aynı ayar
+(eşikler eğitimden calib/test'e taşınır). mega1500 yalnızca MegaDepth tekrarlamasında. Raporda donanım kısıtı
+olarak belirtilir.
 
 ### K3. INTERFACES §1–2 değişiklikleri
 Σ float32 (P yerine; fp16 gerçek dosyalarda taştı/bozuldu), çift listesine ek sütunlar (geriye uyumlu).
@@ -92,31 +101,20 @@ RoMa'nın ölçek farkı büyüyor (30 karelik denemede 1000 m biraz daha iyiydi
 
 ### K5. Taban çizgisi başarısı düşük (en iyi başarı@25 = 0,29)
 Hata değil: eşleşme ya tutuyor (5–50 m) ya tamamen kaçıyor (tarım/su, mevsim farkı) + K1'deki GT kayması.
-- **Öneri:** Tablo mega1500 önbelleğiyle yenilenir; bölge başına drone/uydu tarih farkı belgelenir;
+- **Öneri:** Tablo `cache/v1` ile yenilenir; bölge başına drone/uydu tarih farkı belgelenir;
   Faz 1 raporuna "zor durumlar" paragrafı. Düşük taban M2–M4'ün katkısını göstermek için iyi başlangıç.
 
-## 4. Kalanlar (Kaggle T4 ×2 + dizüstü)
+## 4. Kalanlar — hepsi 3090'da (25.11)
 
-3090 müsait değil. Sıra ve komutlar: [faz1_kalan_isler.md](faz1_kalan_isler.md). Kaggle'a özgü
-adımlar: [faz1_kaggle.md](faz1_kaggle.md).
+Ayrıntılı kılavuz ve komutlar: [faz1_kalan_isler.md](faz1_kalan_isler.md). Özet:
 
-**Ölçüm (Kaggle T4, 24.11):** MegaDepth 7,0 s/çift (dizüstü mega1500 önbelleği 4,4 s/dosya) → tam mega1500
-önbelleği iki T4'te ≈ 70 sa ≈ 2–3 haftalık kota; MegaDepth + C4 (10 tohum) ≈ 15 sa = 2 oturum.
+1. `python scripts/faz1_3090.py`: kurulum kontrolü, veri ve çift checksum'ı, MegaDepth duman testi,
+   önbellek calib + train, taban çizgisi tablosu, MegaDepth-1500 + C4 (5'er tohum), önbellek seq + test (≈ 20 sa)
+2. Claude ile: K1 eğim analizi ve `sigma_scale` kalibrasyon betikleri (yazılacak), belgelerin doldurulması
+3. PR #2 → `main`, `v0.0`, danışmana özet
 
-**Yeni karar K6 — önbellek ayarı.** Tam mega1500 önbelleği (≈ 105 GPU-sa) Kaggle'ın ≈ 30 sa/hafta
-kotasına büyük olasılıkla sığmaz. **Öneri:** Kaggle'da T4 hızı ölçülür. Tam önbellek 30 sa'i aşıyorsa
-önbellek dizüstünde `base` ayarıyla üretilir (≈ 17 sa; bütün kümelerde aynı ayar). mega1500
-yalnızca MegaDepth/C4 tekrarlamasında kalır. Raporda donanım kısıtı olarak belirtilir.
-
-1. K1–K5 kararları (özellikle **K2 önbellekten önce**)
-2. MegaDepth-1500 + C4 tekrarlaması (karar beklemez, hemen)
-3. K2 deneyi → karar → tam önbellek `cache/v1` (mega1500)
-4. Taban çizgisi tablosu `cache/v1` ile
-5. `sigma_scale` kalibrasyonu (betik yazılacak; Modül 2'den önce)
-6. PR #2 → `main`, `v0.0` etiketi, danışmana özet
-
-Henüz yazılmamış kodlar: K2 uyarlamalı karo + deney betiği, K1 eğim analizi betiği (tam önbellekle),
-`sigma_scale` kalibrasyon betiği.
+Kaggle denendi (T4'te duman testi orijinalle birebir, 2,9 sa/tohum) ama kullanılmadı:
+[faz1_kaggle.md](faz1_kaggle.md).
 
 ## 5. Faz 2'ye devreden notlar
 

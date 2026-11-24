@@ -3,8 +3,10 @@ seed: 0
 version: pairs_v1
 
 # Uydu karosu: kuzey-yukarı, kare-metrik (io_visloc.crop_square_m).
-tile_mode: fixed         # fixed: tile_size_m | adaptive: ayak izi köşegeni + 2 × tile_offset_m (K2)
-tile_size_m: 1400        # GEÇİCİ. En geniş ayak izi (11: ≈ 772 × 515 m, yarı köşegen ≈ 464 m)
+tile_mode: adaptive      # K2 (24.11.2026): karo = ayak izi köşegeni + 2 × tile_offset_m, kare başına
+                         # (MIMARI §1C kuralı). Eğitimde sabit 1400 m'den iyi: başarı@25 0,170 → 0,213,
+                         # p = 0,029 (docs/sonuclar/faz1/k2_tile.md). fixed: tile_size_m kullanılır.
+tile_size_m: 1400        # yalnızca tile_mode: fixed iken. En geniş ayak izi (11: ≈ 772 × 515 m, yarı köşegen ≈ 464 m)
                          # + kaydırma (200 m) → yarı kenar ≥ 664 m → 1330 m, yuvarlandı.
 tile_px: 1024            # 1,37 m/px; RoMa zaten 640–800'e küçültüyor
 tile_offset_m: 200       # GEÇİCİ (danışman). Karo merkezi GT'den diskte düzgün, yarıçap ≤ 200 m

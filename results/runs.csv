@@ -92,3 +92,21 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-24T16:12:29,30_build_cache.py,1a2474bf9316,0,b59c24c,train,sec_per_file,0.877,setting=base seq=False n=10000 shard=0/1
 2026-11-24T16:13:22,15_tile_experiment.py,1a2474bf9316,0,b59c24c,train,k2_fixed_row2_success@25_all,0.17,per_region=60 px=3
 2026-11-24T16:13:22,15_tile_experiment.py,1a2474bf9316,0,b59c24c,train,k2_adaptive_row2_success@25_all,0.21333333333333335,per_region=60 px=3
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_easy,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_hard,972,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_pos,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_easy,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_hard,2171,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_pos,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_easy,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_hard,3354,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_pos,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_easy,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_hard,972,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_pos,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_easy,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_hard,2171,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_pos,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_easy,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_hard,3354,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_pos,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
