@@ -3,6 +3,10 @@
 > 3090 müsait değil; kalan GPU işleri Kaggle'a taşındı. İşlerin listesi ve sırası değişmedi:
 > [faz1_kalan_isler.md](faz1_kalan_isler.md). Bu belge yalnızca **Kaggle'a özgü** adımları verir.
 
+**Hazır defter:** [`kaggle/faz1_kaggle.ipynb`](../kaggle/faz1_kaggle.ipynb). Kaggle'da *File → Import Notebook*
+ile yükleyin. §2 ve §4'teki hücreler içinde hazır: MegaDepth indirme, tohum taşıma, 11 sa bütçe.
+MegaDepth tekrarlaması için UAV-VisLoc **gerekmez**.
+
 ## 0. Kaggle'ın bizi etkileyen kısıtları
 
 | Kısıt | Değer (hesabınızın ayarlarından teyit edin) | Bize etkisi |
