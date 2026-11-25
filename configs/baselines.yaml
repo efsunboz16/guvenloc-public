@@ -1,66 +1,66 @@
 # Faz 1F taban çizgisi eşikleri — scripts/40_baselines.py select ile ÜRETİLDİ.
 # Yalnızca eğitim kümesinde seçildi; calib/test'e dokunulmadı.
 selected_on: train (eğitim alt kümesi; önbellekte bulunan çiftler)
-cache: dev_base
+cache: v1
 alpha_far_neg: 0.05
-ransac_px: 3.0
+ransac_px: 5.0
 tau_inliers:
-  1: 567
-  2: 1251
-  3: 294
-train_success@25_row2: 0.1567
+  1: 653
+  2: 1462
+  3: 380
+train_success@25_row2: 0.2293
 candidates:
 - ransac_px: 3.0
   row: 1
-  tau: 567
-  success@25: 0.09666666666666666
-  far_neg: 0.05
-  n_pairs: 840
+  tau: 377
+  success@25: 0.18610634648370497
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
 - ransac_px: 3.0
   row: 2
-  tau: 1251
-  success@25: 0.15666666666666668
-  far_neg: 0.05
-  n_pairs: 840
+  tau: 892
+  success@25: 0.22841623785020013
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
 - ransac_px: 3.0
   row: 3
-  tau: 294
-  success@25: 0.07
-  far_neg: 0.05
-  n_pairs: 840
+  tau: 215
+  success@25: 0.13321898227558604
+  far_neg: 0.049766491535318154
+  n_pairs: 10350
 - ransac_px: 5.0
   row: 1
-  tau: 909
-  success@25: 0.09333333333333334
-  far_neg: 0.05
-  n_pairs: 840
+  tau: 653
+  success@25: 0.1866781017724414
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
 - ransac_px: 5.0
   row: 2
-  tau: 1897
-  success@25: 0.15333333333333332
-  far_neg: 0.04814814814814815
-  n_pairs: 840
+  tau: 1462
+  success@25: 0.22927387078330475
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
 - ransac_px: 5.0
   row: 3
-  tau: 595
-  success@25: 0.07333333333333333
-  far_neg: 0.05
-  n_pairs: 840
+  tau: 380
+  success@25: 0.13264722698684964
+  far_neg: 0.049766491535318154
+  n_pairs: 10350
 - ransac_px: 8.0
   row: 1
-  tau: 1337
-  success@25: 0.09666666666666666
-  far_neg: 0.05
-  n_pairs: 840
+  tau: 1020
+  success@25: 0.18524871355060035
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
 - ransac_px: 8.0
   row: 2
-  tau: 2837
-  success@25: 0.14
-  far_neg: 0.05
-  n_pairs: 840
+  tau: 2162
+  success@25: 0.2249857061177816
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
 - ransac_px: 8.0
   row: 3
-  tau: 951
-  success@25: 0.07333333333333333
-  far_neg: 0.05
-  n_pairs: 840
+  tau: 627
+  success@25: 0.131789594053745
+  far_neg: 0.049912434325744305
+  n_pairs: 10350

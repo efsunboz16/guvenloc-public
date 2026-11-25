@@ -110,3 +110,54 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_easy,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
 2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_hard,3354,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
 2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_pos,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,calib,n_pairs_easy,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,calib,n_pairs_hard,972,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,calib,n_pairs_pos,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,test,n_pairs_easy,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,test,n_pairs_hard,2171,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,test,n_pairs_pos,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,train,n_pairs_easy,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,train,n_pairs_hard,3354,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,train,n_pairs_pos,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:44,23_speed.py,1a2474bf9316,0,52ecfa6,speed,base_matcher_s,0.257,NVIDIA GeForce RTX 3090 peak_gb=3.57
+2026-11-25T14:52:55,23_speed.py,1a2474bf9316,0,52ecfa6,speed,mega1500_matcher_s,0.658,NVIDIA GeForce RTX 3090 peak_gb=7.26
+2026-11-25T14:55:26,20_repro_mega1500.py,1a2474bf9316,0,52ecfa6,mega1500_lim5,auc@5,55.607969054249395,setting=mega1500 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-25T14:55:26,20_repro_mega1500.py,1a2474bf9316,0,52ecfa6,mega1500_lim5,auc@10,72.85209147618025,setting=mega1500 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-25T14:55:26,20_repro_mega1500.py,1a2474bf9316,0,52ecfa6,mega1500_lim5,auc@20,84.33299953170179,setting=mega1500 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-25T15:47:21,30_build_cache.py,1a2474bf9316,0,fd5616c,calib,sec_per_file,0.248,setting=base seq=False n=10000 shard=0/1
+2026-11-25T18:41:41,30_build_cache.py,1a2474bf9316,0,fd5616c,train,sec_per_file,0.253,setting=base seq=False n=10000 shard=0/1
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_success@10,0.04327,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_success@25,0.21355,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_success@50,0.41204,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_success@25_all,0.21543,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_median_err_m_accepted,27.8584,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_auroc,0.9532,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_far_neg,0.06781,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_far_loc,0.28504,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_median_heading_err,4.11961,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_success@10,0.06867,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_success@25,0.31891,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_success@50,0.57479,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_success@25_all,0.3349,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_median_err_m_accepted,25.08428,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_auroc,0.92719,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_far_neg,0.05504,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_far_loc,0.32549,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_median_heading_err,3.80214,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_success@10,0.0301,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_success@25,0.16275,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_success@50,0.31326,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_success@25_all,0.16275,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_median_err_m_accepted,30.54575,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_auroc,0.9634,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_far_neg,0.0629,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_far_loc,0.25964,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_median_heading_err,5.35254,cache=v1 px=5
+2026-11-25T20:19:37,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,mega1500,auc@5,62.97909971274278,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T20:19:37,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,mega1500,auc@10,76.9565479152871,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T20:19:37,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,mega1500,auc@20,86.54766575455116,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T21:59:13,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,c4,auc@5,58.9376460112706,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T21:59:13,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,c4,auc@10,73.47965193559678,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T21:59:13,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,c4,auc@20,83.78079839499964,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T22:30:57,30_build_cache.py,1a2474bf9316,0,fd5616c,all,sec_per_file,0.272,setting=base seq=True n=10000 shard=0/1
+2026-11-26T00:21:00,30_build_cache.py,1a2474bf9316,0,fd5616c,test,sec_per_file,0.253,setting=base seq=False n=10000 shard=0/1
