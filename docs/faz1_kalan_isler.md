@@ -109,7 +109,7 @@ K5 kararı (25.11) gereği ayrıca: bölge başına drone/uydu tarih farkı tabl
 - calib'de medyan kayma öncesi/sonrası. **≥ %30 azalırsa** düzeltilmiş GT ikincil sonuç olarak `pairs_v2`
   (ana sonuç CSV GT'si kalır); azalmazsa konu kapanır. Sonuç faz1_durum.md K1'e yazılır.
 
-**4c. `sigma_scale` kalibrasyonu** (`scripts/42_sigma_scale.py`, yazılacak; Modül 2'den önce şart).
+**4c. `sigma_scale` kalibrasyonu** ✅ 26.11 (`scripts/42_sigma_scale.py --write`: s = 0,9272; eğitim %95 kapsama %93,2, calib %95,7).
 - Eğitim pozitiflerinde satır 2'nin seçtiği doğru eşleşmelerde (hata < 25 m) RANSAC inlier'ları için artık
   `r_i = v_i − H(u_i)` (karo pikseli).
 - Gauss NLL'yi en küçükleyen ölçek: `s² = mean(r_iᵀ Σ_B,i⁻¹ r_i) / 2` (Σ önbellekte `Sigma_B`).

@@ -147,6 +147,26 @@ Uydu tarihleri veri seti yazarlarından/makaleden öğrenilirse tablo tamamlanı
 Düşük taban, M2–M4'ün katkısını göstermek için iyi bir başlangıç: M1 yön çağrılarını azaltır, M2 konumu inceltir,
 M3 eşiği bölgeden bağımsız hâle getirir.
 
+## Belirsizlik ölçeği `sigma_scale` (§4c, `scripts/42_sigma_scale.py`)
+
+Eğitim pozitiflerinde satır 2'nin kabul ettiği ve hatası < 25 m olan 802 çiftin RANSAC inlier'ları (5,49 milyon
+eşleşme): artık r = v − H(u) (karo pikseli), m = rᵀ Σ_B⁻¹ r; Gauss NLL'yi en küçükleyen ölçek s² = mean(m)/2.
+
+| küme | inlier | s (NLL) | %95 elips kapsaması (s ile) | %68 kapsama | %95 kapsama (ham Σ) |
+|---|---|---|---|---|---|
+| train | 5,49 M | **0,927** (seçilen) | %93,2 | %73,9 | %94,9 |
+| calib | 2,51 M | (0,816) | %95,7 | %84,4 | %96,5 |
+
+- **s ≈ 0,93:** RoMa v2'nin Σ'sı (Faz 0.4'teki birim düzeltmesiyle) gerçek artıklarla aynı mertebede; yalnızca
+  %7 küçültme gerekiyor. 0.4'ün birim çözümünün gerçek veride de doğru olduğunun bağımsız sağlaması.
+- Kapsama %95'e yakın ama dağılım Gauss değil: %68 elipsi eğitimde %74, calib'de %84 kapsıyor (merkez dar,
+  kuyruk ağır). Bölgeler arasında s 0,69 (10) – 1,02 (04) arasında değişiyor. M2 tek ölçek kullanır;
+  bölge farkı M3'ün (conformal) kalibrasyonuna kalır.
+- Sınırlama: yalnızca RANSAC inlier'ları (|r| < 5 px) kullanıldığından kuyruk kesik; s hafifçe küçük kestirilmiş
+  olabilir (kapsama eşleştiren ölçek eğitimde 1,01). Kural önceden konduğu gibi uygulandı.
+- `configs/base.yaml: romav2.sigma_scale = 0.9272`; önbellek ham Σ saklar, tüketici kuralı INTERFACES §1'de.
+  Ayrıntı: `docs/sonuclar/faz1/sigma_scale.md`.
+
 ## Kararlar (bkz. faz1_durum.md §3)
 
 1. **GT konumu görüntü merkezi değil — K1: konu kapandı, GT = CSV.** RoMa ile ölçülen görüntü merkezi ile CSV
@@ -171,7 +191,7 @@ M3 eşiği bölgeden bağımsız hâle getirir.
 - [x] 1D MegaDepth-1500 ±1 içinde (62,98 / 76,96 / 86,55); C4 sapması nedeniyle raporlandı
 - [x] Tam önbellek `cache/v1` (sunucu, `base` — K6; 86.620 dosya, bozuk 0) → taban çizgisi tablosu `cache/v1` ile yenilendi
 - [x] K1 eğim analizi (kural: azalma %22,3 < %30 → GT = CSV)
-- [ ] `sigma_scale` kalibrasyonu (§4c, Modül 2'den önce)
+- [x] `sigma_scale` kalibrasyonu: s = 0,9272 (eğitim, NLL); %95 kapsama eğitim %93,2, calib %95,7
 - [ ] C4 hedefinin (53,45) kaynağının doğrulanması
 - [ ] PR #2 → `main`, `v0.0` etiketi
 - [ ] Danışmana tek sayfalık özet

@@ -130,7 +130,7 @@ Ayrıntılı kılavuz ve komutlar: [faz1_kalan_isler.md](faz1_kalan_isler.md). �
 
 1. ~~`python scripts/faz1_3090.py`~~ ✅ 25–26.11, 9,4 sa, hatasız (bir betik düzeltmesiyle)
 2. ~~K1 eğim analizi, belgelerin doldurulması~~ ✅ 26.11
-3. `sigma_scale` kalibrasyonu (`scripts/42_sigma_scale.py`, yazılacak; Modül 2'den önce şart)
+3. ~~`sigma_scale` kalibrasyonu~~ ✅ 26.11: s = 0,9272 (eğitim %95 kapsama %93,2, calib %95,7) → `configs/base.yaml`
 4. C4 hedefinin (53,45) kaynağının doğrulanması
 5. PR #2 → `main`, `v0.0`, danışmana özet
 

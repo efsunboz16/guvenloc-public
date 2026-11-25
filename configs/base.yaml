@@ -10,7 +10,7 @@ romav2:
   setting_laptop: base        # 8 GB dizüstü
   n_matches: 10000
   rotations: [0, 90, 180, 270]   # drone karesine saat yönü
-  sigma_scale: 1.0            # Σ ← sigma_scale² · Σ (Faz 0.4; gerçek veride NLL ile seçilecek)
+  sigma_scale: 0.9272            # Σ ← s²·Σ; 42_sigma_scale.py (eğitim, NLL); cache/v1 ham Σ saklar (meta 1,0)
 eval:
   success_thresholds_m: [10, 25, 50]
   accept_error_m: 25

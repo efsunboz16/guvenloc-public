@@ -23,6 +23,11 @@ Taslaktan değişenler (onaylandı, 25.11 — faz1_durum K3):
 - `rot` (dosya adı) ve `meta.rot_deg`: drone karesine **saat yönünde** uygulanan dönme
   (`geo.north_up_rotation_cw_deg` ile aynı kural); `u` her zaman orijinal kare koordinatında.
 
+**Σ ölçeği (`sigma_scale`, 26.11):** `cache/v1` ham Σ saklar (`meta.sigma_scale = 1.0`). Kalibre ölçek
+`configs/base.yaml: romav2.sigma_scale` (= 0,9272, `scripts/42_sigma_scale.py`). Tüketici (M2–M4) Σ'yı
+`(config.sigma_scale / meta.sigma_scale)²` ile çarpar; böylece config değerle üretilmiş yeni bir önbellek iki kez
+ölçeklenmez. `base` önbelleği tek yönlüdür: `Sigma_A = 0` (yalnızca `Sigma_B` anlamlı).
+
 N ≈ 10.000: `matcher.balanced_sample` — RoMaV2.sample() ile birebir aynı örnekleme (aynı tohumla
 aynı eşleşmeler doğrulandı), yalnızca KDE parça parça (8 GB kartta 1,7 s → ~0,1 s).
 
