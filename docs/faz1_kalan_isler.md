@@ -96,6 +96,8 @@ Claude Code'u repo klasöründe açıp şunu söyleyin: *"docs/faz1_kalan_isler.
 **4a. Belgeler.** `results/faz1/repro_*.json` ve `results/faz1/baselines/table_v1_calib.md` →
 `docs/faz1_tekrarlama.md` (MegaDepth satırları; dev_base tablosunun yerine v1 tablosu) ve
 `docs/sonuclar/faz1/`'e kopya. Kontrol listesini kapat.
+K5 kararı (25.11) gereği ayrıca: bölge başına drone/uydu tarih farkı tablosu ve Faz 1 raporuna
+"zor durumlar" paragrafı (eşleşmenin tamamen kaçtığı tarım/su/mevsim farkı örnekleri, K1 GT kayması).
 
 **4b. K1 eğim analizi** (`scripts/41_gt_tilt.py`, yazılacak). Önceden konan kural (faz1_durum.md K1):
 - Eğitim bölgelerinde, satır 2'nin kabul ettiği ve hatası < 100 m olan pozitiflerde RoMa'nın bulduğu görüntü
@@ -118,7 +120,8 @@ harici diske kopyalanıp aynı komutla doğrulanır (isteğe bağlı).
 ## 5. Kapanış
 
 - [ ] `docs/faz1_tekrarlama.md` tabloları dolu, kontrol listesi kapalı
-- [ ] PR #2: INTERFACES §1–2 kararı (K3), CI yeşil → `main`'e birleştir
+- [x] INTERFACES §1–2 onayı (K3, 25.11)
+- [ ] PR #2: CI yeşil → `main`'e birleştir
 - [ ] `git tag v0.0 && git push origin v0.0`
 - [ ] Danışmana tek sayfalık özet. Özellikle belirtin: karo boyutu artık sabit değil, kare başına
       (MIMARI'deki kuralın kare başına uygulanması; yalnızca eğitimde, önceden konan kuralla seçildi);

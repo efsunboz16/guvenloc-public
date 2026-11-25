@@ -475,7 +475,7 @@ Hedef 4'teki "≤ %5" FAR-neg için garantilidir; FAR-loc ayrıca raporlanır.
 - Karşılaştırma: standart (σ̂ ile ölçeklenmemiş, sabit yarıçaplı) split conformal vs σ̂ ile normalize — "uyarlamalı"nın katkısı.
 
 ### 4F. Mondrian seçeneği (kod baştan hazır)
-`calibrate(scores, errors, group_by=None | "terrain")`. `group_by="terrain"` ile her arazi türü için ayrı τ ve q̂. Bölgeler arası kayma kapsamayı düşürürse B planı olarak devreye girer ve **ablasyonda ayrı satır** olarak raporlanır (yöntem değişikliği olduğu raporda belirtilir). Kalibrasyon kümesi 2 bölge olduğundan grup başına örnek sayısı kontrol edilir (n < 50 ise grup birleştirilir).
+`calibrate(scores, errors, group_by=None | "terrain" | "sigma_quantile")`. **Karar (25.11, faz1_durum K4):** kalibrasyonun iki bölgesi de tarım olduğundan arazi gruplaması uygulanamaz; Mondrian gruplaması σ̂ dilimlerine göre (`group_by="sigma_quantile"`, "en zor çeyrek" ölçütüyle uyumlu). `group_by="terrain"` kodda kalır, arazi kırılımı raporda verilir. Bölgeler arası kayma kapsamayı düşürürse B planı olarak devreye girer ve **ablasyonda ayrı satır** olarak raporlanır (yöntem değişikliği olduğu raporda belirtilir). Kalibrasyon kümesi 2 bölge olduğundan grup başına örnek sayısı kontrol edilir (n < 50 ise grup birleştirilir).
 
 ### 4G. Entegrasyon haftası (ay 7)
 `pipeline.py` — `localize(frame, tile) -> Decision{xy, latlon, theta, sigma_hat, score, accept, radius_m}`. Uçtan uca test: kalibrasyon bölgelerinden 100 kare.
@@ -586,7 +586,8 @@ Kural: her faz biterken sahibi `docs/fazN_*.md` içine **bir yöntem paragrafı 
 | 2 | escnn kurulmaz | pip hatası | Eğitim zaten sunucuda (Linux); olmazsa sürüm sabitleme / kaynaktan kurulum |
 | 3 | Alçak irtifada düzlem varsayımı bozulur | Hata irtifayla ters orantılı | İrtifa kırılımlı rapor, geçerli aralık |
 | 3 | İnceltici v0'ı geçemez | Kalibrasyonda AUROC düşük | v0 ana yöntem, inceltici ablasyon satırı |
-| 4 | Kalibrasyon bölgeler arası taşınmaz | Test kapsaması < %88 | Mondrian (arazi türü), kalan kayma raporlanır |
+| 4 | Kalibrasyon bölgeler arası taşınmaz | Test kapsaması < %88 | Mondrian (σ̂ dilimleri), kalan kayma raporlanır |
+| 4 | Calib yalnızca tarım, test kent/dağlık içerir (arazi kayması; K4) | Test kapsaması arazi türüne göre farklı | H3'ün açıkça sınadığı risk olarak raporlanır; arazi kırılımlı kapsama tablosu |
 | 5 | Kareler seyrek | Ardışık örtüşme yok | Sabit hız modeli |
 | 5 | Kazanç < %20 | – | M1–M3 kendi başına tamam; sonuç olduğu gibi |
 | 6 | Bir üye ayrılır / yoğunlaşır | Durum notu aksar | İkinci sorumlu devralır; her modülün README'si |

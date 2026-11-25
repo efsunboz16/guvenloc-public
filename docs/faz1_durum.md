@@ -59,7 +59,7 @@ Testler: 73 test (GPU'lular dahil), CI'da ruff + pytest yeşil.
 
 ## 3. Kararlar
 
-K2 ve K6 karara bağlandı (24.11). K1 kuralı 3090'da uygulanacak. K3, K4 ve K5 geliştiricinin kararını bekliyor (tek geliştirici, 25.11).
+K2 ve K6 karara bağlandı (24.11); K3, K4 ve K5 önerildiği gibi onaylandı (25.11). K1 kuralı sunucuda uygulanacak.
 
 ### K1. GT konumu görüntü merkezi değil (15–40 m sistematik kayma)
 CSV `lat/lon` drone'un GPS konumu; görüntü merkezi kamera eğimi kadar kayık (yanal ↔ Omega r = −0,88,
@@ -94,20 +94,23 @@ olarak belirtilir.
   tam mega1500 önbelleği sunucuda kabaca bir güne sığabilir. Karar değiştirilmedi; `speed` adımının ölçümüyle
   yeniden açılıp açılmayacağına ekip karar verir (değişirse K2 deneyi `base` ile yapıldığı için not düşülmeli).
 
-### K3. INTERFACES §1–2 değişiklikleri
+### K3. INTERFACES §1–2 değişiklikleri — KARAR: onaylandı (25.11)
 Σ float32 (P yerine; fp16 gerçek dosyalarda taştı/bozuldu), çift listesine ek sütunlar (geriye uyumlu).
-- **Öneri:** Olduğu gibi onay. Tek geliştirici (MIMARI §3.1, 25.11): onay geliştiricinin kararıdır; PR #2 açıklamasına yazılır.
+- **Öneri:** Olduğu gibi onay.
+- **Karar (25.11):** onaylandı (tek geliştirici, MIMARI §3.1). INTERFACES §1–2'deki "onay bekliyor" notları kaldırıldı.
 
-### K4. Kalibrasyonun iki bölgesi de tarım → arazi Mondrian'ı imkânsız
+### K4. Kalibrasyonun iki bölgesi de tarım → arazi Mondrian'ı imkânsız — KARAR: öneri uygulandı (25.11)
 - **Öneri:** Ayrım değişmez (dondurulmuş, raporla tutarlı). Faz 4'te Mondrian gruplaması arazi yerine
   σ̂ dilimlerine göre (`group_by="sigma_quantile"`) — "en zor çeyrek" ölçütüyle de uyumlu. Arazi kırılımı
   raporda; calib (tarım) → test (kent/dağlık) kayması H3'ün açıkça sınadığı risk olarak raporlanır ve
   MIMARI §13'e eklenir.
+- **Karar (25.11):** onaylandı. MIMARI §4F (σ̂ dilimli Mondrian) ve §13 (calib → test arazi kayması riski) güncellendi.
 
-### K5. Taban çizgisi başarısı düşük (en iyi başarı@25 = 0,29)
+### K5. Taban çizgisi başarısı düşük (en iyi başarı@25 = 0,29) — KARAR: öneri uygulanır (25.11)
 Hata değil: eşleşme ya tutuyor (5–50 m) ya tamamen kaçıyor (tarım/su, mevsim farkı) + K1'deki GT kayması.
 - **Öneri:** Tablo `cache/v1` ile yenilenir; bölge başına drone/uydu tarih farkı belgelenir;
   Faz 1 raporuna "zor durumlar" paragrafı. Düşük taban M2–M4'ün katkısını göstermek için iyi başlangıç.
+- **Karar (25.11):** onaylandı. Yapılacaklar `faz1_kalan_isler.md` §4a'da (tablo `cache/v1` ile, tarih farkı, "zor durumlar").
 
 ## 4. Kalanlar — hepsi 3090'da (25.11)
 

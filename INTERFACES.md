@@ -1,4 +1,4 @@
-# GüvenLoc – Modüller arası arayüzler (TASLAK)
+# GüvenLoc – Modüller arası arayüzler (§1–2 onaylı, 25.11)
 
 Biçim değişikliği PR ile yapılır; gerekçesi PR açıklamasına yazılır (tek geliştirici, MIMARI §3.1).
 
@@ -17,7 +17,7 @@ Yazan: `guvenloc.matcher.MatchSet.save_npz`; doğrulayan: `guvenloc.cache.valida
 | `Sigma_B` | (N,2,2) | float32 | `v`'nin kovaryansı, **karo pikseli²** |
 | `meta` | json str | – | setting, romav2, rot_deg, drone_wh, sat_wh, grid_wh, sigma_scale, bidirectional, coords, cov_units, sigma_eig_range_px2, kind, pair_id, label, neg_type, split |
 
-Taslaktan değişenler (onay bekliyor):
+Taslaktan değişenler (onaylandı, 25.11 — faz1_durum K3):
 - `P_A`/`P_B` (hassasiyet, fp16) yerine `Sigma_A`/`Sigma_B` (kovaryans, float32). fp16 hem taşıyordu
   (σ > 256 px) hem de anizotrop matrislerde pozitif tanımlılığı bozuyordu. Özdeğerler [1e-4, 1e6] px².
 - `rot` (dosya adı) ve `meta.rot_deg`: drone karesine **saat yönünde** uygulanan dönme
@@ -55,7 +55,7 @@ Temel alanlar (taslaktaki gibi):
 | `scale_s` | drone pikseli → karo pikseli ölçek oranı = `drone_m_per_px / (tile_size_m / tile_px)` |
 | `tile_offset_m` | pozitiflerde karo merkezinin GT'den uzaklığı (m) |
 
-Ek alanlar (geriye uyumlu ekleme — **onay bekliyor**):
+Ek alanlar (geriye uyumlu ekleme — onaylandı, 25.11):
 `neg_type (pos/hard/easy), tile_region, tile_lat, tile_lon, tile_size_m, tile_px, drone_lat, drone_lon,
 height, agl_m, drone_m_per_px, neg_dist_m, tile_in_map, terrain`
 - `tile_region`: karonun kesildiği bölge (kolay negatifte başka bölge).

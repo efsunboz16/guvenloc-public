@@ -107,7 +107,7 @@ p = 9,1e-38). Kırılımlar (yön, irtifa, arazi, bölge): `docs/sonuclar/faz1/t
    (28 → 28 m; 11'de eğim 23°'ye kadar). → Şimdilik GT = CSV (veri setinin standardı). Seçenekler: (a) böyle
    bırak, başarı@10'un tabanını raporla; (b) eğim düzeltmesini daha çok örnekle kur, `pairs_v2`.
 2. `tile_size_m` (1400 m) ve `tile_offset_m` (±200 m) danışmanla kesinleşmeli (önbellek buna bağlı).
-3. INTERFACES §1–2 değişiklikleri (Σ float32, ek çift alanları) onay bekliyor.
+3. INTERFACES §1–2 değişiklikleri (Σ float32, ek çift alanları) — onaylandı (25.11, faz1_durum K3).
 
 ## Faz 1 kapanış kontrol listesi (MIMARI §14.4)
 
