@@ -118,7 +118,7 @@ harici diske kopyalanıp aynı komutla doğrulanır (isteğe bağlı).
 ## 5. Kapanış
 
 - [ ] `docs/faz1_tekrarlama.md` tabloları dolu, kontrol listesi kapalı
-- [ ] PR #2: INTERFACES §1–2 onayı (K3) ve ikinci kişi incelemesi → `main`'e birleştir
+- [ ] PR #2: INTERFACES §1–2 kararı (K3), CI yeşil → `main`'e birleştir
 - [ ] `git tag v0.0 && git push origin v0.0`
 - [ ] Danışmana tek sayfalık özet. Özellikle belirtin: karo boyutu artık sabit değil, kare başına
       (MIMARI'deki kuralın kare başına uygulanması; yalnızca eğitimde, önceden konan kuralla seçildi);

@@ -59,7 +59,7 @@ Testler: 73 test (GPU'lular dahil), CI'da ruff + pytest yeşil.
 
 ## 3. Kararlar
 
-K2 ve K6 karara bağlandı (24.11). K1 kuralı 3090'da uygulanacak. K3 PR #2'de onay bekliyor. K4 ve K5'te itiraz gelmezse önerilen uygulanır.
+K2 ve K6 karara bağlandı (24.11). K1 kuralı 3090'da uygulanacak. K3, K4 ve K5 geliştiricinin kararını bekliyor (tek geliştirici, 25.11).
 
 ### K1. GT konumu görüntü merkezi değil (15–40 m sistematik kayma)
 CSV `lat/lon` drone'un GPS konumu; görüntü merkezi kamera eğimi kadar kayık (yanal ↔ Omega r = −0,88,
@@ -96,7 +96,7 @@ olarak belirtilir.
 
 ### K3. INTERFACES §1–2 değişiklikleri
 Σ float32 (P yerine; fp16 gerçek dosyalarda taştı/bozuldu), çift listesine ek sütunlar (geriye uyumlu).
-- **Öneri:** Olduğu gibi onay. PR #2'de "INTERFACES onayı" yorumuna dört kişi 👍 (MIMARI §3.1 kuralı).
+- **Öneri:** Olduğu gibi onay. Tek geliştirici (MIMARI §3.1, 25.11): onay geliştiricinin kararıdır; PR #2 açıklamasına yazılır.
 
 ### K4. Kalibrasyonun iki bölgesi de tarım → arazi Mondrian'ı imkânsız
 - **Öneri:** Ayrım değişmez (dondurulmuş, raporla tutarlı). Faz 4'te Mondrian gruplaması arazi yerine

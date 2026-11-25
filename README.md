@@ -13,7 +13,7 @@ Projenin mimarisi, fazları, ekip rolleri ve çalışma kuralları
 1. `main` dalını güncel tutun.
 2. Her iş için `faz<N>/<kisa-ad>` biçiminde dal açın.
 3. Değişiklikleri Pull Request üzerinden gönderin.
-4. CI yeşil olmadan ve ikinci sorumlu incelemesi tamamlanmadan birleştirmeyin.
+4. CI yeşil olmadan birleştirmeyin (tek geliştirici; ikinci kişi incelemesi aranmaz — MIMARI §3.1).
 
 ## Çalışma ortamı
 

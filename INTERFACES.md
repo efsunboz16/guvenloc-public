@@ -1,6 +1,6 @@
 # GüvenLoc – Modüller arası arayüzler (TASLAK)
 
-Biçim değişikliği PR ile yapılır ve diğer üç üyenin onayını gerektirir.
+Biçim değişikliği PR ile yapılır; gerekçesi PR açıklamasına yazılır (tek geliştirici, MIMARI §3.1).
 
 ## 1. Eşleşme dosyası (RoMa önbelleği → M2, M4) — Faz 1E'de uygulandı
 

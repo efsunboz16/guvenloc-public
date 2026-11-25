@@ -106,7 +106,10 @@ guvenloc/
 
 ### 3.1 Git ve kod inceleme
 - `main` her zaman çalışır. Herkes `faz<N>/<kısa-ad>` dalı açar.
-- PR'ı modülün **ikinci sorumlusu** en geç 2 gün içinde inceler. Arayüz değişikliği dört kişinin onayını ister.
+- **Tek geliştirici (25.11'den itibaren):** bütün iş tek kişi tarafından, sunucuda yapılır. PR'lar kayıt için açılır;
+  CI yeşilse geliştirici birleştirir, ikinci kişi incelemesi aranmaz. Arayüz (`INTERFACES.md`), `split.yaml` ve
+  arazi etiketi değişiklikleri PR açıklamasına gerekçesiyle yazılır. §3.4'teki roller proje önerisindeki resmî
+  görev dağılımıdır; uygulamada iş akışını bağlamaz.
 - CI (GitHub Actions, CPU): `ruff` biçim denetimi + `pytest -m "not gpu"`.
 - Sihirli sayı yok: her sabit `configs/` altında.
 
@@ -250,7 +253,7 @@ Ayrıntılar:
 
 Testler (`tests/test_geo.py`): enlem/boylam → piksel → enlem/boylam gidiş-dönüş hatası < 1 cm; karo kesme sınır durumları.
 
-**Bitti sayılır:** bindirmeler ekipçe gözle onaylandı; testler yeşil.
+**Bitti sayılır:** bindirmeler gözle kontrol edildi; testler yeşil.
 
 ### 1C. Bölge ayrımı ve çift üretimi: `pairs.py` (Hafta 2–3) — Üye A + Efsun
 
@@ -264,7 +267,7 @@ test:  [tarım, kent, dağlık] # yön etiketli, farklı arazi türleri
 # aynı kümede. Calib'de yön etiketi aslında VAR; yine de M1 eğitiminde kullanılmaz.
 terrain: {bölge_id: tarım|kent|dağlık, ...}   # Mondrian ve kırılımlar için
 ```
-Arazi türü etiketleri bindirme görsellerine bakılarak ekipçe verilir. Dosya bir kez yazılır, dört kişinin onayıyla değişir.
+Arazi türü etiketleri bindirme görsellerine bakılarak verilir. Dosya bir kez yazılır; değişirse gerekçesi PR'a ve `runs.csv` notuna yazılır.
 
 **Çift türleri:**
 
@@ -639,6 +642,6 @@ eval:
 - [ ] Başarı ölçütleri `results/runs.csv`'de, commit ve config ile kayıtlı
 - [ ] `docs/fazN_*.md`: yöntem paragrafı + sonuç tablosu + B planı kullanıldı mı
 - [ ] Testler yeşil, `main` çalışır
-- [ ] Modül README'si (çalıştırma, girdi, çıktı) ve ikinci sorumlu bilgilendirildi
+- [ ] Modül README'si (çalıştırma, girdi, çıktı)
 - [ ] Sürüm etiketi atıldı
 - [ ] Danışmana tek sayfalık özet gönderildi
