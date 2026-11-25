@@ -183,3 +183,6 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-26T01:43:34,50_m1_labels.py,49fd69844ed7,0,e5a6743,train,label_noise_median_abs_d,5.151,n=802 val=04
 2026-11-26T01:43:34,50_m1_labels.py,49fd69844ed7,0,e5a6743,train,label_noise_frac_gt10,0.3641,
 2026-11-26T01:43:34,50_m1_labels.py,49fd69844ed7,0,e5a6743,train,label_lolo_median_abs_after,1.359,"önce 5.158, n=795"
+2026-11-26T02:41:36,52_m1_train.py,49fd69844ed7,0,04bcc06,calib,m1_median_err_0,50.8724,"±1.4977 seeds=[0, 1, 2] lr=0.003 epochs=60"
+2026-11-26T02:41:36,52_m1_train.py,49fd69844ed7,0,04bcc06,calib,m1_acc10_0,0.1123,"±0.0031 seeds=[0, 1, 2] lr=0.003 epochs=60"
+2026-11-26T02:41:36,52_m1_train.py,49fd69844ed7,0,04bcc06,calib,m1_median_err_all,51.0753,"±2.1803 seeds=[0, 1, 2] lr=0.003 epochs=60"

@@ -1,0 +1,39 @@
+  lr 0.0003 tohum 0 epoch 10: kayıp 1.728, val medyan hata (12 açı) 68.33°, (0°) 68.21° [116 s]
+  lr 0.0003 tohum 0 epoch 20: kayıp 1.572, val medyan hata (12 açı) 62.83°, (0°) 64.03° [207 s]
+  lr 0.0003 tohum 0 epoch 30: kayıp 1.527, val medyan hata (12 açı) 67.53°, (0°) 67.93° [297 s]
+  lr 0.0003 tohum 0 epoch 40: kayıp 1.504, val medyan hata (12 açı) 66.82°, (0°) 66.67° [387 s]
+  lr 0.0003 tohum 0 epoch 50: kayıp 1.499, val medyan hata (12 açı) 65.07°, (0°) 65.17° [477 s]
+  lr 0.0003 tohum 0 epoch 60: kayıp 1.494, val medyan hata (12 açı) 66.22°, (0°) 65.59° [566 s]
+  lr 0.001 tohum 0 epoch 10: kayıp 1.634, val medyan hata (12 açı) 70.02°, (0°) 70.06° [90 s]
+  lr 0.001 tohum 0 epoch 20: kayıp 1.534, val medyan hata (12 açı) 59.58°, (0°) 62.00° [179 s]
+  lr 0.001 tohum 0 epoch 30: kayıp 1.495, val medyan hata (12 açı) 64.16°, (0°) 64.77° [269 s]
+  lr 0.001 tohum 0 epoch 40: kayıp 1.470, val medyan hata (12 açı) 68.52°, (0°) 68.58° [358 s]
+  lr 0.001 tohum 0 epoch 50: kayıp 1.461, val medyan hata (12 açı) 65.12°, (0°) 65.50° [448 s]
+  lr 0.001 tohum 0 epoch 60: kayıp 1.457, val medyan hata (12 açı) 66.77°, (0°) 66.99° [537 s]
+  lr 0.003 tohum 0 epoch 10: kayıp 1.627, val medyan hata (12 açı) 62.92°, (0°) 64.32° [89 s]
+  lr 0.003 tohum 0 epoch 20: kayıp 1.527, val medyan hata (12 açı) 60.24°, (0°) 60.34° [178 s]
+  lr 0.003 tohum 0 epoch 30: kayıp 1.477, val medyan hata (12 açı) 62.95°, (0°) 62.87° [267 s]
+  lr 0.003 tohum 0 epoch 40: kayıp 1.457, val medyan hata (12 açı) 65.90°, (0°) 66.19° [357 s]
+  lr 0.003 tohum 0 epoch 50: kayıp 1.447, val medyan hata (12 açı) 63.25°, (0°) 63.14° [446 s]
+  lr 0.003 tohum 0 epoch 60: kayıp 1.444, val medyan hata (12 açı) 64.04°, (0°) 63.57° [535 s]
+seçilen lr = 0.003 (val medyan hata, 12 açı: 0.0003: 66.22°, 0.001: 66.77°, 0.003: 64.04°)
+  lr 0.003 tohum 1 epoch 10: kayıp 1.629, val medyan hata (12 açı) 47.69°, (0°) 45.83° [89 s]
+  lr 0.003 tohum 1 epoch 20: kayıp 1.521, val medyan hata (12 açı) 60.47°, (0°) 58.97° [178 s]
+  lr 0.003 tohum 1 epoch 30: kayıp 1.486, val medyan hata (12 açı) 58.51°, (0°) 58.96° [267 s]
+  lr 0.003 tohum 1 epoch 40: kayıp 1.455, val medyan hata (12 açı) 57.74°, (0°) 57.11° [357 s]
+  lr 0.003 tohum 1 epoch 50: kayıp 1.451, val medyan hata (12 açı) 63.00°, (0°) 63.87° [446 s]
+  lr 0.003 tohum 1 epoch 60: kayıp 1.448, val medyan hata (12 açı) 62.82°, (0°) 64.24° [535 s]
+  lr 0.003 tohum 2 epoch 10: kayıp 1.635, val medyan hata (12 açı) 62.44°, (0°) 62.21° [89 s]
+  lr 0.003 tohum 2 epoch 20: kayıp 1.505, val medyan hata (12 açı) 61.85°, (0°) 62.25° [178 s]
+  lr 0.003 tohum 2 epoch 30: kayıp 1.498, val medyan hata (12 açı) 68.73°, (0°) 68.80° [267 s]
+  lr 0.003 tohum 2 epoch 40: kayıp 1.460, val medyan hata (12 açı) 57.75°, (0°) 58.44° [357 s]
+  lr 0.003 tohum 2 epoch 50: kayıp 1.452, val medyan hata (12 açı) 57.61°, (0°) 57.81° [446 s]
+  lr 0.003 tohum 2 epoch 60: kayıp 1.447, val medyan hata (12 açı) 60.44°, (0°) 61.52° [535 s]
+calib (5 + 11), 3 tohum ortalama ± std:
+  median_err_0: 50.872 ± 1.498
+  acc10_0: 0.112 ± 0.003
+  acc20_0: 0.257 ± 0.007
+  acc45_0: 0.467 ± 0.008
+  median_err_all: 51.075 ± 2.180
+  acc10_all: 0.120 ± 0.000
+M1_BITTI_KOD=0

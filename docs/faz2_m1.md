@@ -78,3 +78,26 @@ Ayrıntı: `docs/sonuclar/faz2/label_correction.md`.
   (bilineer yeniden örnekleme); plan "45°'nin katlarında tam" diyordu — doğrusu: 90°'de tam, 45°'de yaklaşık.
   45° ve 20° sapması eğitilmiş ağda ölçülüp raporlanacak (2E).
 - **Hız (3090):** 64'lük grup eğitim adımı 195 ms, 3,0 GB → epoch (2.760 kare) ≈ 9 s.
+
+## 2C. Eğitim — ilk deneme (v1): ezberliyor, genellemiyor (`scripts/51_m1_prep.py`, `scripts/52_m1_train.py`)
+
+Kurulum: eğitim 01/08/09/10 (2.760 kare, φ_corr), her örnek U(0, 360°) döndürülür; dairesel Gauss yumuşatmalı
+çapraz entropi (σ = 1 bölme), AdamW, 60 epoch, grup 64, bf16. λ·L_prior kullanılmadı: denetimli kurulumda önselin
+hedefi (kuzey-yukarı) etiketin kendisi, ayrı bir şey ayarlamıyor (plandan sapma). Öğrenme oranı {3e-4, 1e-3, 3e-3}
+doğrulamada (04) seçildi → 3e-3; 3 tohum. İzleme: `scripts/m1_izle.py`. Koşu 45 dk.
+
+| küme | bölge | kare | medyan hata (0°) | hata < 10° | hata deseni |
+|---|---|---|---|---|---|
+| eğitim | 01, 08, 09, 10 | 2.760 | ≈ 0° | %100 | ezber |
+| doğrulama | 04 | 738 | 59–64° | %7 | çoğu ±90° civarında, sistematik |
+| calib | 05 | 473 | 19° | %23 | medyan −18° |
+| calib | 11 | 590 | 96–111° | %2 | ±90° ve 180° civarında |
+| **calib toplam (3 tohum)** | | 1.063 | **50,9 ± 1,5°** | %11 | hedef ≤ 10° ✗ |
+
+Eşdeğerlik (eğitilmiş ağ, calib): 90° tam (0,0°), 45° medyan 3,0°, 20° medyan 4,4° sapma.
+
+**Teşhis:** eğitim kaybı yumuşatılmış hedefin alt sınırına (≈ 1,42) iniyor ve eğitim karelerinin %100'ü 10° içinde
+→ ağ her eğitim sahnesini tanıyıp onun kuzeyini ezberliyor. 4 uçuş (her biri tek yer, iki uçuş yönü) yeni bölgeye
+taşınan bir "kuzey ipucu" (gölge yönü, yol/bina düzeni) öğretmeye yetmiyor; yeni bölgedeki hata rastgele değil,
+sistematik (±90° kümeleri) — ağ başka bölgenin ipucunu yanlış yöne bağlıyor. Hiperparametre (lr) farkı küçük
+(63–67°); tohumlar arası fark küçük → sorun veri/görev kaynaklı, ayardan değil.
