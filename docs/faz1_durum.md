@@ -2,7 +2,9 @@
 
 > Tek sayfada: ne bitti, hangi sorunlar çıktı ve nasıl çözüldü, hangi kararlar bekliyor (önerilerle),
 > ne kaldı. Kalan işlerin komutları: [faz1_kalan_isler.md](faz1_kalan_isler.md).
-> Dal: `faz1/altyapi` — PR #2. Çalışılan makine: RTX 5050 Laptop 8 GB.
+> Dal: `faz1/altyapi` — PR #2. Çalışılan makine: RTX 5050 Laptop 8 GB (24.11'e kadar).
+> **25.11'den itibaren bütün işler üniversite sunucusunda (RTX 3090 24 GB, Ubuntu 22.04);** kurulum doğrulandı
+> (köşe hatası 0,32 px, testler yeşil).
 
 ## 1. Bitenler
 
@@ -88,6 +90,9 @@ RoMa'nın ölçek farkı büyüyor (30 karelik denemede 1000 m biraz daha iyiydi
 Tam mega1500 önbelleği dizüstünde ≈ 105 sa, Kaggle T4'te ≈ 70 sa. `base` ile bütün kümelerde aynı ayar
 (eşikler eğitimden calib/test'e taşınır). mega1500 yalnızca MegaDepth tekrarlamasında. Raporda donanım kısıtı
 olarak belirtilir.
+- **Not (25.11):** Gerekçe 8 GB dizüstü / Kaggle kotasıydı. 3090'da mega1500 tek çift 0,54 s (aynı testte dizüstünde 2,1 s);
+  tam mega1500 önbelleği sunucuda kabaca bir güne sığabilir. Karar değiştirilmedi; `speed` adımının ölçümüyle
+  yeniden açılıp açılmayacağına ekip karar verir (değişirse K2 deneyi `base` ile yapıldığı için not düşülmeli).
 
 ### K3. INTERFACES §1–2 değişiklikleri
 Σ float32 (P yerine; fp16 gerçek dosyalarda taştı/bozuldu), çift listesine ek sütunlar (geriye uyumlu).

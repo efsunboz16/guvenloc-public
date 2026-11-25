@@ -116,7 +116,9 @@ Her betik sonunda `guvenloc.metrics.log_run()` çağırır → `results/runs.csv
 
 ### 3.3 Veri ve önbellek
 - Veri ve önbellek için `sha256sum` listesi `docs/checksums/` altında tutulur.
-- Önbelleği yalnızca Üye B üretir ve sürümler (`cache/v1/`, `cache/v2/`…). Diğerleri kopyalar.
+- Önbelleği yalnızca Üye B üretir ve sürümler (`cache/v1/`, `cache/v2/`…). Önbellek sunucuda durur;
+  ekip ona SSH ile sunucuda erişir, kopyalanmaz.
+- Bütün GPU işleri (önbellek, eğitim, değerlendirme, hız ölçümü) üniversite sunucusunda (RTX 3090 24 GB) yapılır.
 
 ### 3.4 Roller
 
@@ -168,6 +170,13 @@ gantt
 
 ## Faz 0 — Altyapı (TAMAM) ve devreden işler
 
+### Çalışma ortamı (25 Kasım 2026'dan itibaren)
+**Bütün GPU işleri üniversite sunucusunda yapılır:** RTX 3090 24 GB (sm_86), Ubuntu 22.04, Python 3.12,
+torch 2.11.0+cu128, romav2 2.0.1. Veri (`data/`), önbellek (`cache/v1/`) ve sonuçlar (`results/`) yalnızca
+burada durur; diğer makinelere kopyalanmaz. Ekip üyeleri kendi bilgisayarlarında yalnızca kod yazar ve CPU
+testlerini (`pytest -m "not gpu"`) koşar. 23–24 Kasım'daki işler (Faz 0 Gün 1, Faz 1'in ilk kısmı) RTX 5060/5050
+dizüstünde ve Kaggle T4'te yapıldı; o sayılar belgelerde kendi donanımıyla birlikte kayıtlı kalır.
+
 ### Tamamlananlar (Gün 1, 23 Kasım 2026)
 - `.venv`: Python 3.12.10, torch 2.11.0+cu128, romav2 2.0.1 (Windows'ta doğrudan çalışıyor).
 - Depo iskeleti, `README.md`, `INTERFACES.md` (taslak), `requirements*.txt`, `.gitignore`.
@@ -175,15 +184,21 @@ gantt
 - Ölçümler (RTX 5060 Laptop 8 GB): `precise` 10,4 GB / 3,7 s; `mega1500` 7,1 GB / 2,1 s; `base` 3,4 GB / 0,31 s.
 - Bulgular: WxBS = v1.1 (paket içi `benchmarks/wxbs.py`); tek yönlü ayarlarda `sample()` hassasiyet hatası.
 
-### Devreden işler (Faz 1'in ilk haftasında kapanır)
+### Sunucu kurulumu (25 Kasım 2026)
+- `00_check_env.py`: RTX 3090, 25,4 GB, sm_86; matmul ve bf16 doğru.
+- `01_roma_single_pair.py --setting mega1500`: 0,54 s/çift, 7,13 GB, köşe hatası **0,32 px**, eşleşme hatası medyan
+  0,32 px (dizüstüyle aynı) → `results/day1/report.json`.
+- `pytest`: 70 geçti (GPU testleri dahil), 1 atlandı (önbellek henüz yok).
+
+### Devreden işler
 
 | # | İş | Sorumlu | Bitti sayılır |
 |---|---|---|---|
-| 0.1 | Diğer 3 makinede kurulum + `01_roma_single_pair.py --setting mega1500` | Üye B, Üye C, Efsun | Dört `report.json` paylaşıldı, köşe hataları < 1 px |
-| 0.2 | GitHub deposu, ilk commit, ekip üyeleri eklendi | Efsun | Herkes push yapabiliyor |
-| 0.3 | Üniversite GPU sunucusu erişimi | Üye C | SSH ile girilip `00_check_env.py` koştu |
+| 0.1 | ~~Diğer 3 makinede kurulum~~ → sunucuda kurulum + `01_roma_single_pair.py --setting mega1500` | Üye B | **✅ 25.11:** sunucuda köşe hatası 0,32 px. Diğer makinelerde GPU kurulumu gerekmiyor (bütün GPU işleri sunucuda); donanımdan bağımsızlık dizüstü (5060), Kaggle T4 ve 3090 ile gösterildi |
+| 0.2 | GitHub deposu, ilk commit, ekip üyeleri eklendi | Efsun | **✅** dört hesabın push yetkisi var |
+| 0.3 | Üniversite GPU sunucusu erişimi | Üye C | `00_check_env.py` sunucuda koştu **✅**. **Açık:** SSH sunucusu kurulu değil (`openssh-server`, yönetici yetkisi gerekir); kurulunca ekipten biri SSH ile bağlanıp `00_check_env.py` koşar |
 | 0.4 | **Hassasiyet biriminin çözülmesi** (bkz. INTERFACES.md açık soru) | Üye B | `matcher.py` Σ'yı piksel biriminde döndürüyor; sentetik çiftte σ ile gerçek hata aynı mertebede — **✅ Faz 1'de çözüldü:** P son refiner aşamasının ızgara pikselinde (`docs/faz1_matcher_onbellek.md`) |
-| 0.5 | CI kurulumu (ruff + pytest) | Üye A | PR'larda yeşil tik |
+| 0.5 | CI kurulumu (ruff + pytest) | Üye A | **✅** PR'larda ruff + `pytest -m "not gpu"` |
 
 **0.4 için yöntem:** `romav2/geometry.py::prec_mat_from_prec_params` ve `RoMaV2.prec_map_coordinates` okunur. Hassasiyetin tanımlandığı koordinat sistemi (normalize mi, `anchor_width=512` ölçeğinde piksel mi, çıkış çözünürlüğünde piksel mi) belirlenir. Doğrulama: sentetik çiftte gerçek hatalar `e_i` için `e_iᵀ P_i e_i` dağılımı ~χ²(2) civarında olmalı (tam kalibrasyon beklenmez, mertebe tutmalı).
 
@@ -200,7 +215,7 @@ gantt
 | Veri | Kaynak | Hedef klasör | Not |
 |---|---|---|---|
 | UAV-VisLoc örnek (2,04 GB) | GitHub `IntelliSensing/UAV-VisLoc` README | `data/uav_visloc_sample/` | Yalnızca 03 klasörü; geliştirme için |
-| UAV-VisLoc tam (16,4 GB) | Aynı README, Google Drive | `data/uav_visloc/` | Sunucuda bir kez indirilir, kopyalanır. Zenodo'daki 197 GB sürüm **değil** |
+| UAV-VisLoc tam (16,4 GB) | Aynı README, Google Drive | `data/uav_visloc/` | Sunucuya bir kez konur, yalnızca orada durur. Zenodo'daki 197 GB sürüm **değil** |
 | MegaDepth-1500 test | `romav2` deposu `scripts/eval_prep.sh` (yalnızca MegaDepth satırları) veya LoFTR bölmesi | `data/megadepth/` | ScanNet indirilmez |
 | WxBS v1.1 | `romav2.benchmarks.wxbs` otomatik indirir (`wxbs_benchmark` paketi gerekir) | `data/WxBS/` | 32 çift (test alt kümesi; Faz 1'de sayıldı) |
 | MegaDepth-C4 | İndirilmez, kodla türetilir (1D) | – | – |
@@ -212,7 +227,7 @@ Betikler:
   - CSV sütunlarının listesi yazdırılır; enlem, boylam, irtifa, yön (Phi) sütunlarının adı ve **hangi bölgelerde boş olduğu** raporlanır (rapora göre Phi iki bölgede yok — Yunnan, Shandan; doğrulanacak). **Faz 1 bulgusu:** tam pakette Phi yalnızca 07'de (Donghuayuan) yok; Yunnan ve Shandan'da tam dolu. Toplam kare 6.774 (6.742 değil); 09'un haritası 4 parça (`docs/faz1_veri_notlari.md`).
   - Her dosyanın sha256'sı → `docs/checksums/uav_visloc.sha256`.
 
-**Bitti sayılır:** dört makinede/sunucuda `11_verify_data.py` aynı sayıları ve aynı checksum'ları veriyor.
+**Bitti sayılır:** sunucuda `11_verify_data.py` dizüstündeki doğrulamayla aynı sayıları ve aynı checksum'ları veriyor (`docs/checksums/`).
 
 ### 1B. Coğrafi altyapı: `io_visloc.py`, `geo.py` (Hafta 1–2) — Üye A
 
@@ -343,7 +358,7 @@ class Matcher:
 - Etiket gürültüsü kontrolü: kalibrasyon dışı küçük bir alt kümede RoMa v2 homografisinden çıkan açı ile `φ` karşılaştırılır; fark dağılımı raporlanır.
 
 ### 2B. Ağ (Hafta 1–3) — `m1_canon.py`
-- Kütüphane: `escnn` (eklenecek bağımlılık; Windows'ta kurulumu Hafta 1'de denenir).
+- Kütüphane: `escnn` (eklenecek bağımlılık; sunucuda, Linux'ta kurulur — Hafta 1'de denenir).
 - Grup: C8, regular gösterim. Gövde: 4–5 eşdeğer evrişim bloğu + grup havuzlama; ~1–2 M parametre.
 - Giriş: drone karesi, merkezden dairesel maske ile kırpılmış (köşe etkisi dönmeyi bozar), 256×256 veya 320×320.
 - Çıkış: 36 bölmeli olasılık `p_θ`. C8 regular alan 8 yönde tam eşdeğer; 36 bölme, 8 grup kanalına bağlı eşdeğer bir başlıkla (ör. regular alanın açısal Fourier katsayılarından 36 noktada açı yoğunluğu) üretilir. Tam eşdeğerlik 45°'nin katlarında, ara açılarda yaklaşıktır — belgelenir.
@@ -520,14 +535,15 @@ Tek betik, aynı test kareleri, eşleştirilmiş karşılaştırma:
 - `scripts/final_eval.py` yalnızca bu fazda ve tek sefer (dondurulmuş config ile) test bölgelerinde koşulur.
 
 ### 6B. Hız ve bellek — `scripts/91_speed.py`
-- 8 GB dizüstü GPU'da (RTX 5060 Laptop) ve sunucuda: ms/kare (her modül ayrı), en yüksek bellek.
+- Sunucuda (RTX 3090): ms/kare (her modül ayrı), en yüksek bellek. 8 GB'lık bir kartta çalışabilirlik, en yüksek
+  belleğin 8 GB'ın altında kaldığı gösterilerek raporlanır (dizüstü ölçümü gerekmez).
 - M1'in sağladığı çağrı tasarrufu (satır 2/3'e karşı) burada sayısal olarak gösterilir.
 
 ### 6C. Gradio prototipi — `app/`
 - İskelet Faz 3 sırasında sahte karar çıktısıyla kurulur (Üye A).
 - Mod 1 — tek kare: kare yükle (veya test kümesinden seç) → harita üzerinde tahmin, q̂·σ̂ güven dairesi, kabul/ret kararı, enlem/boylam, yön.
 - Mod 2 — dizi: uçuş seç → oynatıcı; yörünge, parçacık bulutu, uydu eşleştirmesinin yapıldığı/atlandığı kareler.
-- 8 GB kartta `mega1500` veya `base` ayarıyla çalışır.
+- Sunucuda çalışır; `mega1500` veya `base` ayarıyla (en yüksek bellek 8 GB altında).
 - Demo videosu bu arayüzden kaydedilir.
 
 ### 6D. Açık kaynak paketi
@@ -559,12 +575,12 @@ Kural: her faz biterken sahibi `docs/fazN_*.md` içine **bir yöntem paragrafı 
 |---|---|---|---|
 | 0/1 | Hassasiyet birimi çözülemez | σ ile gerçek hata mertebe olarak tutmuyor | Σ'yı eğitim bölgelerinde tek bir ölçek katsayısıyla kalibre et (`Σ ← k·Σ`, k NLL ile) |
 | 1 | Tekrarlama > 1 puan sapar | 5 seed ortalaması hedef dışında | Nedeni raporla; kıyaslar kendi tekrarımıza göre |
-| 1 | 8 GB yetmez | `precise` 10,4 GB (doğrulandı) | Önbellek sunucuda; dizüstünde `mega1500`/`base` |
+| 1 | 8 GB yetmez | `precise` 10,4 GB (doğrulandı) | Önbellek sunucuda; dizüstünde `mega1500`/`base`. **25.11:** bütün GPU işleri 24 GB sunucuda → risk kapandı |
 | 1 | Google Drive kota hatası | İndirme yarıda kesiliyor | Tarayıcıdan / ertesi gün / Baidu |
 | 1 | Yön sütunu tanımı belirsiz | Bindirmeler tutarsız | Eğitim bölgelerinde RoMa v2 homografisinden açı çıkar, sütunla karşılaştırıp işaret/ofset belirle |
 | 2 | Simetrik arazide M1 yetersiz | Medyan hata > 10° | 8 kaba bölme veya en olası 2 yön |
 | 2 | Yön etiketsiz iki bölge | – | Yalnızca kalibrasyonda; eğitimde dönme artırımı |
-| 2 | escnn Windows'ta kurulmaz | pip hatası | WSL2 veya sunucuda eğitim |
+| 2 | escnn kurulmaz | pip hatası | Eğitim zaten sunucuda (Linux); olmazsa sürüm sabitleme / kaynaktan kurulum |
 | 3 | Alçak irtifada düzlem varsayımı bozulur | Hata irtifayla ters orantılı | İrtifa kırılımlı rapor, geçerli aralık |
 | 3 | İnceltici v0'ı geçemez | Kalibrasyonda AUROC düşük | v0 ana yöntem, inceltici ablasyon satırı |
 | 4 | Kalibrasyon bölgeler arası taşınmaz | Test kapsaması < %88 | Mondrian (arazi türü), kalan kayma raporlanır |
@@ -607,8 +623,8 @@ paths:
   results: results/
 romav2:
   version: "2.0.1"
-  setting_cache: mega1500     # sunucu önbelleği
-  setting_laptop: base        # 8 GB dizüstü
+  setting_cache: base         # K6 (24.11): base; mega1500 yalnızca tekrarlamada
+  setting_laptop: base        # 8 GB kart ayarı (demo/hız raporu)
   n_matches: 10000
   rotations: [0, 90, 180, 270]
 eval:

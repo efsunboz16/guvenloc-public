@@ -1,6 +1,7 @@
-# Faz 1 — kalan işler (RTX 3090 makinesi, 25 Kasım 2026)
+# Faz 1 — kalan işler (üniversite sunucusu, RTX 3090, 25 Kasım 2026)
 
-> Bu belge yarın 3090'lı bilgisayarda Faz 1'i bitirmek için gereken her şeyi sırasıyla anlatır.
+> Bu belge Faz 1'i sunucuda bitirmek için gereken her şeyi sırasıyla anlatır. 25.11'den itibaren bütün GPU
+> işleri bu sunucuda yapılır (MIMARI "Çalışma ortamı").
 > Durum özeti ve kararların gerekçeleri: [faz1_durum.md](faz1_durum.md).
 
 ## 0. Ne bitti, ne kaldı?
@@ -25,21 +26,26 @@ kodu, metrik/istatistik kodu, WxBS tekrarlaması (55,91 ✅), ilk taban çizgisi
 | 5 | `sigma_scale` kalibrasyonu | RoMa'nın belirsizlik (Σ) ölçeğini gerçek verimize ayarlamak; Modül 2'den önce şart | Claude ile yazılacak (§4) |
 | 6 | Kapanış: belgeler, PR #2 → main, `v0.0` etiketi, danışman özeti | Faz 1'in resmi bitişi | §5 |
 
-## 1. Hazırlık (≈ 30 dk)
+## 1. Hazırlık
 
-```
-git clone https://github.com/efsunboz16/guvenloc.git
-cd guvenloc
+Sunucu (Ubuntu 22.04, RTX 3090) — 25.11'de yapıldı:
+- [x] Depo klonlandı, `faz1/altyapi` dalı; `.venv` (Python 3.12, torch 2.11.0+cu128) kuruldu
+- [x] `00_check_env.py` (RTX 3090, sm_86), `01_roma_single_pair.py --setting mega1500` (köşe hatası 0,32 px),
+      `pytest` (70 geçti); RoMa v2 ağırlıkları indirildi
+- [x] Uyku modu kapalı (GNOME: `sleep-inactive-ac-type = nothing`)
+- [ ] UAV-VisLoc paketini (dizüstündeki `data/UAV_VisLoc_dataset/` klasörünün tamamı) sunucuda
+      `data/UAV_VisLoc_dataset/` altına koyun. MegaDepth'i betik kendisi indirir. Veri sunucuda kalır.
+
+Sıfırdan kurulum gerekirse:
+```bash
+git clone https://github.com/efsunboz16/guvenloc.git && cd guvenloc
 git checkout faz1/altyapi            # PR #2 birleşince: main
-py -3.12 -m venv .venv               # Linux: python3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1         # Linux: source .venv/bin/activate
+python3.12 -m venv .venv && source .venv/bin/activate
 pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
 pip install -r requirements.txt
 ```
-- UAV-VisLoc paketini (dizüstündeki `data/UAV_VisLoc_dataset/` klasörünün tamamı) `data/UAV_VisLoc_dataset/`
-  altına kopyalayın. MegaDepth'i betik kendisi indirir.
-- **Uyku modunu kapatın** (Windows: Ayarlar → Sistem → Güç → Uyku: Hiçbir zaman). Ekran kapanabilir.
-- Windows'ta konsol Türkçe karakterde sorun çıkarırsa: `$env:PYTHONUTF8=1`.
+Uzun koşuları `tmux` içinde başlatın (`tmux new -s faz1`; ayrılmak için Ctrl+B, D; dönmek için
+`tmux attach -t faz1`): oturum kapansa da koşu devam eder.
 
 ## 2. Tek komut (≈ 20 sa, gözetimsiz)
 
@@ -105,8 +111,9 @@ Claude Code'u repo klasöründe açıp şunu söyleyin: *"docs/faz1_kalan_isler.
 - Kontrol: ölçeklenmiş %95 elipslerinin kapsaması eğitimde ≈ %95; calib'de rapor edilir.
 - Sonuç `configs/base.yaml: romav2.sigma_scale` (şu an 1,0) + `results/runs.csv`.
 
-**4d. Önbelleği ekibe dağıtmak.** `cache/v1/` klasörü (MANIFEST.csv dahil, ≈ 20 GB) harici disk/Drive ile
-diğer makinelere kopyalanır; alan kişi `python scripts/31_verify_cache.py cache/v1` ile doğrular.
+**4d. Önbellek erişimi.** `cache/v1/` (MANIFEST.csv dahil, ≈ 20 GB) sunucuda kalır, kopyalanmaz: Faz 2–5'in
+bütün GPU işleri sunucuda koşar. Doğrulama: `python scripts/31_verify_cache.py cache/v1`. Yedek almak isterseniz
+harici diske kopyalanıp aynı komutla doğrulanır (isteğe bağlı).
 
 ## 5. Kapanış
 

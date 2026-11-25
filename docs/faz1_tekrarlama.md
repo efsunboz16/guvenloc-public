@@ -118,5 +118,5 @@ p = 9,1e-38). Kırılımlar (yön, irtifa, arazi, bölge): `docs/sonuclar/faz1/t
 - [x] 1F metrikler, istatistik, taban çizgileri (calib tablosu, `dev_base` önbelleği ile)
 - [x] 1D WxBS ±1 içinde; hız/bellek ölçüldü
 - [ ] 1D MegaDepth-1500 + C4 (sunucu) → tamamlanınca `v0.0` etiketi
-- [ ] Tam önbellek `cache/v1` (sunucu, mega1500) → taban çizgisi tablosunun mega1500 ile yenilenmesi
+- [ ] Tam önbellek `cache/v1` (sunucu, `base` — K6) → taban çizgisi tablosunun `cache/v1` ile yenilenmesi
 - [ ] Danışmana tek sayfalık özet
