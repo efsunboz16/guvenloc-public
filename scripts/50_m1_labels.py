@@ -15,7 +15,11 @@ eğitim bölgesiyle paylaşmayan ve ≥ 500 karesi olan adaylar içinden medyan 
 M1'in yön hatası calib bölgelerinde (05, 11) ölçülür (karar 26.11); calib etiketleri eğitimde kullanılmaz.
 Test bölgelerine dokunulmaz.
 
-Çıktılar: data/m1/labels_v1.csv (+ docs/checksums/m1_labels_v1.sha256), results/faz2/label_noise.{md,json}.
+Düzeltme (karar F2-4, 26.11): gürültü uçuş yönüne bağlı ve sistematik olduğundan (Phi1 rota yönü + burun
+açısı), train/val bölgelerinde bölge × uçuş yönü başına sabit c = medyan d eklenir → φ_corr (labels_v2).
+
+Çıktılar: data/m1/labels_v1.csv, data/m1/labels_v2.csv (+ docs/checksums/m1_labels_v*.sha256),
+results/faz2/label_noise.{md,json}, results/faz2/label_correction.{md,json}.
 """
 from __future__ import annotations
 
@@ -37,6 +41,9 @@ from guvenloc.pairs import load_split
 
 OUT = Path("results/faz2")
 LABELS = Path("data/m1/labels_v1.csv")
+LABELS_V2 = Path("data/m1/labels_v2.csv")
+DIR_TOL_DEG = 45.0
+MIN_CORR_N = 20
 N_BINS = 36
 LEG_JUMP_DEG = 30.0
 MAX_ERR_M = 25.0
@@ -171,7 +178,103 @@ def main() -> int:
     log_run("50_m1_labels.py", a.config, seed, "train", "label_noise_median_abs_d", round(t["median_abs_d"], 3),
             notes=f"n={t['n_reliable']} val={val}")
     log_run("50_m1_labels.py", a.config, seed, "train", "label_noise_frac_gt10", round(t["frac_gt10"], 4))
+    correct_labels(lab, a.config, seed)
     return 0
+
+
+def directions(leg_phi: pd.Series) -> dict[int, int]:
+    """Bacakları uçuş yönüne göre kümeler: medyan φ'leri ≤ 45° (dairesel) olan bacaklar aynı yön."""
+    centers: list[float] = []
+    out = {}
+    for leg, p in leg_phi.items():
+        for k, c in enumerate(centers):
+            if abs(wrap180(p - c)) <= DIR_TOL_DEG:
+                out[leg] = k
+                break
+        else:
+            centers.append(p)
+            out[leg] = len(centers) - 1
+    return out
+
+
+def correct_labels(lab: pd.DataFrame, config: Path, seed: int) -> None:
+    """Karar F2-4 (26.11): bölge × uçuş yönü başına sabit düzeltme (yalnızca train/val rolleri).
+
+    düzeltme c(bölge, yön) = o yöndeki güvenilir karelerin medyan d'si (n ≥ MIN_CORR_N; değilse 0, etiket
+    ham kalır). φ_corr = φ + c. Calib (eval) etiketleri değişmez. Düzeltmenin dürüst etkisi birini-dışarıda-
+    bırak ile ölçülür: her bacağın düzeltmesi yalnızca aynı yöndeki DİĞER bacaklardan hesaplanıp o bacakta sınanır.
+    """
+    lab = lab.copy()
+    lab["dir"] = -1
+    lab["corr_deg"] = 0.0
+    lab["corr_n"] = 0
+    lolo = []
+    for rid, g in lab[lab.m1_role != "eval"].groupby("region"):
+        leg_phi = g.groupby("leg").phi.median()
+        dmap = directions(leg_phi)
+        lab.loc[g.index, "dir"] = g.leg.map(dmap).to_numpy()
+        gg = lab.loc[g.index]
+        for k, h in gg.groupby("dir"):
+            dd = h.d.dropna()
+            if len(dd) >= MIN_CORR_N:
+                lab.loc[h.index, "corr_deg"] = float(np.median(dd))
+                lab.loc[h.index, "corr_n"] = len(dd)
+            for leg, hl in h.groupby("leg"):
+                own = hl.d.dropna()
+                other = h[h.leg != leg].d.dropna()
+                if len(own) < 5 or len(other) < MIN_CORR_N:
+                    continue
+                c = float(np.median(other))
+                lolo.append({"region": rid, "dir": int(k), "leg": int(leg), "n": len(own),
+                             "abs_before": np.abs(own.to_numpy()), "abs_after": np.abs(wrap180(own - c))})
+    lab["phi_corr"] = (lab.phi + lab.corr_deg) % 360.0
+    lab["bin_corr"] = (np.floor(lab.phi_corr / (360.0 / N_BINS)).astype(int)) % N_BINS
+
+    LABELS_V2.parent.mkdir(parents=True, exist_ok=True)
+    cols = ["pair_id", "region", "split", "m1_role", "num", "drone_path", "gt_heading", "phi", "bin", "leg",
+            "dir", "corr_deg", "corr_n", "phi_corr", "bin_corr", "reliable", "roma_bearing", "d"]
+    lab.reset_index()[cols].to_csv(LABELS_V2, index=False, float_format="%.4f")
+    digest = hashlib.sha256(LABELS_V2.read_bytes()).hexdigest()
+    Path("docs/checksums/m1_labels_v2.sha256").write_text(f"{digest}  {LABELS_V2.as_posix()}\n", encoding="utf-8")
+
+    corr_tab = (lab[lab.m1_role != "eval"].groupby(["region", "dir"])
+                .agg(n=("phi", "size"), phi_med=("phi", "median"), corr=("corr_deg", "first"), corr_n=("corr_n", "first"))
+                .reset_index())
+    L = ["# Faz 2A — etiket düzeltmesi (karar F2-4)", "",
+         (f"Bölge × uçuş yönü başına c = güvenilir karelerin medyan d'si (n ≥ {MIN_CORR_N}; değilse c = 0). "
+         f"φ_corr = φ + c. Yalnızca train/val; calib değişmez. `{LABELS_V2}` sha256 `{digest[:16]}…`."), "",
+         "| bölge | yön | kare | medyan φ | c | c'nin dayandığı kare |", "|---|---|---|---|---|---|"]
+    for r in corr_tab.itertuples():
+        L.append(f"| {r.region} | {r.dir} | {r.n} | {r.phi_med:.0f}° | "
+                 + (f"{r.corr:+.1f}°" if r.corr_n else "0 (ham; n az)") + f" | {r.corr_n} |")
+    res = {"labels_v2": str(LABELS_V2), "sha256": digest, "min_corr_n": MIN_CORR_N,
+           "corrections": corr_tab.to_dict("records"), "lolo": {}}
+    L += ["", "**Birini-dışarıda-bırak (bacağın düzeltmesi yalnızca aynı yöndeki diğer bacaklardan):**", "",
+          "| bölge | sınanan bacak | güvenilir kare | medyan \\|d\\| önce | sonra | \\|d\\| > 10° önce | sonra |",
+          "|---|---|---|---|---|---|---|"]
+    groups = {}
+    for x in lolo:
+        groups.setdefault(x["region"], []).append(x)
+    groups["hepsi"] = lolo
+    for rid, xs in groups.items():
+        if not xs:
+            continue
+        b = np.concatenate([x["abs_before"] for x in xs])
+        af = np.concatenate([x["abs_after"] for x in xs])
+        s = {"legs": len(xs), "n": len(b), "median_abs_before": float(np.median(b)),
+             "median_abs_after": float(np.median(af)), "frac_gt10_before": float((b > 10).mean()),
+             "frac_gt10_after": float((af > 10).mean())}
+        res["lolo"][rid] = s
+        L.append(f"| {rid} | {s['legs']} | {s['n']} | {s['median_abs_before']:.1f}° | {s['median_abs_after']:.1f}° | "
+                 f"%{s['frac_gt10_before'] * 100:.0f} | %{s['frac_gt10_after'] * 100:.0f} |")
+    (OUT / "label_correction.json").write_text(json.dumps(res, indent=2, ensure_ascii=False, default=float),
+                                               encoding="utf-8")
+    (OUT / "label_correction.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+    print("\n" + "\n".join(L))
+    h = res["lolo"].get("hepsi")
+    if h:
+        log_run("50_m1_labels.py", config, seed, "train", "label_lolo_median_abs_after", round(h["median_abs_after"], 3),
+                notes=f"önce {h['median_abs_before']:.3f}, n={h['n']}")
 
 
 if __name__ == "__main__":

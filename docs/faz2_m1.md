@@ -10,6 +10,7 @@
 | F2-1 | M1'in yön hatası **calib bölgelerinde (05, 11)** ölçülür; calib etiketleri eğitimde kullanılmaz | Plan calib'de yön etiketi olmadığını varsayıyordu; Faz 1'de var olduğu görüldü. Test bölgeleri Faz 6'ya kadar kapalı |
 | F2-2 | Doğrulama uçuşu (λ, öğrenme oranı seçimi) önceden konan kuralla seçilir: grubunu başka eğitim bölgesiyle paylaşmayan, ≥ 500 kareli adaylardan etiket gürültüsü (medyan \|d\|) en küçük olan → **04** | 08/09 aynı coğrafi grup (sızıntı); 10 yalnızca 144 kare; 01'in etiketi gürültülü (9,5°) |
 | F2-3 | Eğitim bölgeleri **01, 08, 09, 10** (2.760 kare); doğrulama 04 (738 kare) | Plan "6 eğitim bölgesi" diyordu; 07 dışlandığı için eğitim kümesi 5 bölge |
+| F2-4 | Eğitim/doğrulama etiketi **φ_corr = Phi1 + c(bölge, uçuş yönü)**; c = o yöndeki güvenilir karelerde RoMa yönü − Phi1 farkının medyanı (n ≥ 20, değilse c = 0). Calib (değerlendirme) etiketleri ham Phi1 | Etiket gürültüsü uçuş yönüne bağlı ve sistematik (2A); düzeltme bacaklar arası çok tutarlı (aşağıda). Plandan sapma: etiket yalnız Phi1 değil, Phi1 + RoMa'dan bölge/yön düzeltmesi |
 
 ## 2A. Etiketler ve etiket gürültüsü (`scripts/50_m1_labels.py`)
 
@@ -40,3 +41,21 @@ değişir. Bunun üstüne ≈ −3° sabit kayma var (Faz 1'de de görülmüşt�
 
 Eğitim karelerinin %36'sında etiket hatası 10°'nin, yani hedef doğruluğun üstünde. Etiketler olduğu gibi
 kullanılırsa M1 rotayı öğrenir; 08 gibi bölgelerde ±20° tutarsız hedef görür.
+
+## 2A (devam). Etiket düzeltmesi — karar F2-4 (`data/m1/labels_v2.csv`)
+
+| bölge | yön (medyan φ) | düzeltme c |
+|---|---|---|
+| 01 | 167° / 30° | −4,5° / −13,5° |
+| 04 (val) | 351° / 169° | +1,1° / −4,3° |
+| 08 | 111° / 278° | −24,0° / +15,6° |
+| 09 | 312° / 127° | +2,6° / −2,1° |
+| 10 | 169° / 326° | 0 / 0 (güvenilir kare 7 < 20 → ham) |
+
+**Dürüst sınama (birini-dışarıda-bırak):** her bacağın düzeltmesi yalnızca aynı yöndeki diğer bacaklardan
+hesaplanıp o bacakta ölçüldü (33 bacak, 795 güvenilir kare): medyan |etiket hatası| **5,2° → 1,4°**, 10°'yi
+aşan kare oranı **%36 → %1** (08: 18,0° → 1,7°; 01: 9,5° → 2,3°). Düzeltme bacaktan bacağa genelleniyor.
+
+Kalan risk: 10'un etiketleri ham (144 kare, eğitimin %5'i; gürültüsü ölçülemedi). Düzeltme RoMa'nın ölçtüğü
+yönü referans alıyor; RoMa yönü ile drone'un gerçek yönü arasındaki fark Faz 1B'de < 1° bulunmuştu.
+Ayrıntı: `docs/sonuclar/faz2/label_correction.md`.

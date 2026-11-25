@@ -180,3 +180,6 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-26T01:23:43,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,c4_res576,auc@20,81.53714098633905,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
 2026-11-26T01:38:30,50_m1_labels.py,49fd69844ed7,0,c57d4f9,train,label_noise_median_abs_d,5.151,n=802 val=04
 2026-11-26T01:38:30,50_m1_labels.py,49fd69844ed7,0,c57d4f9,train,label_noise_frac_gt10,0.3641,
+2026-11-26T01:43:34,50_m1_labels.py,49fd69844ed7,0,e5a6743,train,label_noise_median_abs_d,5.151,n=802 val=04
+2026-11-26T01:43:34,50_m1_labels.py,49fd69844ed7,0,e5a6743,train,label_noise_frac_gt10,0.3641,
+2026-11-26T01:43:34,50_m1_labels.py,49fd69844ed7,0,e5a6743,train,label_lolo_median_abs_after,1.359,"önce 5.158, n=795"
