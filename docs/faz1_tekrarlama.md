@@ -34,6 +34,14 @@
   da başka bir C4 tanımından (ör. her iki görüntünün döndürülmesi, farklı dönme dağılımı) geliyor. Kaynağı
   henüz doğrulanmadı. MIMARI 1D B planı: sapma nedeniyle raporlanır, karşılaştırmalar kendi tekrarımıza göre
   (döndürmesiz 62,98, C4 58,94). Sonuç dosyaları: `docs/sonuclar/faz1/repro_mega1500.json`, `repro_c4.json`.
+- **Kaynak araştırması (26.11):** MegaDepth-C4'ü tanımlayan Steerers (Bökman vd., CVPR 2024, arXiv 2312.02152)
+  protokolü: **ikinci görüntü (i mod 4)·90° döndürülür, birinci döndürülmez** — bizim uygulamamızla aynı. Steerers
+  tablolarında 60,0 / 53,45 yok (tablolar tamsayı; ör. DeDoDe-B 49 → 12, C4-B steerer 51 → 50). RoMa v2 makalesinde
+  (arXiv 2511.15706) döndürülmüş MegaDepth değerlendirmesi yok (dönme yalnızca SatAst'ta). "Who Handles
+  Orientation?" (arXiv 2604.11809) her iki görüntüyü rastgele döndüren farklı bir protokol kullanıyor (RoMa v2 sayısı
+  yok). → 60,0 / 53,45'in kaynağı bulunamadı; 2209 önerisindeki atfa bakılmalı. Bulunana kadar C4 için kendi
+  tekrarımız (62,98 → 58,94) referans alınır. RoMa v2'nin C4'te 4 puan kaybetmesi, seyrek tanımlayıcıların
+  (DeDoDe-B 49 → 12) aksine kısmi dönme dayanıklılığı gösteriyor (hava görüntüsüyle eğitim).
 
 **MegaDepth-1500 / C4 — yöntem notları**
 - **Kaggle T4 duman testi (24.11.2026, `--limit 5` = 25 çift, tohum 0):** AUC@5/10/20 = 57,63 / 73,19 / 84,11;
