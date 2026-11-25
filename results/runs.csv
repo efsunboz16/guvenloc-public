@@ -172,3 +172,9 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-26T00:34:49,42_sigma_scale.py,1a2474bf9316,0,d6512fd,train,sigma_scale,0.9272,n_inl=5487783 n_pairs=802
 2026-11-26T00:34:49,42_sigma_scale.py,1a2474bf9316,0,d6512fd,train,sigma_cov95,0.9324,
 2026-11-26T00:34:49,42_sigma_scale.py,1a2474bf9316,0,d6512fd,calib,sigma_cov95,0.9568,
+2026-11-26T01:11:34,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,mega1500_res576,auc@5,60.973300390938135,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:11:34,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,mega1500_res576,auc@10,75.43121374176405,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:11:34,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,mega1500_res576,auc@20,85.53645243921595,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:23:43,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,c4_res576,auc@5,55.35700738239989,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:23:43,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,c4_res576,auc@10,70.5110089961089,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:23:43,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,c4_res576,auc@20,81.53714098633905,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090

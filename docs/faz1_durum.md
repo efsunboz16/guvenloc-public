@@ -131,7 +131,7 @@ Ayrıntılı kılavuz ve komutlar: [faz1_kalan_isler.md](faz1_kalan_isler.md). �
 1. ~~`python scripts/faz1_3090.py`~~ ✅ 25–26.11, 9,4 sa, hatasız (bir betik düzeltmesiyle)
 2. ~~K1 eğim analizi, belgelerin doldurulması~~ ✅ 26.11
 3. ~~`sigma_scale` kalibrasyonu~~ ✅ 26.11: s = 0,9272 (eğitim %95 kapsama %93,2, calib %95,7) → `configs/base.yaml`
-4. ~~C4 hedefinin kaynağı~~ ✅ REDI-Match (Ge vd., 2026), 576×576 değerlendirme → sapma çözünürlükten
+4. ~~C4 hedefinin kaynağı~~ ✅ REDI-Match (Ge vd., 2026), 576×576; aynı çözünürlükte C4 55,36 (fark 5,49 → 1,91)
 5. PR #2 → `main`, `v0.0`, danışmana özet
 
 Kaggle denendi (T4'te duman testi orijinalle birebir, 2,9 sa/tohum) ama kullanılmadı:

@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|---|
 | WxBS v1.1 (32 çift) | `21_repro_wxbs.py` | wxbs | mAA@10px 55,4 | **55,91 ± 0,00** (5 tohum) | +0,51 | ✅ ±1 içinde |
 | MegaDepth-1500 (1500 çift) | `20_repro_mega1500.py` | mega1500 | AUC@5/10/20 62,8 / 77,0 / 86,6 | **62,98 ± 0,13 / 76,96 ± 0,11 / 86,55 ± 0,09** (5 tohum) | +0,18 / −0,04 / −0,05 | ✅ ±1 içinde |
-| MegaDepth-C4 (1500 çift) | `20_repro_mega1500.py --c4` | mega1500 (800/1024 px) | AUC@5 60,02 → 53,45 (Ge vd., 2026; **576×576**) | **62,98 → 58,94 ± 0,08** (5 tohum) | AUC@5 +5,49 | ⚠️ sapma > 1 — farklı çözünürlük (aşağıya bkz.) |
+| MegaDepth-C4 (1500 çift) | `20_repro_mega1500.py --c4` | mega1500 (800/1024 px) | AUC@5 60,02 → 53,45 (Ge vd., 2026; **576×576**) | **62,98 → 58,94 ± 0,08** (5 tohum) | AUC@5 +5,49 (576×576'da +1,91) | ⚠️ sapma > 1 — çoğu çözünürlükten (ölçüldü; aşağıya bkz.) |
 
 **WxBS notları**
 - mAA@10px = **0–10 px eşiklerinin (11 eşik) PCK ortalaması**. 0 hariç (1–10 px) tanım 61,50 veriyor ve
@@ -46,12 +46,19 @@
   |---|---|---|---|
   | Edstedt vd. (2025), RoMa v2 makalesi, mega1500 (800/1024) | 62,8 | – | – |
   | **Bizim, mega1500 (800/1024), 5 tohum** | **62,98** | **58,94** | −4,04 |
+  | **Bizim, mega1500 ayarı 576×576 (hr kapalı), tohum 0** | **60,97** | **55,36** | −5,61 |
   | Ge vd. (2026), 576×576 | 60,02 | 53,45 | −6,57 |
 
-  **Sonuç:** fark protokolden değil (bizim C4 tanımımız Steerers'la aynı: ikinci görüntü (i mod 4)·90°), büyük
-  olasılıkla **çözünürlükten**: Ge vd. düz MegaDepth'te de RoMa v2'nin kendi sonucundan 2,8 puan düşük; düşük
-  çözünürlük döndürülmüş çiftlerde daha çok kayıp verebilir. Bu, ölçülerek doğrulanmadı. Karşılaştırmalar kendi
-  tekrarımıza (62,98 → 58,94) göre yapılır (MIMARI 1D B planı). Steerers (arXiv 2312.02152) C4 tanımı; RoMa v2
+  576×576 C4 yön kırılımı (AUC@5): 0° 60,95 · 90° 57,67 · 180° 47,65 · 270° 55,24
+  (`scripts/20_repro_mega1500.py --res 576`; `docs/sonuclar/faz1/repro_*_res576.json`).
+
+  **Sonuç (ölçüldü, 26.11):** sapmanın çoğu **çözünürlükten**. Aynı 576×576 çözünürlükte düz MegaDepth'te Ge vd.'ye
+  ±1 içindeyiz (60,97 vs 60,02); C4 farkı 5,49 → **1,91 puana** iniyor (55,36 vs 53,45), yani farkın ≈ 2/3'ü
+  çözünürlük. Düşük çözünürlük döndürülmüş çiftlerde daha çok kaybettiriyor (dönme kaybı 4,0 → 5,6 puan; en çok
+  180°'de). Kalan ≈ 1,9 puan açıklanamadı: Ge vd.'nin dönme açılarının dağılımı (`rotation_gt.json`; bizde
+  (i mod 4), dengeli) ya da RoMa v2'yi koştukları diğer ayarlar (tek/çift yön, örnekleme) farklı olabilir; ikisi de
+  yayımlanmamış. Protokolümüz C4'ün özgün tanımıyla (Steerers: ikinci görüntü (i mod 4)·90°) aynı. Karşılaştırmalar
+  kendi tekrarımıza (mega1500: 62,98 → 58,94) göre yapılır (MIMARI 1D B planı). Steerers (arXiv 2312.02152) C4 tanımı; RoMa v2
   makalesinde (arXiv 2511.15706) döndürülmüş MegaDepth sonucu yok.
 
 **MegaDepth-1500 / C4 — yöntem notları**
@@ -211,6 +218,6 @@ eşleşme): artık r = v − H(u) (karo pikseli), m = rᵀ Σ_B⁻¹ r; Gauss NL
 - [x] Tam önbellek `cache/v1` (sunucu, `base` — K6; 86.620 dosya, bozuk 0) → taban çizgisi tablosu `cache/v1` ile yenilendi
 - [x] K1 eğim analizi (kural: azalma %22,3 < %30 → GT = CSV)
 - [x] `sigma_scale` kalibrasyonu: s = 0,9272 (eğitim, NLL); %95 kapsama eğitim %93,2, calib %95,7
-- [x] C4 hedefinin kaynağı: REDI-Match (Ge vd., 2026), 576×576; sapma çözünürlük farkıyla açıklandı (ölçülmedi)
+- [x] C4 hedefinin kaynağı: REDI-Match (Ge vd., 2026), 576×576; aynı çözünürlükte fark 5,49 → 1,91 (ölçüldü)
 - [ ] PR #2 → `main`, `v0.0` etiketi
 - [ ] Danışmana tek sayfalık özet

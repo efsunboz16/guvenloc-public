@@ -2,13 +2,14 @@
 
 Hedef (rapor): AUC@5/10/20 = 62,8 / 77,0 / 86,6 ± 1 (mega1500 ayarı).
 C4: i. çiftin ikinci görüntüsü (i mod 4)·90° döndürülür, K ve poz aynı dönmeyle güncellenir
-(guvenloc/repro.py; tests/test_repro.py). Rapor: AUC@5 60,0 → 53,45 düşüşü.
+(guvenloc/repro.py; tests/test_repro.py). Rapor: AUC@5 60,02 → 53,45 (Ge vd., 2026; 576×576).
 
 Kullanım (sunucu; 8 GB kartta mega1500 ≈ 50 s/çift — bkz. docs/faz1_tekrarlama.md):
   python scripts/20_repro_mega1500.py --data data/megadepth                    # 1500 çift
   python scripts/20_repro_mega1500.py --data data/megadepth --c4               # C4
   python scripts/20_repro_mega1500.py --data data/megadepth --seeds 0 1 2 3 4  # 5 tohum
   python scripts/20_repro_mega1500.py --data data/megadepth --limit 10 --check-original
+  python scripts/20_repro_mega1500.py --data data/megadepth --c4 --res 576   # Ge vd. çözünürlüğü
 Kesintiye dayanıklı: her tohum results/faz1/repro_<ad>_seed<S>.json'a yazılır, var olan tohum
 atlanır (--force hariç); özet o ana kadar biten TÜM tohumlardan üretilir. Kaggle'da her oturumda
 birkaç tohum koşup tohum dosyalarını sonraki oturuma taşımak yeter (docs/faz1_kaggle.md).
@@ -48,6 +49,8 @@ def main() -> int:
     ap.add_argument("--data", default="data/megadepth")
     ap.add_argument("--setting", default="mega1500")
     ap.add_argument("--c4", action="store_true")
+    ap.add_argument("--res", type=int, default=None,
+                    help="tek aşamalı kare çözünürlük (ör. 576): H_lr = W_lr = res, hr kapalı; ayarın geri kalanı aynı")
     ap.add_argument("--limit", type=int, default=None, help="sahne başına ilk N çift")
     ap.add_argument("--seeds", type=int, nargs="+", default=[0])
     ap.add_argument("--check-original", action="store_true")
@@ -59,9 +62,13 @@ def main() -> int:
     torch.set_float32_matmul_precision("highest")
     model = RoMaV2()
     model.apply_setting(a.setting)
+    if a.res:
+        model.H_lr = model.W_lr = a.res
+        model.H_hr = model.W_hr = None
+        a.setting = f"{a.setting}@{a.res}"
     scenes = load_mega1500(a.data, a.limit)
     name = "c4" if a.c4 else "mega1500"
-    tag = f"{name}{'_lim' + str(a.limit) if a.limit else ''}"
+    tag = f"{name}{'_res' + str(a.res) if a.res else ''}{'_lim' + str(a.limit) if a.limit else ''}"
     res_dir = Path("results/faz1")
     res_dir.mkdir(parents=True, exist_ok=True)
     for s in a.seeds:
