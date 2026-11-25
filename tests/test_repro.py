@@ -39,6 +39,7 @@ def test_rot90_points_matches_numpy():
 
 def test_pose_auc_runs_on_numpy2():
     """romav2.geometry.pose_auc np.trapz kullanır; guvenloc.repro uyum yamasıyla çalışmalı."""
+    pytest.importorskip("romav2")  # CI'da GPU paketleri kurulmaz
     from romav2.geometry import pose_auc
 
     err = np.array([0.5, 1.0, 3.0, 7.0, 15.0, 30.0])
