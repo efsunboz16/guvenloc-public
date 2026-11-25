@@ -17,6 +17,8 @@ data/*
 cache/*
 results/*
 !results/.gitkeep
+# MIMARI §3.2: deney kaydı (results/runs.csv) git'te tutulur
+!results/runs.csv
 
 # Model weights and visualizations
 *.pt
@@ -28,3 +30,10 @@ vis/
 .idea/
 .vscode/
 Thumbs.db
+
+# Benchmark indirmeleri (wxbs_benchmark çalışma klasörüne iner)
+.WxBS/
+.EVD/
+
+# Uzun koşuların günlükleri
+logs/

@@ -13,36 +13,53 @@ Projenin mimarisi, fazları, ekip rolleri ve çalışma kuralları
 1. `main` dalını güncel tutun.
 2. Her iş için `faz<N>/<kisa-ad>` biçiminde dal açın.
 3. Değişiklikleri Pull Request üzerinden gönderin.
-4. CI yeşil olmadan ve ikinci sorumlu incelemesi tamamlanmadan birleştirmeyin.
+4. CI yeşil olmadan birleştirmeyin (tek geliştirici; ikinci kişi incelemesi aranmaz — MIMARI §3.1).
 
-## Kurulum (Windows veya Linux, Python 3.12)
+## Çalışma ortamı
 
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1          # Linux: source .venv/bin/activate
+Bütün işler (önbellek, tekrarlama, eğitim, değerlendirme) **üniversite sunucusunda**, makinenin başında yapılır:
+RTX 3090 24 GB, Ubuntu 22.04. Veri, önbellek ve sonuçlar yalnızca orada durur.
+
+## Kurulum (sunucu, Linux, Python 3.12)
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
 pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
 pip install -r requirements.txt
 python scripts/00_check_env.py
 python scripts/01_roma_single_pair.py --setting mega1500
 ```
 
-RTX 50 serisi (Blackwell, `sm_120`) için cu128 PyTorch şarttır. İlk çalıştırma RoMa v2
-ağırlıklarını (~1 GB) ve DINOv3 kodunu `~/.cache/torch/hub` altına indirir.
+İlk çalıştırma RoMa v2 ağırlıklarını (~1 GB) ve DINOv3 kodunu `~/.cache/torch/hub` altına indirir.
+Windows'ta: `py -3.12 -m venv .venv` ve `.\.venv\Scripts\Activate.ps1` (RTX 50 serisi için de cu128 şart).
 Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
 
-### Gün 1 ölçümleri (RTX 5060 Laptop 8 GB, Windows 11, sentetik çift)
+### Tek çift ölçümleri (sentetik çift)
 
-| Ayar | çözünürlük (lr/hr) | süre/çift | en yüksek bellek | köşe hatası |
-|---|---|---|---|---|
-| precise | 800 / 1280 | 3,7 s | 10,4 GB (8 GB'ı aşar) | 0,31 px |
-| mega1500 / wxbs | 800 / 1024 | 2,1 s | 7,1 GB | 0,32 px |
-| base | 640 | 0,31 s | 3,4 GB | 0,34 px |
-| fast | 512 | 0,20 s | 2,6 GB | 0,33 px |
+| Ayar | çözünürlük (lr/hr) | GPU | süre/çift | en yüksek bellek | köşe hatası |
+|---|---|---|---|---|---|
+| mega1500 / wxbs | 800 / 1024 | **RTX 3090 (sunucu, 25.11)** | **0,54 s** | 7,1 GB | 0,32 px |
+| precise | 800 / 1280 | RTX 5060 Laptop 8 GB (23.11) | 3,7 s | 10,4 GB (8 GB'ı aşar) | 0,31 px |
+| mega1500 / wxbs | 800 / 1024 | RTX 5060 Laptop 8 GB | 2,1 s | 7,1 GB | 0,32 px |
+| base | 640 | RTX 5060 Laptop 8 GB | 0,31 s | 3,4 GB | 0,34 px |
+| fast | 512 | RTX 5060 Laptop 8 GB | 0,20 s | 2,6 GB | 0,33 px |
 
 ## Durum
 
-İlk depo iskeleti oluşturulmuştur. Veri, önbellek ve sonuç dosyaları
-`.gitignore` ile dışarıda tutulur; veri lisansları doğrulanmadan paylaşılmaz.
+- **Faz 0** tamam (ortam, RoMa v2 tek çift testi; 25.11'de sunucuda da doğrulandı). Hassasiyet birimi (0.4)
+  Faz 1'de çözüldü.
+- **Faz 1** (`faz1/altyapi`, PR #2): veri doğrulama, coğrafi altyapı, bölge ayrımı + çiftler, `matcher.py` +
+  önbellek, metrikler/istatistik, WxBS tekrarlaması tamam. Sunucuda (25–26.11): MegaDepth-1500 makaleyle ±0,2
+  içinde (62,98 / 76,96 / 86,55), C4 58,94 (hedef 53,45 Ge vd. 2026'da 576×576'da; fark çözünürlükten), tam önbellek `cache/v1` (86.620 dosya),
+  taban çizgisi tablosu `cache/v1` ile (satır 2 başarı@25 0,319), K1 kapandı (GT = CSV).
+  `sigma_scale` = 0,9272 (eğitim, NLL). Kalan: `v0.0`. Kılavuz: [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
+  **Özet, sorunlar ve bekleyen kararlar: [docs/faz1_durum.md](docs/faz1_durum.md).**
+  Ayrıntı ve komutlar: [docs/faz1_tekrarlama.md](docs/faz1_tekrarlama.md),
+  [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
+
+Veri, önbellek ve sonuç dosyaları `.gitignore` ile dışarıda tutulur (`results/runs.csv` hariç);
+veri lisansları doğrulanmadan paylaşılmaz.
 
 ## Lisans
 

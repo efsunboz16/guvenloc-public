@@ -1,0 +1,66 @@
+# Faz 1F taban çizgisi eşikleri — scripts/40_baselines.py select ile ÜRETİLDİ.
+# Yalnızca eğitim kümesinde seçildi; calib/test'e dokunulmadı.
+selected_on: train (eğitim alt kümesi; önbellekte bulunan çiftler)
+cache: v1
+alpha_far_neg: 0.05
+ransac_px: 5.0
+tau_inliers:
+  1: 653
+  2: 1462
+  3: 380
+train_success@25_row2: 0.2293
+candidates:
+- ransac_px: 3.0
+  row: 1
+  tau: 377
+  success@25: 0.18610634648370497
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
+- ransac_px: 3.0
+  row: 2
+  tau: 892
+  success@25: 0.22841623785020013
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
+- ransac_px: 3.0
+  row: 3
+  tau: 215
+  success@25: 0.13321898227558604
+  far_neg: 0.049766491535318154
+  n_pairs: 10350
+- ransac_px: 5.0
+  row: 1
+  tau: 653
+  success@25: 0.1866781017724414
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
+- ransac_px: 5.0
+  row: 2
+  tau: 1462
+  success@25: 0.22927387078330475
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
+- ransac_px: 5.0
+  row: 3
+  tau: 380
+  success@25: 0.13264722698684964
+  far_neg: 0.049766491535318154
+  n_pairs: 10350
+- ransac_px: 8.0
+  row: 1
+  tau: 1020
+  success@25: 0.18524871355060035
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
+- ransac_px: 8.0
+  row: 2
+  tau: 2162
+  success@25: 0.2249857061177816
+  far_neg: 0.049912434325744305
+  n_pairs: 10350
+- ransac_px: 8.0
+  row: 3
+  tau: 627
+  success@25: 0.131789594053745
+  far_neg: 0.049912434325744305
+  n_pairs: 10350

@@ -1,0 +1,240 @@
+{
+  "rule": "calib medyan kayma azalması ≥ %30 → pairs_v2 (ikincil)",
+  "selection": {
+    "row": 2,
+    "ransac_px": 5.0,
+    "tau2": 1462,
+    "max_err_m": 100.0
+  },
+  "models": {
+    "metre (kural)": {
+      "coef": {
+        "lat_m": {
+          "a": 1.7688162021608276,
+          "b_omega": -6.99879028231927,
+          "c_kappa": 0.9721740417606042,
+          "r2_train": 0.5819626259885451
+        },
+        "fwd_m": {
+          "a": 6.049527168110186,
+          "b_omega": -1.1553189524434002,
+          "c_kappa": 5.675062924064589,
+          "r2_train": 0.3398411179832307
+        }
+      },
+      "train": {
+        "n": 1358,
+        "median_before_m": 21.854737465512308,
+        "median_after_m": 16.473957520237068,
+        "reduction": 0.2462065698005449,
+        "median_lat_before_m": -3.559046417351574,
+        "median_fwd_before_m": 7.038021139643311,
+        "corr_lat_omega": -0.7541601332415524,
+        "corr_fwd_kappa": 0.572813544539663,
+        "by_region": {
+          "01": {
+            "n": 470,
+            "median_before_m": 18.618554968144384,
+            "median_after_m": 18.084199497398053,
+            "reduction": 0.028700158076746085,
+            "median_lat_before_m": -4.982742666357328,
+            "median_fwd_before_m": -4.108567559188697,
+            "corr_lat_omega": -0.7099103884098376,
+            "corr_fwd_kappa": 0.6907567411232026
+          },
+          "04": {
+            "n": 454,
+            "median_before_m": 31.110076215597374,
+            "median_after_m": 18.363367887953004,
+            "reduction": 0.4097292542553679,
+            "median_lat_before_m": -2.937326061008326,
+            "median_fwd_before_m": 16.509480048261935,
+            "corr_lat_omega": -0.8627591070066152,
+            "corr_fwd_kappa": 0.9426599390386817
+          },
+          "08": {
+            "n": 201,
+            "median_before_m": 18.988012714982816,
+            "median_after_m": 13.010739632126244,
+            "reduction": 0.31479192544147083,
+            "median_lat_before_m": 8.770905700749172,
+            "median_fwd_before_m": 5.90741213959736,
+            "corr_lat_omega": -0.7254305941833037,
+            "corr_fwd_kappa": 0.47457746545400514
+          },
+          "09": {
+            "n": 218,
+            "median_before_m": 18.03271779391484,
+            "median_after_m": 14.915977309554286,
+            "reduction": 0.17283808907675036,
+            "median_lat_before_m": -10.948722472901554,
+            "median_fwd_before_m": 12.256327561435848,
+            "corr_lat_omega": -0.7007995616665289,
+            "corr_fwd_kappa": 0.5041307064124562
+          },
+          "10": {
+            "n": 15,
+            "median_before_m": 30.21594981248751,
+            "median_after_m": 24.72607621167398,
+            "reduction": 0.1816879374926913,
+            "median_lat_before_m": 12.071425042210972,
+            "median_fwd_before_m": 14.434538361604707,
+            "corr_lat_omega": 0.08923502278000812,
+            "corr_fwd_kappa": 0.20160977088204426
+          }
+        }
+      },
+      "calib": {
+        "n": 672,
+        "median_before_m": 24.862991794438006,
+        "median_after_m": 19.326436131574713,
+        "reduction": 0.2226826002533554,
+        "median_lat_before_m": 2.3517051264690556,
+        "median_fwd_before_m": 7.670383776980279,
+        "corr_lat_omega": -0.8393821233446402,
+        "corr_fwd_kappa": 0.5001054885812676,
+        "by_region": {
+          "05": {
+            "n": 262,
+            "median_before_m": 23.682940271531585,
+            "median_after_m": 16.724983336674995,
+            "reduction": 0.29379616107973305,
+            "median_lat_before_m": 4.7980855873576616,
+            "median_fwd_before_m": 12.369999470559456,
+            "corr_lat_omega": -0.7941693357129963,
+            "corr_fwd_kappa": 0.9305527688167579
+          },
+          "11": {
+            "n": 410,
+            "median_before_m": 25.09834446075729,
+            "median_after_m": 21.549979276380135,
+            "reduction": 0.14137845585493614,
+            "median_lat_before_m": 0.5118065102856707,
+            "median_fwd_before_m": 4.5027830323907185,
+            "corr_lat_omega": -0.9032463413583702,
+            "corr_fwd_kappa": 0.8821672240869255
+          }
+        },
+        "reduction_ci95": [
+          0.1446463693561506,
+          0.28170217748334714
+        ]
+      }
+    },
+    "AGL'ye bölünmüş (ek bilgi)": {
+      "coef": {
+        "lat_m": {
+          "a": 0.003114620460089729,
+          "b_omega": -0.014279366798508625,
+          "c_kappa": 0.0017147658576982278,
+          "r2_train": 0.5822841656164888
+        },
+        "fwd_m": {
+          "a": 0.010235255638058847,
+          "b_omega": -0.0025057173742827257,
+          "c_kappa": 0.011184023011302748,
+          "r2_train": 0.3235918824191022
+        }
+      },
+      "train": {
+        "n": 1358,
+        "median_before_m": 21.854737465512308,
+        "median_after_m": 16.17704485133348,
+        "reduction": 0.25979230467254366,
+        "median_lat_before_m": -3.559046417351574,
+        "median_fwd_before_m": 7.038021139643311,
+        "corr_lat_omega": -0.7541601332415524,
+        "corr_fwd_kappa": 0.572813544539663,
+        "by_region": {
+          "01": {
+            "n": 470,
+            "median_before_m": 18.618554968144384,
+            "median_after_m": 15.885068419090029,
+            "reduction": 0.14681518268905636,
+            "median_lat_before_m": -4.982742666357328,
+            "median_fwd_before_m": -4.108567559188697,
+            "corr_lat_omega": -0.7099103884098376,
+            "corr_fwd_kappa": 0.6907567411232026
+          },
+          "04": {
+            "n": 454,
+            "median_before_m": 31.110076215597374,
+            "median_after_m": 17.79398644224738,
+            "reduction": 0.428031409536497,
+            "median_lat_before_m": -2.937326061008326,
+            "median_fwd_before_m": 16.509480048261935,
+            "corr_lat_omega": -0.8627591070066152,
+            "corr_fwd_kappa": 0.9426599390386817
+          },
+          "08": {
+            "n": 201,
+            "median_before_m": 18.988012714982816,
+            "median_after_m": 13.00262931990562,
+            "reduction": 0.31521905345862367,
+            "median_lat_before_m": 8.770905700749172,
+            "median_fwd_before_m": 5.90741213959736,
+            "corr_lat_omega": -0.7254305941833037,
+            "corr_fwd_kappa": 0.47457746545400514
+          },
+          "09": {
+            "n": 218,
+            "median_before_m": 18.03271779391484,
+            "median_after_m": 16.13651538666727,
+            "reduction": 0.10515344547162198,
+            "median_lat_before_m": -10.948722472901554,
+            "median_fwd_before_m": 12.256327561435848,
+            "corr_lat_omega": -0.7007995616665289,
+            "corr_fwd_kappa": 0.5041307064124562
+          },
+          "10": {
+            "n": 15,
+            "median_before_m": 30.21594981248751,
+            "median_after_m": 28.568367070206286,
+            "reduction": 0.054526922122445365,
+            "median_lat_before_m": 12.071425042210972,
+            "median_fwd_before_m": 14.434538361604707,
+            "corr_lat_omega": 0.08923502278000812,
+            "corr_fwd_kappa": 0.20160977088204426
+          }
+        }
+      },
+      "calib": {
+        "n": 672,
+        "median_before_m": 24.862991794438006,
+        "median_after_m": 23.258459124121075,
+        "reduction": 0.06453497968317212,
+        "median_lat_before_m": 2.3517051264690556,
+        "median_fwd_before_m": 7.670383776980279,
+        "corr_lat_omega": -0.8393821233446402,
+        "corr_fwd_kappa": 0.5001054885812676,
+        "by_region": {
+          "05": {
+            "n": 262,
+            "median_before_m": 23.682940271531585,
+            "median_after_m": 17.484107154291024,
+            "reduction": 0.2617425474273546,
+            "median_lat_before_m": 4.7980855873576616,
+            "median_fwd_before_m": 12.369999470559456,
+            "corr_lat_omega": -0.7941693357129963,
+            "corr_fwd_kappa": 0.9305527688167579
+          },
+          "11": {
+            "n": 410,
+            "median_before_m": 25.09834446075729,
+            "median_after_m": 27.341728585526837,
+            "reduction": -0.08938374912644975,
+            "median_lat_before_m": 0.5118065102856707,
+            "median_fwd_before_m": 4.5027830323907185,
+            "corr_lat_omega": -0.9032463413583702,
+            "corr_fwd_kappa": 0.8821672240869255
+          }
+        },
+        "reduction_ci95": [
+          -0.06671989436874574,
+          0.16751563264468664
+        ]
+      }
+    }
+  },
+  "decision": "konu kapanır (GT = CSV)"
+}

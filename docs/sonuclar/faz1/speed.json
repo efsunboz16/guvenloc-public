@@ -1,0 +1,70 @@
+{
+  "gpu": "NVIDIA GeForce RTX 5050 Laptop GPU",
+  "torch": "2.11.0+cu128",
+  "results": [
+    {
+      "setting": "turbo",
+      "grid": [
+        320,
+        320
+      ],
+      "bidirectional": false,
+      "match_s": 0.132,
+      "sample_romav2_s": 0.373,
+      "sample_ours_s": 0.146,
+      "matcher_s": 0.333,
+      "peak_gb": 2.1,
+      "peak_gb_match_only": 1.83,
+      "peak_gb_romav2_sample": 7.52,
+      "reps": 5
+    },
+    {
+      "setting": "fast",
+      "grid": [
+        512,
+        512
+      ],
+      "bidirectional": false,
+      "match_s": 0.249,
+      "sample_romav2_s": 0.677,
+      "sample_ours_s": 0.146,
+      "matcher_s": 0.457,
+      "peak_gb": 2.73,
+      "peak_gb_match_only": 2.73,
+      "peak_gb_romav2_sample": 7.53,
+      "reps": 5
+    },
+    {
+      "setting": "base",
+      "grid": [
+        640,
+        640
+      ],
+      "bidirectional": false,
+      "match_s": 0.393,
+      "sample_romav2_s": 0.816,
+      "sample_ours_s": 0.145,
+      "matcher_s": 0.618,
+      "peak_gb": 3.57,
+      "peak_gb_match_only": 3.57,
+      "peak_gb_romav2_sample": 7.55,
+      "reps": 5
+    },
+    {
+      "setting": "mega1500",
+      "grid": [
+        1024,
+        1024
+      ],
+      "bidirectional": true,
+      "match_s": 4.388,
+      "sample_romav2_s": 0.821,
+      "sample_ours_s": 0.197,
+      "matcher_s": 4.374,
+      "peak_gb": 7.27,
+      "peak_gb_match_only": 7.27,
+      "peak_gb_romav2_sample": 7.86,
+      "reps": 1
+    }
+  ]
+}

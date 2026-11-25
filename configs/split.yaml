@@ -1,0 +1,35 @@
+# Bölge ayrık protokol — DONDURULMUŞ (MIMARI.md 1C). Değişiklik dört kişinin onayıyla, PR ile.
+# Karar: 2026-11-23, "rapora sadık" düzen. Gerekçeler: docs/faz1_veri_notlari.md.
+version: 1
+
+# Kare sayıları (excluded_frames düşülmüş): train 3.498 | calib 1.063 | test 2.177
+train: ["01", "04", "08", "09", "10"]
+calib: ["05", "11"]          # Yunnan, Shandan (rapordaki gibi; ikisinde de yön etiketi VAR)
+test:  ["02", "03", "06"]    # tarım, kent, dağlık — yalnızca scripts/final_eval.py ile
+
+# 07 Donghuayuan: 30 kare, yön/poz yok, harita ≈ 50 m bandı → kullanılmaz.
+excluded_regions: ["07"]
+
+# Harita dışında + height (≈499 m) bölgenin zemin yüksekliğinin (≈525 m) altında: bozuk GPS kaydı.
+excluded_frames: ["06_0093.JPG", "06_0094.JPG", "06_0095.JPG",
+                  "06_0096.JPG", "06_0097.JPG", "06_0098.JPG"]
+
+# Aynı gruptakiler aynı kümede olmak ZORUNDA ve birbirine "kolay negatif" olamaz.
+# 08 ve 09 ikisi de Huzhou-3; haritaları üst üste biniyor.
+groups:
+  huzhou3: ["08", "09"]
+
+# Arazi türü (Mondrian ve kırılımlar). Bindirme görsellerinden; GEÇİCİ, ekip onayı bekliyor.
+# Not: kalibrasyon kümesinin ikisi de "tarım" → Mondrian (group_by=terrain) kalibrasyonda
+# tek grup verir; bu sınırlama Faz 4'te raporlanmalı.
+terrain:
+  "01": kent      # Changjiang-20: villa sitesi + tarla
+  "02": tarım     # Changjiang-23: tarla şeritleri, sera
+  "03": kent      # Taizhou-1: apartman blokları, kanal
+  "04": kent      # Taizhou-6: sanayi
+  "05": tarım     # Yunnan: tarla + otoyol, engebeli
+  "06": dağlık    # Zhuxi: ormanlık tepeler, baraj gölü
+  "08": kent      # Huzhou-3: su yüzeyleri + kent çeperi (09 ile aynı bölge)
+  "09": kent      # Huzhou-3: kanallı kent çeperi
+  "10": tarım     # Huailai: tarla + sulak alan
+  "11": tarım     # Shandan: kurak tarım arazisi

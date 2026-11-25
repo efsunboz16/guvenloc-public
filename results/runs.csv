@@ -1,0 +1,180 @@
+timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
+2026-11-23T20:28:54,13_roma_heading_scale.py,277689aeaab4,0,ddbb118,region01,d_phi1_spread_deg,0.0,tile_m=800.0 setting=base
+2026-11-23T20:28:54,13_roma_heading_scale.py,277689aeaab4,0,ddbb118,region03,d_phi1_spread_deg,1.97,tile_m=800.0 setting=base
+2026-11-23T20:30:58,13_roma_heading_scale.py,277689aeaab4,0,ddbb118,region01,d_phi1_spread_deg,46.47,tile_m=2000.0 setting=base
+2026-11-23T20:30:58,13_roma_heading_scale.py,277689aeaab4,0,ddbb118,region02,d_phi1_spread_deg,32.53,tile_m=2000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region01,d_phi1_spread_deg,4.08,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region02,d_phi1_spread_deg,27.69,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region03,d_phi1_spread_deg,2.71,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region04,d_phi1_spread_deg,3.13,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region05,d_phi1_spread_deg,2.85,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region06,d_phi1_spread_deg,5.16,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region08,d_phi1_spread_deg,20.48,tile_m=1000.0 setting=base
+2026-11-23T20:39:51,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region09,d_phi1_spread_deg,2.22,tile_m=1000.0 setting=base
+2026-11-23T20:39:52,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region10,d_phi1_spread_deg,9.95,tile_m=1000.0 setting=base
+2026-11-23T20:39:52,13_roma_heading_scale.py,277689aeaab4,0,a2cd4bc,region11,d_phi1_spread_deg,1.74,tile_m=1000.0 setting=base
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_easy,1063,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_hard,868,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_pos,1063,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_easy,2177,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_hard,2080,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_pos,2177,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_easy,3498,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_hard,3354,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:45:42,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_pos,3498,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_easy,1063,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_hard,868,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,calib,n_pairs_pos,1063,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_easy,2177,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_hard,2080,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,test,n_pairs_pos,2177,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_easy,3498,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_hard,3354,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:49:23,14_make_pairs.py,95489dc1d455,0,9878fbd,train,n_pairs_pos,3498,pairs_v1 sha256=59c3cfc9f2c24c67
+2026-11-23T20:55:04,02_precision_units.py,277689aeaab4,0,850a4d7,train,precision_median_m_imgB,0.083,setting=base
+2026-11-23T20:57:02,02_precision_units.py,277689aeaab4,0,850a4d7,train,precision_median_m_hr,0.1073,setting=mega1500
+2026-11-23T21:04:25,30_build_cache.py,34c9025716d1,0,850a4d7,all,sec_per_file,3.783,setting=base seq=False n=10000
+2026-11-23T21:24:56,30_build_cache.py,34c9025716d1,0,850a4d7,all,sec_per_file,0.787,setting=base seq=False n=10000
+2026-11-23T21:28:19,30_build_cache.py,34c9025716d1,0,850a4d7,all,sec_per_file,0.864,setting=base seq=False n=10000
+2026-11-23T21:30:51,30_build_cache.py,34c9025716d1,0,850a4d7,all,sec_per_file,0.867,setting=base seq=False n=10000
+2026-11-24T11:13:58,30_build_cache.py,2303cecdf095,0,f87654a,calib,sec_per_file,0.777,setting=base seq=False n=10000
+2026-11-24T11:54:15,30_build_cache.py,2303cecdf095,0,f87654a,train,sec_per_file,0.709,setting=base seq=False n=10000
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_success@10,0.04421,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_success@25,0.19755,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_success@50,0.4064,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_success@25_all,0.20226,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_median_err_m_accepted,29.37077,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_auroc,0.95013,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_far_neg,0.04247,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_far_loc,0.29915,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row1_median_heading_err,4.1714,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_success@10,0.06961,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_success@25,0.29069,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_success@50,0.53716,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_success@25_all,0.3048,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_median_err_m_accepted,26.55323,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_auroc,0.93484,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_far_neg,0.02641,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_far_loc,0.32643,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row2_median_heading_err,4.05369,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_success@10,0.02916,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_success@25,0.15146,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_success@50,0.29351,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_success@25_all,0.15334,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_median_err_m_accepted,31.74937,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_auroc,0.96769,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_far_neg,0.04764,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_far_loc,0.27563,cache=dev_base px=3
+2026-11-24T12:01:50,40_baselines.py,40b8ed56dc7c,0,f87654a,calib,row3_median_heading_err,6.99968,cache=dev_base px=3
+2026-11-24T12:13:51,21_repro_wxbs.py,2303cecdf095,0,f87654a,wxbs,mAA@10px,55.912,"setting=wxbs seeds=[0, 1, 2, 3, 4]"
+2026-11-24T12:16:33,23_speed.py,2303cecdf095,0,f87654a,speed,turbo_matcher_s,0.333,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=2.1
+2026-11-24T12:16:46,23_speed.py,2303cecdf095,0,f87654a,speed,fast_matcher_s,0.457,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=2.73
+2026-11-24T12:17:02,23_speed.py,2303cecdf095,0,f87654a,speed,base_matcher_s,0.618,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=3.57
+2026-11-24T12:17:27,23_speed.py,2303cecdf095,0,f87654a,speed,mega1500_matcher_s,4.374,NVIDIA GeForce RTX 5050 Laptop GPU peak_gb=7.27
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_easy,1063,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_hard,868,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_pos,1063,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_easy,2177,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_hard,2080,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_pos,2177,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_easy,3498,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_hard,3354,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:32,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_pos,3498,pairs_v1 sha256=59c3cfc9f2c24c67 set=[]
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_easy,1063,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_hard,972,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,calib,n_pairs_pos,1063,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_easy,2177,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_hard,2171,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,test,n_pairs_pos,2177,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_easy,3498,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_hard,3354,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T15:52:57,14_make_pairs.py,b706c1afd114,0,b59c24c,train,n_pairs_pos,3498,"pairs_k2_adaptive sha256=c4776e5fd97bb8f0 set=['tile_mode=adaptive', 'version=pairs_k2_adaptive']"
+2026-11-24T16:12:29,30_build_cache.py,1a2474bf9316,0,b59c24c,train,sec_per_file,0.877,setting=base seq=False n=10000 shard=0/1
+2026-11-24T16:13:22,15_tile_experiment.py,1a2474bf9316,0,b59c24c,train,k2_fixed_row2_success@25_all,0.17,per_region=60 px=3
+2026-11-24T16:13:22,15_tile_experiment.py,1a2474bf9316,0,b59c24c,train,k2_adaptive_row2_success@25_all,0.21333333333333335,per_region=60 px=3
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_easy,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_hard,972,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_pos,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_easy,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_hard,2171,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_pos,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_easy,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_hard,3354,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:30:45,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_pos,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_easy,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_hard,972,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,calib,n_pairs_pos,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_easy,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_hard,2171,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,test,n_pairs_pos,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_easy,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_hard,3354,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-24T16:31:41,14_make_pairs.py,f5998b5828bf,0,8f1e6e7,train,n_pairs_pos,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,calib,n_pairs_easy,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,calib,n_pairs_hard,972,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,calib,n_pairs_pos,1063,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,test,n_pairs_easy,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,test,n_pairs_hard,2171,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,test,n_pairs_pos,2177,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,train,n_pairs_easy,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,train,n_pairs_hard,3354,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:35,14_make_pairs.py,f5998b5828bf,0,52ecfa6,train,n_pairs_pos,3498,pairs_v1 sha256=c4776e5fd97bb8f0 set=[]
+2026-11-25T14:52:44,23_speed.py,1a2474bf9316,0,52ecfa6,speed,base_matcher_s,0.257,NVIDIA GeForce RTX 3090 peak_gb=3.57
+2026-11-25T14:52:55,23_speed.py,1a2474bf9316,0,52ecfa6,speed,mega1500_matcher_s,0.658,NVIDIA GeForce RTX 3090 peak_gb=7.26
+2026-11-25T14:55:26,20_repro_mega1500.py,1a2474bf9316,0,52ecfa6,mega1500_lim5,auc@5,55.607969054249395,setting=mega1500 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-25T14:55:26,20_repro_mega1500.py,1a2474bf9316,0,52ecfa6,mega1500_lim5,auc@10,72.85209147618025,setting=mega1500 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-25T14:55:26,20_repro_mega1500.py,1a2474bf9316,0,52ecfa6,mega1500_lim5,auc@20,84.33299953170179,setting=mega1500 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-25T15:47:21,30_build_cache.py,1a2474bf9316,0,fd5616c,calib,sec_per_file,0.248,setting=base seq=False n=10000 shard=0/1
+2026-11-25T18:41:41,30_build_cache.py,1a2474bf9316,0,fd5616c,train,sec_per_file,0.253,setting=base seq=False n=10000 shard=0/1
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_success@10,0.04327,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_success@25,0.21355,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_success@50,0.41204,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_success@25_all,0.21543,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_median_err_m_accepted,27.8584,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_auroc,0.9532,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_far_neg,0.06781,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_far_loc,0.28504,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row1_median_heading_err,4.11961,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_success@10,0.06867,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_success@25,0.31891,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_success@50,0.57479,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_success@25_all,0.3349,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_median_err_m_accepted,25.08428,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_auroc,0.92719,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_far_neg,0.05504,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_far_loc,0.32549,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row2_median_heading_err,3.80214,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_success@10,0.0301,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_success@25,0.16275,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_success@50,0.31326,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_success@25_all,0.16275,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_median_err_m_accepted,30.54575,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_auroc,0.9634,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_far_neg,0.0629,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_far_loc,0.25964,cache=v1 px=5
+2026-11-25T18:48:52,40_baselines.py,a5ff25e7d6c4,0,fd5616c,calib,row3_median_heading_err,5.35254,cache=v1 px=5
+2026-11-25T20:19:37,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,mega1500,auc@5,62.97909971274278,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T20:19:37,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,mega1500,auc@10,76.9565479152871,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T20:19:37,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,mega1500,auc@20,86.54766575455116,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T21:59:13,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,c4,auc@5,58.9376460112706,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T21:59:13,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,c4,auc@10,73.47965193559678,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T21:59:13,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,c4,auc@20,83.78079839499964,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
+2026-11-25T22:30:57,30_build_cache.py,1a2474bf9316,0,fd5616c,all,sec_per_file,0.272,setting=base seq=True n=10000 shard=0/1
+2026-11-26T00:21:00,30_build_cache.py,1a2474bf9316,0,fd5616c,test,sec_per_file,0.253,setting=base seq=False n=10000 shard=0/1
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,train,k1_median_shift_before_m,21.855,
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,train,k1_median_shift_after_m,16.474,
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,calib,k1_median_shift_before_m,24.863,
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,calib,k1_median_shift_after_m,19.326,
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,calib,k1_reduction,0.2227,karar=konu kapanır (GT = CSV) n_train=1358 cache=v1
+2026-11-26T00:34:24,42_sigma_scale.py,1a2474bf9316,0,d6512fd,train,sigma_scale,0.9272,n_inl=5487783 n_pairs=802
+2026-11-26T00:34:24,42_sigma_scale.py,1a2474bf9316,0,d6512fd,train,sigma_cov95,0.9324,
+2026-11-26T00:34:24,42_sigma_scale.py,1a2474bf9316,0,d6512fd,calib,sigma_cov95,0.9568,
+2026-11-26T00:34:49,42_sigma_scale.py,1a2474bf9316,0,d6512fd,train,sigma_scale,0.9272,n_inl=5487783 n_pairs=802
+2026-11-26T00:34:49,42_sigma_scale.py,1a2474bf9316,0,d6512fd,train,sigma_cov95,0.9324,
+2026-11-26T00:34:49,42_sigma_scale.py,1a2474bf9316,0,d6512fd,calib,sigma_cov95,0.9568,
+2026-11-26T01:11:34,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,mega1500_res576,auc@5,60.973300390938135,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:11:34,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,mega1500_res576,auc@10,75.43121374176405,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:11:34,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,mega1500_res576,auc@20,85.53645243921595,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:23:43,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,c4_res576,auc@5,55.35700738239989,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:23:43,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,c4_res576,auc@10,70.5110089961089,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090
+2026-11-26T01:23:43,20_repro_mega1500.py,49fd69844ed7,0,dd44d11,c4_res576,auc@20,81.53714098633905,setting=mega1500@576 seeds=[0] gpu=NVIDIA GeForce RTX 3090

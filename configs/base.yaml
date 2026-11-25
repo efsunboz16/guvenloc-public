@@ -1,0 +1,20 @@
+seed: 0
+device: cuda
+paths:
+  data: data/
+  cache: cache/v1/
+  results: results/
+romav2:
+  version: "2.0.1"
+  setting_cache: base         # K6 (24.11.2026): tam mega1500 Kaggle kotasına sığmıyor → dizüstünde base (640 px); mega1500 yalnızca tekrarlamada
+  setting_laptop: base        # 8 GB dizüstü
+  n_matches: 10000
+  rotations: [0, 90, 180, 270]   # drone karesine saat yönü
+  sigma_scale: 0.9272            # Σ ← s²·Σ; 42_sigma_scale.py (eğitim, NLL); cache/v1 ham Σ saklar (meta 1,0)
+eval:
+  success_thresholds_m: [10, 25, 50]
+  accept_error_m: 25
+  bootstrap_B: 2000
+  alpha_sig: 0.05
+  alpha_far: 0.05             # hedef yanlış kabul (FAR-neg); taban çizgisi τ seçimi + M3
+  multiple_comparison: holm
