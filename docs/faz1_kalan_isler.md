@@ -54,6 +54,9 @@ python scripts/faz1_3090.py --list     # adımları göster
 python scripts/faz1_3090.py            # hepsini sırayla çalıştır
 ```
 
+Canlı izleme (ikinci terminalde; yalnızca okur): `python scripts/faz1_izle.py` — adım durumları, önbellek
+ilerleme çubukları ve kalan süre, tekrarlama tohumları, GPU/disk, son günlük satırları.
+
 | Adım | Ne yapar | Süre (tahmin) | Doğru gitti mi? |
 |---|---|---|---|
 | `env` | GPU kontrolü + testler | 5 dk | `RTX 3090 … sm_86`, testler yeşil |
