@@ -16,7 +16,7 @@
 | 0.4 | Hassasiyet birimi çözüldü: P son refiner aşamasının ızgara pikselinde | [faz1_matcher_onbellek.md](faz1_matcher_onbellek.md) |
 | 1E | `matcher.py`, `cache.py`, önbellek üretimi (kesintiye dayanıklı), doğrulama/onarım | aynı belge |
 | 1F | Metrikler, istatistik testleri, taban çizgileri 1–3 (calib tablosu, `base` önbelleğiyle) | [faz1_tekrarlama.md](faz1_tekrarlama.md) |
-| 1D | WxBS v1.1 mAA@10px **55,91** (rapor 55,4 ✅); **MegaDepth-1500 62,98 / 76,96 / 86,55** (makale 62,8 / 77,0 / 86,6 ✅); C4 AUC@5 58,94 (hedef 53,45 ⚠️ sapma, nedeni raporlandı); hız/bellek | aynı belge |
+| 1D | WxBS v1.1 mAA@10px **55,91** (rapor 55,4 ✅); **MegaDepth-1500 62,98 / 76,96 / 86,55** (makale 62,8 / 77,0 / 86,6 ✅); C4 AUC@5 58,94 (hedef 53,45, Ge vd. 2026 576×576 ⚠️ çözünürlük farkı); hız/bellek | aynı belge |
 | 1E | Tam önbellek `cache/v1` sunucuda: 86.620 dosya (calib + train + test + ardışık kareler), 21 GB, bozuk 0, 6 sa | – |
 | K1 | Eğim analizi kuralla uygulandı: calib'de azalma %22,3 < %30 → GT = CSV, konu kapandı | §3 K1 |
 | K2 | Karo deneyi: uyarlamalı karo kazandı ve uygulandı | §3 K2 |
@@ -131,7 +131,7 @@ Ayrıntılı kılavuz ve komutlar: [faz1_kalan_isler.md](faz1_kalan_isler.md). �
 1. ~~`python scripts/faz1_3090.py`~~ ✅ 25–26.11, 9,4 sa, hatasız (bir betik düzeltmesiyle)
 2. ~~K1 eğim analizi, belgelerin doldurulması~~ ✅ 26.11
 3. ~~`sigma_scale` kalibrasyonu~~ ✅ 26.11: s = 0,9272 (eğitim %95 kapsama %93,2, calib %95,7) → `configs/base.yaml`
-4. C4 hedefinin (53,45) kaynağının doğrulanması
+4. ~~C4 hedefinin kaynağı~~ ✅ REDI-Match (Ge vd., 2026), 576×576 değerlendirme → sapma çözünürlükten
 5. PR #2 → `main`, `v0.0`, danışmana özet
 
 Kaggle denendi (T4'te duman testi orijinalle birebir, 2,9 sa/tohum) ama kullanılmadı:

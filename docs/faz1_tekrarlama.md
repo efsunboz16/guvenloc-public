@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|---|
 | WxBS v1.1 (32 çift) | `21_repro_wxbs.py` | wxbs | mAA@10px 55,4 | **55,91 ± 0,00** (5 tohum) | +0,51 | ✅ ±1 içinde |
 | MegaDepth-1500 (1500 çift) | `20_repro_mega1500.py` | mega1500 | AUC@5/10/20 62,8 / 77,0 / 86,6 | **62,98 ± 0,13 / 76,96 ± 0,11 / 86,55 ± 0,09** (5 tohum) | +0,18 / −0,04 / −0,05 | ✅ ±1 içinde |
-| MegaDepth-C4 (1500 çift) | `20_repro_mega1500.py --c4` | mega1500 | AUC@5 60,0 → 53,45 | **62,98 → 58,94 ± 0,08** (5 tohum) | AUC@5 +5,49 | ⚠️ sapma > 1 (aşağıya bkz.) |
+| MegaDepth-C4 (1500 çift) | `20_repro_mega1500.py --c4` | mega1500 (800/1024 px) | AUC@5 60,02 → 53,45 (Ge vd., 2026; **576×576**) | **62,98 → 58,94 ± 0,08** (5 tohum) | AUC@5 +5,49 | ⚠️ sapma > 1 — farklı çözünürlük (aşağıya bkz.) |
 
 **WxBS notları**
 - mAA@10px = **0–10 px eşiklerinin (11 eşik) PCK ortalaması**. 0 hariç (1–10 px) tanım 61,50 veriyor ve
@@ -34,14 +34,25 @@
   da başka bir C4 tanımından (ör. her iki görüntünün döndürülmesi, farklı dönme dağılımı) geliyor. Kaynağı
   henüz doğrulanmadı. MIMARI 1D B planı: sapma nedeniyle raporlanır, karşılaştırmalar kendi tekrarımıza göre
   (döndürmesiz 62,98, C4 58,94). Sonuç dosyaları: `docs/sonuclar/faz1/repro_mega1500.json`, `repro_c4.json`.
-- **Kaynak araştırması (26.11):** MegaDepth-C4'ü tanımlayan Steerers (Bökman vd., CVPR 2024, arXiv 2312.02152)
-  protokolü: **ikinci görüntü (i mod 4)·90° döndürülür, birinci döndürülmez** — bizim uygulamamızla aynı. Steerers
-  tablolarında 60,0 / 53,45 yok (tablolar tamsayı; ör. DeDoDe-B 49 → 12, C4-B steerer 51 → 50). RoMa v2 makalesinde
-  (arXiv 2511.15706) döndürülmüş MegaDepth değerlendirmesi yok (dönme yalnızca SatAst'ta). "Who Handles
-  Orientation?" (arXiv 2604.11809) her iki görüntüyü rastgele döndüren farklı bir protokol kullanıyor (RoMa v2 sayısı
-  yok). → 60,0 / 53,45'in kaynağı bulunamadı; 2209 önerisindeki atfa bakılmalı. Bulunana kadar C4 için kendi
-  tekrarımız (62,98 → 58,94) referans alınır. RoMa v2'nin C4'te 4 puan kaybetmesi, seyrek tanımlayıcıların
-  (DeDoDe-B 49 → 12) aksine kısmi dönme dayanıklılığı gösteriyor (hava görüntüsüyle eğitim).
+- **Hedefin kaynağı (26.11):** 2209 önerisindeki atıf REDI-Match (Ge vd., 2026, arXiv 2606.24330). Sayılar aynı
+  makalenin iki tablosundan: Tablo 3 düz MegaDepth RoMa v2 **60,02** / 74,77 / 85,19; Tablo 1 MegaDepth-C4 RoMa v2
+  **53,45** / 68,93 / 80,09 (RoMa v1: 59,56 → 25,90). Makale **bütün yöntemleri sabit 576×576 çözünürlükte**
+  değerlendiriyor; RoMa v2'yi hangi ayarla koştuğunu, kendi deposunda RoMa v2 kodu olmadığı için de yeniden
+  üretilebilirliğini vermiyor. C4 çiftleri `rotation_gt.json` ile hazır veriliyor (B görüntüsü k·90° döndürülmüş);
+  açının nasıl seçildiği yazılmıyor. Önerideki "C4 testinde 60,02'den 53,45'e" ifadesi düz → C4 karşılaştırması olarak
+  okunmalı.
+
+  | | düz MegaDepth AUC@5 | C4 AUC@5 | dönme kaybı |
+  |---|---|---|---|
+  | Edstedt vd. (2025), RoMa v2 makalesi, mega1500 (800/1024) | 62,8 | – | – |
+  | **Bizim, mega1500 (800/1024), 5 tohum** | **62,98** | **58,94** | −4,04 |
+  | Ge vd. (2026), 576×576 | 60,02 | 53,45 | −6,57 |
+
+  **Sonuç:** fark protokolden değil (bizim C4 tanımımız Steerers'la aynı: ikinci görüntü (i mod 4)·90°), büyük
+  olasılıkla **çözünürlükten**: Ge vd. düz MegaDepth'te de RoMa v2'nin kendi sonucundan 2,8 puan düşük; düşük
+  çözünürlük döndürülmüş çiftlerde daha çok kayıp verebilir. Bu, ölçülerek doğrulanmadı. Karşılaştırmalar kendi
+  tekrarımıza (62,98 → 58,94) göre yapılır (MIMARI 1D B planı). Steerers (arXiv 2312.02152) C4 tanımı; RoMa v2
+  makalesinde (arXiv 2511.15706) döndürülmüş MegaDepth sonucu yok.
 
 **MegaDepth-1500 / C4 — yöntem notları**
 - **Kaggle T4 duman testi (24.11.2026, `--limit 5` = 25 çift, tohum 0):** AUC@5/10/20 = 57,63 / 73,19 / 84,11;
@@ -200,6 +211,6 @@ eşleşme): artık r = v − H(u) (karo pikseli), m = rᵀ Σ_B⁻¹ r; Gauss NL
 - [x] Tam önbellek `cache/v1` (sunucu, `base` — K6; 86.620 dosya, bozuk 0) → taban çizgisi tablosu `cache/v1` ile yenilendi
 - [x] K1 eğim analizi (kural: azalma %22,3 < %30 → GT = CSV)
 - [x] `sigma_scale` kalibrasyonu: s = 0,9272 (eğitim, NLL); %95 kapsama eğitim %93,2, calib %95,7
-- [ ] C4 hedefinin (53,45) kaynağının doğrulanması
+- [x] C4 hedefinin kaynağı: REDI-Match (Ge vd., 2026), 576×576; sapma çözünürlük farkıyla açıklandı (ölçülmedi)
 - [ ] PR #2 → `main`, `v0.0` etiketi
 - [ ] Danışmana tek sayfalık özet

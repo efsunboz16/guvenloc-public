@@ -293,7 +293,7 @@ Arazi türü etiketleri bindirme görsellerine bakılarak verilir. Dosya bir kez
 |---|---|---|---|
 | MegaDepth-1500 | `romav2.benchmarks.mega1500` sarmalayan `scripts/20_repro_mega1500.py` | `mega1500` | AUC@5/10/20 = 62,8 / 77,0 / 86,6 ± 1 |
 | WxBS v1.1 | `romav2.benchmarks.wxbs` sarmalayan `scripts/21_repro_wxbs.py` | `wxbs` | mAA@10px = 55,4 ± 1 |
-| MegaDepth-C4 | `scripts/22_repro_c4.py` | `mega1500` | AUC@5 düşüşünün gösterilmesi (rapor: 60,0 → 53,45) |
+| MegaDepth-C4 | `scripts/22_repro_c4.py` | `mega1500` | AUC@5 düşüşünün gösterilmesi (rapor: 60,02 → 53,45, Ge vd. 2026, 576×576; bizim mega1500: 62,98 → 58,94) |
 | Hız/bellek | `scripts/23_speed.py` | `mega1500`, `base` | Kendi kartımızda ms/çift, GB |
 
 - Ağır koşular sunucuda (8 GB'ta `precise` sığmıyor; `mega1500` 7,1 GB sınırda). **Faz 1 bulgusu:** bu tepenin kaynağı romav2 `sample()`'ın KDE'si; `matcher.balanced_sample` ile mega1500 7,3 GB / 4,4 s (RTX 5050). WxBS ±1 içinde tekrarlandı (55,91); `docs/faz1_tekrarlama.md`.
