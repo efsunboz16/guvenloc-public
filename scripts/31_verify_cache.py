@@ -27,6 +27,10 @@ def main() -> int:
     ap.add_argument("--delete-bad", action="store_true")
     ap.add_argument("--workers", type=int, default=6)
     a = ap.parse_args()
+    if not a.cache.is_dir():
+        # Yeni makinede ilk koşu: önbellek henüz yok, doğrulanacak bir şey yok.
+        print(f"{a.cache} yok — doğrulanacak önbellek yok (ilk koşu)")
+        return 0
 
     tmp = list(a.cache.rglob("*.tmp.npz"))
     for t in tmp:
