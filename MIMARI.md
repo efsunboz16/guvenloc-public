@@ -173,8 +173,8 @@ gantt
 ### Çalışma ortamı (25 Kasım 2026'dan itibaren)
 **Bütün GPU işleri üniversite sunucusunda yapılır:** RTX 3090 24 GB (sm_86), Ubuntu 22.04, Python 3.12,
 torch 2.11.0+cu128, romav2 2.0.1. Veri (`data/`), önbellek (`cache/v1/`) ve sonuçlar (`results/`) yalnızca
-burada durur; diğer makinelere kopyalanmaz. Ekip üyeleri kendi bilgisayarlarında yalnızca kod yazar ve CPU
-testlerini (`pytest -m "not gpu"`) koşar. 23–24 Kasım'daki işler (Faz 0 Gün 1, Faz 1'in ilk kısmı) RTX 5060/5050
+burada durur; diğer makinelere kopyalanmaz. **Bütün iş bu makinede, makinenin başında yapılır; uzaktan
+erişim (SSH) kullanılmaz.** 23–24 Kasım'daki işler (Faz 0 Gün 1, Faz 1'in ilk kısmı) RTX 5060/5050
 dizüstünde ve Kaggle T4'te yapıldı; o sayılar belgelerde kendi donanımıyla birlikte kayıtlı kalır.
 
 ### Tamamlananlar (Gün 1, 23 Kasım 2026)
@@ -196,7 +196,7 @@ dizüstünde ve Kaggle T4'te yapıldı; o sayılar belgelerde kendi donanımıyl
 |---|---|---|---|
 | 0.1 | ~~Diğer 3 makinede kurulum~~ → sunucuda kurulum + `01_roma_single_pair.py --setting mega1500` | Üye B | **✅ 25.11:** sunucuda köşe hatası 0,32 px. Diğer makinelerde GPU kurulumu gerekmiyor (bütün GPU işleri sunucuda); donanımdan bağımsızlık dizüstü (5060), Kaggle T4 ve 3090 ile gösterildi |
 | 0.2 | GitHub deposu, ilk commit, ekip üyeleri eklendi | Efsun | **✅** dört hesabın push yetkisi var |
-| 0.3 | Üniversite GPU sunucusu erişimi | Üye C | `00_check_env.py` sunucuda koştu **✅**. **Açık:** SSH sunucusu kurulu değil (`openssh-server`, yönetici yetkisi gerekir); kurulunca ekipten biri SSH ile bağlanıp `00_check_env.py` koşar |
+| 0.3 | Üniversite GPU sunucusu erişimi | Üye C | **✅ 25.11:** sunucu = bu makine, `00_check_env.py` koştu. SSH gerekmiyor (bütün iş makinenin başında yapılır) |
 | 0.4 | **Hassasiyet biriminin çözülmesi** (bkz. INTERFACES.md açık soru) | Üye B | `matcher.py` Σ'yı piksel biriminde döndürüyor; sentetik çiftte σ ile gerçek hata aynı mertebede — **✅ Faz 1'de çözüldü:** P son refiner aşamasının ızgara pikselinde (`docs/faz1_matcher_onbellek.md`) |
 | 0.5 | CI kurulumu (ruff + pytest) | Üye A | **✅** PR'larda ruff + `pytest -m "not gpu"` |
 

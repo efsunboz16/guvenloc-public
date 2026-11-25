@@ -17,9 +17,8 @@ Projenin mimarisi, fazları, ekip rolleri ve çalışma kuralları
 
 ## Çalışma ortamı
 
-Bütün GPU işleri (önbellek, tekrarlama, eğitim, değerlendirme) **üniversite sunucusunda** yapılır:
-RTX 3090 24 GB, Ubuntu 22.04. Veri, önbellek ve sonuçlar yalnızca orada durur. Kendi bilgisayarınızda
-kod yazıp CPU testlerini koşmanız yeterli (`pip install -r requirements.txt` + `pytest -m "not gpu"`).
+Bütün işler (önbellek, tekrarlama, eğitim, değerlendirme) **üniversite sunucusunda**, makinenin başında yapılır:
+RTX 3090 24 GB, Ubuntu 22.04. Veri, önbellek ve sonuçlar yalnızca orada durur.
 
 ## Kurulum (sunucu, Linux, Python 3.12)
 
@@ -49,7 +48,7 @@ Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
 ## Durum
 
 - **Faz 0** tamam (ortam, RoMa v2 tek çift testi; 25.11'de sunucuda da doğrulandı). Hassasiyet birimi (0.4)
-  Faz 1'de çözüldü. Açık tek iş: sunucuya SSH erişimi (MIMARI 0.3).
+  Faz 1'de çözüldü.
 - **Faz 1** (`faz1/altyapi`, PR #2): veri doğrulama, coğrafi altyapı, bölge ayrımı + çiftler, `matcher.py` +
   önbellek, metrikler/istatistik, taban çizgileri (calib) ve WxBS tekrarlaması tamam.
   Kalan (sunucuda, tek komut `python scripts/faz1_3090.py`): MegaDepth-1500/C4 tekrarlaması ve tam önbellek
