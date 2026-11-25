@@ -219,5 +219,5 @@ eşleşme): artık r = v − H(u) (karo pikseli), m = rᵀ Σ_B⁻¹ r; Gauss NL
 - [x] K1 eğim analizi (kural: azalma %22,3 < %30 → GT = CSV)
 - [x] `sigma_scale` kalibrasyonu: s = 0,9272 (eğitim, NLL); %95 kapsama eğitim %93,2, calib %95,7
 - [x] C4 hedefinin kaynağı: REDI-Match (Ge vd., 2026), 576×576; aynı çözünürlükte fark 5,49 → 1,91 (ölçüldü)
-- [ ] PR #2 → `main`, `v0.0` etiketi
-- [ ] Danışmana tek sayfalık özet
+- [x] PR #2 → `main`, `v0.0` etiketi (26.11)
+- [x] Danışmana tek sayfalık özet hazırlandı (26.11)

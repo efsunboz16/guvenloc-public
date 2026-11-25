@@ -1,0 +1,42 @@
+# Faz 2 — Modül 1: kuzey kanonikleştirici (İP2)
+
+> Dal `faz2/m1`. Plan: MIMARI.md "Faz 2". Hedef (H1, ablasyon satırı 4): medyan yön hatası ≤ 10°, kare başına
+> RoMa v2 çağrısı ≤ 1,5, başarı@25 satır 2'den (calib 0,319, 4 çağrı) anlamlı biçimde düşük değil.
+
+## Kararlar (26.11)
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| F2-1 | M1'in yön hatası **calib bölgelerinde (05, 11)** ölçülür; calib etiketleri eğitimde kullanılmaz | Plan calib'de yön etiketi olmadığını varsayıyordu; Faz 1'de var olduğu görüldü. Test bölgeleri Faz 6'ya kadar kapalı |
+| F2-2 | Doğrulama uçuşu (λ, öğrenme oranı seçimi) önceden konan kuralla seçilir: grubunu başka eğitim bölgesiyle paylaşmayan, ≥ 500 kareli adaylardan etiket gürültüsü (medyan \|d\|) en küçük olan → **04** | 08/09 aynı coğrafi grup (sızıntı); 10 yalnızca 144 kare; 01'in etiketi gürültülü (9,5°) |
+| F2-3 | Eğitim bölgeleri **01, 08, 09, 10** (2.760 kare); doğrulama 04 (738 kare) | Plan "6 eğitim bölgesi" diyordu; 07 dışlandığı için eğitim kümesi 5 bölge |
+
+## 2A. Etiketler ve etiket gürültüsü (`scripts/50_m1_labels.py`)
+
+Etiket φ = Phi1 mod 360 (görüntü üst kenarının pusula yönü, Faz 1B), 36 bölme (10°) →
+`data/m1/labels_v1.csv` (sha256 `docs/checksums/m1_labels_v1.sha256`). Gürültü: RoMa v2 homografisinin verdiği
+görüntü yönü ile φ farkı d, yalnızca eşleşmesi güvenilir karelerde (satır 2 kabul + konum hatası < 25 m).
+
+| bölge | küme | kare | güvenilir | medyan d | medyan \|d\| | \|d\| > 10° |
+|---|---|---|---|---|---|---|
+| 01 | train | 817 | 330 | −9,5° | 9,5° | %48 |
+| 04 | val | 738 | 161 | −0,2° | 2,2° | %0 |
+| 08 | train | 1033 | 140 | +7,5° | 18,0° | %92 |
+| 09 | train | 766 | 164 | +2,0° | 2,4° | %1 |
+| 10 | train | 144 | 7 | +3,1° | 3,2° | (n küçük) |
+| 05 | calib | 473 | 137 | −1,4° | 3,8° | %4 |
+| 11 | calib | 590 | 202 | −1,1° | 1,2° | %0 |
+
+**Bulgu: gürültü rastgele değil, uçuş yönüne bağlı ve sistematik.** Uçuşlar gidiş-dönüş bacaklarından oluşuyor;
+fark aynı yöndeki bacaklarda neredeyse sabit, yön değişince değişiyor:
+- 08: φ ≈ 110° bacaklarında d ≈ −22…−25°, φ ≈ 278° bacaklarında d ≈ +15…+17° (5'er bacak, her biri ±2° içinde).
+- 01: φ ≈ 30° bacaklarında d ≈ −12…−15°, φ ≈ 167° bacaklarında d ≈ −3…−6°.
+- 04, 09: iki yönde ±2…4° (küçük ama aynı işaret deseni).
+
+Desen, Phi1'in kameranın gerçek yönünü değil uçuş rotasını (yere göre gidiş yönü) verdiği, aradaki farkın da
+yan rüzgârla burun açısı (crab) olduğu açıklamasıyla uyumlu: rüzgâr aynıyken gidiş ve dönüşte farkın işareti
+değişir. Bunun üstüne ≈ −3° sabit kayma var (Faz 1'de de görülmüştü). Calib bölgelerinde (05, 11) fark küçük
+(medyan |d| 1–4°) → değerlendirme etiketleri temiz.
+
+Eğitim karelerinin %36'sında etiket hatası 10°'nin, yani hedef doğruluğun üstünde. Etiketler olduğu gibi
+kullanılırsa M1 rotayı öğrenir; 08 gibi bölgelerde ±20° tutarsız hedef görür.
