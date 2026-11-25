@@ -50,9 +50,10 @@ Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
 - **Faz 0** tamam (ortam, RoMa v2 tek çift testi; 25.11'de sunucuda da doğrulandı). Hassasiyet birimi (0.4)
   Faz 1'de çözüldü.
 - **Faz 1** (`faz1/altyapi`, PR #2): veri doğrulama, coğrafi altyapı, bölge ayrımı + çiftler, `matcher.py` +
-  önbellek, metrikler/istatistik, taban çizgileri (calib) ve WxBS tekrarlaması tamam.
-  Kalan (sunucuda, tek komut `python scripts/faz1_3090.py`): MegaDepth-1500/C4 tekrarlaması ve tam önbellek
-  `cache/v1` → `v0.0`. Kılavuz: [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
+  önbellek, metrikler/istatistik, WxBS tekrarlaması tamam. Sunucuda (25–26.11): MegaDepth-1500 makaleyle ±0,2
+  içinde (62,98 / 76,96 / 86,55), C4 58,94 (hedef 53,45, sapma raporlandı), tam önbellek `cache/v1` (86.620 dosya),
+  taban çizgisi tablosu `cache/v1` ile (satır 2 başarı@25 0,319), K1 kapandı (GT = CSV).
+  Kalan: `sigma_scale` kalibrasyonu, C4 hedef kaynağı, `v0.0`. Kılavuz: [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
   **Özet, sorunlar ve bekleyen kararlar: [docs/faz1_durum.md](docs/faz1_durum.md).**
   Ayrıntı ve komutlar: [docs/faz1_tekrarlama.md](docs/faz1_tekrarlama.md),
   [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).

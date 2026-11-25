@@ -161,3 +161,8 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-25T21:59:13,20_repro_mega1500.py,1a2474bf9316,0,fd5616c,c4,auc@20,83.78079839499964,"setting=mega1500 seeds=[0, 1, 2, 3, 4] gpu=NVIDIA GeForce RTX 3090"
 2026-11-25T22:30:57,30_build_cache.py,1a2474bf9316,0,fd5616c,all,sec_per_file,0.272,setting=base seq=True n=10000 shard=0/1
 2026-11-26T00:21:00,30_build_cache.py,1a2474bf9316,0,fd5616c,test,sec_per_file,0.253,setting=base seq=False n=10000 shard=0/1
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,train,k1_median_shift_before_m,21.855,
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,train,k1_median_shift_after_m,16.474,
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,calib,k1_median_shift_before_m,24.863,
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,calib,k1_median_shift_after_m,19.326,
+2026-11-26T00:28:42,41_gt_tilt.py,1a2474bf9316,0,951c860,calib,k1_reduction,0.2227,karar=konu kapanır (GT = CSV) n_train=1358 cache=v1

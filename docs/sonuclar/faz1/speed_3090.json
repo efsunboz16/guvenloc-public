@@ -1,0 +1,38 @@
+{
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "torch": "2.11.0+cu128",
+  "results": [
+    {
+      "setting": "base",
+      "grid": [
+        640,
+        640
+      ],
+      "bidirectional": false,
+      "match_s": 0.155,
+      "sample_romav2_s": 0.054,
+      "sample_ours_s": 0.055,
+      "matcher_s": 0.257,
+      "peak_gb": 3.57,
+      "peak_gb_match_only": 3.57,
+      "peak_gb_romav2_sample": 7.54,
+      "reps": 5
+    },
+    {
+      "setting": "mega1500",
+      "grid": [
+        1024,
+        1024
+      ],
+      "bidirectional": true,
+      "match_s": 0.543,
+      "sample_romav2_s": 0.055,
+      "sample_ours_s": 0.058,
+      "matcher_s": 0.658,
+      "peak_gb": 7.26,
+      "peak_gb_match_only": 7.26,
+      "peak_gb_romav2_sample": 7.86,
+      "reps": 5
+    }
+  ]
+}

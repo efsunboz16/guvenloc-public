@@ -33,7 +33,7 @@ Sunucu (Ubuntu 22.04, RTX 3090) — 25.11'de yapıldı:
 - [x] `00_check_env.py` (RTX 3090, sm_86), `01_roma_single_pair.py --setting mega1500` (köşe hatası 0,32 px),
       `pytest` (70 geçti); RoMa v2 ağırlıkları indirildi
 - [x] Uyku modu kapalı (GNOME: `sleep-inactive-ac-type = nothing`)
-- [ ] UAV-VisLoc paketini (dizüstündeki `data/UAV_VisLoc_dataset/` klasörünün tamamı) sunucuda
+- [x] UAV-VisLoc paketini (dizüstündeki `data/UAV_VisLoc_dataset/` klasörünün tamamı) sunucuda
       `data/UAV_VisLoc_dataset/` altına koyun. MegaDepth'i betik kendisi indirir. Veri sunucuda kalır.
 
 Sıfırdan kurulum gerekirse:
@@ -96,13 +96,13 @@ git push
 
 Claude Code'u repo klasöründe açıp şunu söyleyin: *"docs/faz1_kalan_isler.md §4'ü yap."*
 
-**4a. Belgeler.** `results/faz1/repro_*.json` ve `results/faz1/baselines/table_v1_calib.md` →
+**4a. Belgeler.** ✅ 26.11. `results/faz1/repro_*.json` ve `results/faz1/baselines/table_v1_calib.md` →
 `docs/faz1_tekrarlama.md` (MegaDepth satırları; dev_base tablosunun yerine v1 tablosu) ve
 `docs/sonuclar/faz1/`'e kopya. Kontrol listesini kapat.
 K5 kararı (25.11) gereği ayrıca: bölge başına drone/uydu tarih farkı tablosu ve Faz 1 raporuna
 "zor durumlar" paragrafı (eşleşmenin tamamen kaçtığı tarım/su/mevsim farkı örnekleri, K1 GT kayması).
 
-**4b. K1 eğim analizi** (`scripts/41_gt_tilt.py`, yazılacak). Önceden konan kural (faz1_durum.md K1):
+**4b. K1 eğim analizi** ✅ 26.11 (`scripts/41_gt_tilt.py`: azalma %22,3 < %30 → GT = CSV). Önceden konan kural (faz1_durum.md K1):
 - Eğitim bölgelerinde, satır 2'nin kabul ettiği ve hatası < 100 m olan pozitiflerde RoMa'nın bulduğu görüntü
   merkezi ile CSV `lat/lon` arasındaki kaymayı drone çerçevesine (ileri/yanal, Phi1 ile) çevir.
 - Doğrusal model: `yanal ~ a + b·Omega + c·Kappa`, `ileri ~ …` — YALNIZCA eğitimde kur.
@@ -122,7 +122,7 @@ harici diske kopyalanıp aynı komutla doğrulanır (isteğe bağlı).
 
 ## 5. Kapanış
 
-- [ ] `docs/faz1_tekrarlama.md` tabloları dolu, kontrol listesi kapalı
+- [x] `docs/faz1_tekrarlama.md` tabloları dolu (26.11; kontrol listesinde `sigma_scale`, C4 kaynağı, PR/etiket açık)
 - [x] INTERFACES §1–2 onayı (K3, 25.11)
 - [ ] PR #2: CI yeşil → `main`'e birleştir
 - [ ] `git tag v0.0 && git push origin v0.0`
