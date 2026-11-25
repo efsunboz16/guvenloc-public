@@ -59,3 +59,22 @@ aşan kare oranı **%36 → %1** (08: 18,0° → 1,7°; 01: 9,5° → 2,3°). D�
 Kalan risk: 10'un etiketleri ham (144 kare, eğitimin %5'i; gürültüsü ölçülemedi). Düzeltme RoMa'nın ölçtüğü
 yönü referans alıyor; RoMa yönü ile drone'un gerçek yönü arasındaki fark Faz 1B'de < 1° bulunmuştu.
 Ayrıntı: `docs/sonuclar/faz2/label_correction.md`.
+
+## 2B. Ağ — `guvenloc/m1_canon.py`
+
+- **Kurulum:** escnn 1.0.11. `lie_learn`'ün PyPI paketi numpy 1.x ile derlenmiş (numpy'ı 1.26'ya indiriyordu);
+  numpy 2.5.4'e karşı GitHub'dan (`edf012f`) derlendi, `py3nj` de derlendi; numpy/scipy değişmedi (komutlar
+  `requirements.txt`'te). Sunucuda `python3.12-dev` gerekli.
+- **Mimari:** C8 (`rot2dOnR2(N=8)`) eşdeğer CNN, regular alanlar 16/32/64/96/128, ilk katman 7×7 adım 2, sonraki
+  bloklar 3×3 + antialiased ortalama havuzlama; **1,01 M parametre**. Son katman tek regular alan (8 yön logiti) →
+  uzaysal ortalama → bant sınırlı Fourier interpolasyonu (frekans ≤ 4) ile 36 bölme → öğrenilen logit ölçeği.
+  θ̂ = argmax + parabolik alt-bölme inceltmesi.
+- **Girdi:** merkez kare (kısa kenar) → 321 px önbellek; eğitimde GPU'da keyfi açıyla döndürme + **257×257**
+  dairesel maske. Kenarın tek sayı olması şart: 256'da adımlı katmanların örnekleme ızgarası simetrik olmadığından
+  90°'de bile eşdeğerlik bozuluyor (ölçüldü); 257'de tam.
+- **Dönme kuralı:** içerik saat yönünde α döndürülünce φ' = φ − α; kare φ̂ kadar saat yönünde döndürülünce kuzey-yukarı.
+- **Eşdeğerlik (`tests/test_m1_equivariance.py`):** 90°'nin katlarında 36 bölmeli çıktı tam 9k bölme kayıyor
+  (rastgele ağırlıklı ağda θ̂ sapması < 0,14°). 45°'nin tek katları ve ara açılar piksel ızgarasında tam olamaz
+  (bilineer yeniden örnekleme); plan "45°'nin katlarında tam" diyordu — doğrusu: 90°'de tam, 45°'de yaklaşık.
+  45° ve 20° sapması eğitilmiş ağda ölçülüp raporlanacak (2E).
+- **Hız (3090):** 64'lük grup eğitim adımı 195 ms, 3,0 GB → epoch (2.760 kare) ≈ 9 s.

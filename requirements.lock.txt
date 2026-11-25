@@ -51,3 +51,11 @@ urllib3==2.8.0
 kornia==0.9.2
 kornia_rs==0.2.0
 wxbs-benchmark==0.0.4
+# Faz 2 (Modül 1, escnn) — sunucu, 26.11.2026; kurulum sırası requirements.txt'te
+autograd==1.9.1
+cloudpickle==3.1.3
+escnn==1.0.11
+joblib==1.6.0
+lie_learn @ git+https://github.com/AMLab-Amsterdam/lie_learn@edf012f5f60af320175d2e6269db78b984b5bfc3
+py3nj==0.2.1
+pymanopt==2.2.1
