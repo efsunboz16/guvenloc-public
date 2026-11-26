@@ -27,13 +27,15 @@ from guvenloc.metrics import log_run
 OUT = Path("results/faz3/m2")
 BLOCK = 50
 TAU_4A = 709.0      # Faz 2 satır 4a eşiği: eğitim negatifleri, 4 dönme havuzu, FAR-neg ≤ 0,05 (56_m1c_roma.py)
-M1_DECISIONS = "results/faz2/m1/roma_row4_decisions_D2_olcek_rot90_s2_calib.csv"
+M1_DECISIONS = "results/faz2/m1/roma_row4_decisions_{model}_calib.csv"   # model: configs/h2.yaml m1_model
 
 
 def feat_matrix(df: pd.DataFrame, names) -> np.ndarray:
     cols = {"log1p_support": np.log1p(df.support.clip(lower=0)), "log1p_sum_c": np.log1p(df.sum_c),
             "support_frac": df.support_frac, "rho": df.rho, "spread_m": df.spread_m.fillna(50.0),
             "entropy_bits": df.entropy_bits.fillna(df.entropy_bits.max()), "frac_dropped": df.frac_dropped}
+    if "n_inliers" in df:                                     # h2_v3 (F3-9): inlier sayısı da S'ye girer
+        cols["log1p_inliers"] = np.log1p(df.n_inliers.clip(lower=0))
     return np.column_stack([np.asarray(cols[n], float) for n in names])
 
 
@@ -105,18 +107,19 @@ def main() -> int:
         return d
 
     tr, ca = load("train"), load("calib")
-    model = fit_logistic(feat_matrix(tr, feats), tr.ok_m2.to_numpy(float), float(h2["score_model"]["C"]))
+    tcol = {"peak": "ok_m2", "shared": "ok_ransac"}[h2["score_model"].get("target_label", "peak")]
+    model = fit_logistic(feat_matrix(tr, feats), tr[tcol].to_numpy(float), float(h2["score_model"]["C"]))
     tr["S"] = predict(model, feat_matrix(tr, feats))
     ca["S"] = predict(model, feat_matrix(ca, feats))
     singles = {n: (lambda df, n=n: feat_matrix(df, [n])[:, 0] * (-1 if n in ("rho", "entropy_bits") else 1))
                for n in h2["ablation_single"]}
     for n, f in singles.items():
         ca[f"S_{n}"] = f(ca)
-    print(f"S eğitim AUROC (tüm dönmeler, örneklem içi): {M.auroc(tr.S, tr.ok_m2):.3f}; "
+    print(f"S eğitim AUROC (tüm dönmeler, örneklem içi): {M.auroc(tr.S, tr[tcol]):.3f}; "
           f"inlier eğitim AUROC: {M.auroc(tr.n_inliers, tr.ok_ransac):.3f}")
 
     # 4a/5a: M1-C'nin en olası dönmesi (Faz 2, v0.1 modeli)
-    dec = pd.read_csv(M1_DECISIONS)
+    dec = pd.read_csv(M1_DECISIONS.format(model=h2.get("m1_model", "D2_olcek_rot90_s2")))
     rot_4a = dec[dec.row == "4a"].set_index("pair_id").rot
     a4 = ca.set_index(["pair_id", "rot"]).loc[list(zip(rot_4a.index, rot_4a.to_numpy(), strict=True))].reset_index()
     tau4 = TAU_4A

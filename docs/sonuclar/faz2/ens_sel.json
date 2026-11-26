@@ -1,0 +1,28 @@
+{
+  "region": "04",
+  "n_pos": 738,
+  "variants": {
+    "D2_olcek_rot90_s2": {
+      "median": 8.992759704589844,
+      "acc45": 0.7859078590785907,
+      "passes": 1
+    },
+    "D2_olcek_rot90_s2@tta": {
+      "median": 8.549331665039062,
+      "acc45": 0.7994579945799458,
+      "passes": 4
+    },
+    "D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2": {
+      "median": 8.294288635253906,
+      "acc45": 0.8197831978319783,
+      "passes": 3
+    },
+    "D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta": {
+      "median": 7.804252624511719,
+      "acc45": 0.8292682926829268,
+      "passes": 12
+    }
+  },
+  "best": "D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta",
+  "selected": "D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta"
+}

@@ -1,7 +1,10 @@
 # H2 ön-kaydı (karar F3-3, 26.11.2026) — hacim skorunun calib/test sonuçları görülmeden ÖNCE sabitlendi.
 # Ölçüt MIMARI.md "Hedef 3 / H2" ile aynı; yalnız işlemselleştirildi. Değiştirmek yeni karar ister.
 # scripts/61_m2_score.py bu dosyayı okur. Test bölgeleri (02, 03, 06) Faz 6'da.
-version: h2_v2           # F3-8 (26.11.2026): ortak etiket; h2_v1 eşleme kuralı tanımsızdı (F3-5)
+version: h2_v3           # F3-9 (26.11.2026): S ortak etiketle + inlier özelliği; M1 = birleşik model (F2-11)
+# h2_v2 (F3-8): ortak etiket; h2_v1 eşleme kuralı tanımsızdı (F3-5). v2 → v3 seçimi YALNIZ eğitim bölgelerinde
+# bölge-dışarıda doğrulamayla yapıldı (inlier 0,964; hacim 0,968; hacim + inlier 0,969). Calib v3'ten önce görülmedi.
+m1_model: D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
 rows:
   baseline: 4a            # M1-C en olası dönme, tek RoMa çağrısı; konum = RANSAC homografisi, skor = inlier sayısı
   method: 5a              # aynı eşleşmeler; konum = hacim tepesi, skor = S (lojistik, 3B metrikleri)
@@ -21,6 +24,6 @@ bootstrap: {block_frames: 50, B: 2000}
 score_model:               # S; yalnız eğitim bölmesi (01, 04, 08, 09, 10), 4 dönmenin hepsi örnek
   kind: logistic_l2
   C: 1.0
-  features: [log1p_support, support_frac, rho, spread_m, entropy_bits, log1p_sum_c, frac_dropped]
-  target: doğru, hacim tepesiyle (h2_v1'deki gibi; h2_v2'de değiştirilmedi, F3-8)
+  features: [log1p_support, support_frac, rho, spread_m, entropy_bits, log1p_sum_c, frac_dropped, log1p_inliers]
+  target_label: shared     # doğru = ortak etiket (yukarıdaki tanım); v1–v2: peak (hacim tepesi)
 ablation_single: [log1p_support, rho, entropy_bits]   # tek-metrik skorlar (MIMARI 3B), alt satır
