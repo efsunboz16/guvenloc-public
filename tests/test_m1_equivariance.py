@@ -78,3 +78,16 @@ def test_c8_equivariance_90():
             # içerik saat yönünde 90k° → φ − 90k° → 36 bölmede −9k kayma
             exp = l0.roll(-9 * k, dims=1)
             assert torch.allclose(lk, exp, atol=1e-4 * float(l0.abs().max()) + 1e-6), k
+
+
+def test_relrot_sign():
+    """Aynı görüntü: drone = uydu saat yönünde 90k° döndürülmüş → φ = −90k° (mod 360) en yüksek logit."""
+    pytest.importorskip("escnn")
+    torch.manual_seed(0)
+    net = M.C8RelRot(widths=(4, 8, 8, 8, 8), n_desc=4).eval()
+    x = smooth_input(b=3, seed=1)
+    with torch.no_grad():
+        for k in (0, 1, 2, 3):
+            pred = M.predict_deg(net(M.rotate_cw_90k(x, k), x))
+            exp = torch.full_like(pred, (-90.0 * k) % 360)
+            assert float(M.angular_error_deg(pred, exp).max()) < 6.0, (k, pred)

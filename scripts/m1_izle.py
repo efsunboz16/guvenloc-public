@@ -3,6 +3,7 @@
   python scripts/m1_izle.py          # 5 s'de bir yenilenir, Ctrl+C ile çıkılır
   python scripts/m1_izle.py --once
   python scripts/m1_izle.py --ab     # öneri A/B deneyleri (52_m1_train.py ab, logs/m1_ab.log)
+  python scripts/m1_izle.py --c      # öneri C fizibilitesi (55_m1c_train.py, logs/m1c.log)
 """
 from __future__ import annotations
 
@@ -29,6 +30,7 @@ AB_LINE = re.compile(r"deney (\S+) epoch (\d+): kayıp ([\d.]+), val medyan hata
                      r"\(0°\) ([\d.]+)° \[(\d+) s\]")
 AB_PLAN = ["v1_es", "A1_sert", "A2_sert_gri", "A3_sert_gri_kucuk", "B1_sert_uydu50", "B2_sert_gri_uydu50",
            "B3_yalniz_uydu"]
+C_PLAN = ["C1_1e-3", "C2_3e-3", "C3_1e-3_gri"]
 AB = {"on": False, "epochs": 40}
 TARGET = 10.0
 BLOCKS = "▁▂▃▄▅▆▇█"
@@ -87,7 +89,7 @@ def gpu() -> str:
 
 
 def alive() -> bool:
-    return subprocess.run(["pgrep", "-f", "52_m1_train.py"], check=False, capture_output=True).returncode == 0
+    return subprocess.run(["pgrep", "-f", "5[25]_m1c?_train.py"], check=False, capture_output=True).returncode == 0
 
 
 def render() -> Group:
@@ -124,7 +126,7 @@ def render() -> Group:
     if allv:
         best = min(allv)
     status = ("bitti (kod " + done + ")") if done is not None else ("çalışıyor" if alive() else "çalışmıyor")
-    head = Text.assemble(("Modül 1 A/B deneyleri  " if AB["on"] else "Modül 1 eğitimi  ", "bold"), ("● " + status, "green" if alive() or done == "0" else "red"),
+    head = Text.assemble(("Modül 1 deneyleri  " if AB["on"] else "Modül 1 eğitimi  ", "bold"), ("● " + status, "green" if alive() or done == "0" else "red"),
                          f"   {time.strftime('%H:%M:%S')}   {gpu()}\n",
                          f"Hedef: calib medyan yön hatası ≤ {TARGET:g}°. ",
                          (f"En iyi val şimdiye kadar: {best[0]:.1f}° ({best[1][0]}"
@@ -143,12 +145,17 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--ab", action="store_true", help="A/B deneylerini izle (logs/m1_ab.log)")
-    ap.add_argument("--epochs", type=int, default=40)
+    ap.add_argument("--c", action="store_true", help="öneri C fizibilitesini izle (logs/m1c.log)")
+    ap.add_argument("--epochs", type=int, default=None)
     a = ap.parse_args()
-    if a.ab:
+    if a.c:
         global LOG
+        LOG = ROOT / "logs/m1c.log"
+        AB_PLAN[:] = C_PLAN
+        AB.update(on=True, epochs=a.epochs or 20)
+    elif a.ab:
         LOG = ROOT / "logs/m1_ab.log"
-        AB.update(on=True, epochs=a.epochs)
+        AB.update(on=True, epochs=a.epochs or 40)
     con = Console()
     if a.once:
         con.print(render())

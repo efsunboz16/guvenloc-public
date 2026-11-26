@@ -183,3 +183,55 @@ def heading_after_cw(phi_deg, alpha_cw_deg):
 def to_bins(phi_deg) -> np.ndarray:
     return (np.floor(np.asarray(phi_deg) / BIN_DEG).astype(int)) % N_BINS
 
+
+
+# ---------------------------------------------------------------------------
+# Öneri C (fizibilite): drone karesi + kuzey-yukarı uydu karosu → göreli dönme
+# ---------------------------------------------------------------------------
+
+class C8RelRot(nn.Module):
+    """Siyam C8 eşdeğer gövde (ağırlıklar paylaşılır) + grup korelasyonu.
+
+    Her görüntü için D regular alan, uzaysal ortalama → (B, D, 8) betimleyici. Uydu karosu kuzey-yukarı;
+    drone betimleyicisi 8 grup kayması üzerinden uyduyla ilişkilendirilir: c_k = <roll(d_drone, ROLL_SIGN·k),
+    d_uydu>. c_k, k·45° yönü için logit → 36 bölmeye Fourier interpolasyonu (C8Canon ile aynı çıktı).
+    Drone girdisi 45°·k döndürülünce çıktı tam 4,5k bölme kayar; uydu girdisi döndürülmez.
+    """
+
+    ROLL_SIGN = -1   # tests/test_m1_equivariance.py::test_relrot_sign sayısal olarak sınar
+
+    def __init__(self, widths: tuple[int, ...] = (16, 32, 64, 96, 128), n_desc: int = 32):
+        super().__init__()
+        from escnn import gspaces
+        from escnn import nn as enn
+
+        self.enn = enn
+        g = gspaces.rot2dOnR2(N=N_GROUP)
+        self.in_type = enn.FieldType(g, 3 * [g.trivial_repr])
+        layers, t_in = [], self.in_type
+        for i, w in enumerate(widths):
+            t_out = enn.FieldType(g, w * [g.regular_repr])
+            k, stride = (7, 2) if i == 0 else (3, 1)
+            layers += [enn.R2Conv(t_in, t_out, kernel_size=k, padding=k // 2, stride=stride, bias=False),
+                       enn.InnerBatchNorm(t_out), enn.ReLU(t_out, inplace=True)]
+            if i > 0:
+                layers.append(enn.PointwiseAvgPoolAntialiased(t_out, sigma=0.66, stride=2))
+            t_in = t_out
+        self.body = enn.SequentialModule(*layers)
+        self.head = enn.R2Conv(t_in, enn.FieldType(g, n_desc * [g.regular_repr]), kernel_size=1)
+        self.n_desc = n_desc
+        self.register_buffer("interp", fourier_interp_matrix(sign=REGULAR_SIGN))
+        self.log_beta = nn.Parameter(torch.tensor(2.3))   # kosinüs benzerliği ölçeği (≈ 10)
+
+    def describe(self, x: torch.Tensor) -> torch.Tensor:
+        y = self.head(self.body(self.enn.GeometricTensor(x, self.in_type))).tensor
+        d = y.mean(dim=(2, 3)).view(len(x), self.n_desc, N_GROUP)
+        return F.normalize(d.flatten(1), dim=1).view_as(d)
+
+    def forward(self, drone: torch.Tensor, sat: torch.Tensor) -> torch.Tensor:
+        dd, ds = self.describe(drone), self.describe(sat)
+        c = torch.stack([(dd.roll(self.ROLL_SIGN * k, dims=2) * ds).sum((1, 2)) for k in range(N_GROUP)], 1)
+        return torch.exp(self.log_beta) * c @ self.interp.T   # (B, 36)
+
+    def n_params(self) -> int:
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
