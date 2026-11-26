@@ -1,5 +1,6 @@
 # Faz 2 — Modül 1: kuzey kanonikleştirici (İP2)
 
+> **Durum: kapandı (26.11.2026, `v0.1`)** — H1 calib'de sağlanmadı, olumsuz ve açıklanmış; bkz. "Faz 2 özeti".
 > Dal `faz2/m1`. Plan: MIMARI.md "Faz 2". Hedef (H1, ablasyon satırı 4): medyan yön hatası ≤ 10°, kare başına
 > RoMa v2 çağrısı ≤ 1,5, başarı@25 satır 2'den (calib 0,319, 4 çağrı) anlamlı biçimde düşük değil.
 > İşlemsel tanım ve ön-kayıt: karar F2-6, `configs/h1.yaml`. Modül 1 = göreli dönme (F2-5).
