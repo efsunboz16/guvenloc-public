@@ -394,6 +394,8 @@ class Matcher:
 > Ön-kayıt v2 (`configs/h1.yaml`, satır 4e, karar F2-10): (i) 10,1 ± 0,2° (eşikte), (ii) 1,38 çağrı ✓,
 > (iii) ✗. Kahin tavanı (4k) gösteriyor ki (iii), RoMa v2'nin dönmeye dayanıklılığı nedeniyle hiçbir dönme
 > kestiricisiyle ≤ 1,5 çağrıda sağlanamıyor. Ölçütler değiştirilmedi; test kararı Faz 6'da.
+> **Ek (F2-11, h1_v3):** M1-C 3 tohum + TTA (val 04'te seçildi) → calib (i) 8,9° ✓, (ii) 1,38 ✓, (iii) ✗;
+> süre 31,8 ms. H1 calib'de 3 ölçütün 2'si; (iii)'ün sağlanamazlığı kâhinle gösterildi.
 > v0.1 = M1-C `D2_olcek_rot90_s2` (5,8 ms, 4 MB) + satır 4c/4e. Katkı: aynı maliyette satır 1'e göre
 > +3,3 puan (4a); satır 2 ile eşdeğer başarı 1,7 kat hızlı (4c). Ayrıntı: `docs/faz2_m1.md` "Faz 2 özeti".
 **B planı:** tekdüze/simetrik arazide doğruluk yetersizse 8 kaba bölmeye inilir veya en olası iki yön RoMa v2'ye verilir (hâlâ 4 yönden ucuz).
@@ -451,7 +453,9 @@ P(x, y, θ) ∝ Σ_i c_i · N((x, y); m_i(θ), Σ_i^map + σ_0² I)
 > Öğrenilmiş inceltici (3D) karar kuralını geçmedi (başarı tavanı 0,217 < v0 0,233; aynı etiketle AUROC farkı
 > −0,002), ana M2 v0 kalır (F3-7). Neden: ret bilgisi inlier sayısında zaten var (hacmin "destek" metriği onun
 > yumuşak sürümü); 25 m etiketi K1 GT kaymasıyla (18–31 m) sınırda gürültülü. Ölçütler değiştirilmedi; test
-> kararı Faz 6'da. v0.2 = M1-C (v0.1) + oylama hacmi v0 (`m2_volume.py`), uçtan uca. Ayrıntı: `docs/faz3_m2.md` "Faz 3 özeti".
+> kararı Faz 6'da. **Ek (F3-9, h2_v3):** S ortak etiket + inlier özelliği (eğitim LORO ile seçildi) → calib
+> AUROC farkı −0,008 [−0,016; +0,001], yanlış kabul 0,185 / 0,142; H2 ✗, yeni sürüm yapılmayacak.
+> v0.2 = M1-C (v0.1) + oylama hacmi v0 (`m2_volume.py`), uçtan uca. Ayrıntı: `docs/faz3_m2.md` "Faz 3 özeti".
 **B planı:** alçak irtifada düzlem varsayımı bozulursa sonuçlar irtifaya göre ayrı raporlanır ve geçerli irtifa aralığı belirtilir.
 
 ---

@@ -169,7 +169,7 @@ def main() -> int:
     lines = ["# Faz 3 — H2 kuru denemesi (calib 05, 11), `configs/h2.yaml`", "",
              (f"S: lojistik, eğitim {len(tr)} (çift, dönme); öznitelikler {feats}. Eşik eşleme: 5a/5a-x başarı@25'i "
              f"4a'ya ({tgt:.3f}), 2v satır 2'ye. Doğru = pozitif ∧ hata ≤ 25 m, hata ortak konumdan (RANSAC "
-             f"merkezi, h2_v2 / F3-8); yanlış kabul = kabul ∧ ¬doğru."), "",
+             f"merkezi, {h2['version']}); yanlış kabul = kabul ∧ ¬doğru."), "",
              (f"Konum (bilgi, pozitiflerde ≤ 25 m): RANSAC merkezi {loc['4a_ransac']:.3f}, hacim tepesi "
               f"{loc['5a_peak']:.3f}." + (" 2v hedefi tavana indirildi (fallback)." if res['2v']['fallback'] else "")), "",
              "| satır | yöntem | τ | başarı@25 | yanlış kabul (tüm) | FAR-neg | FAR-loc | AUROC [GA] |",

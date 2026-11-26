@@ -15,6 +15,7 @@
 | F3-6 | **Öğrenilmiş inceltici (3D) tasarımı:** girdi v0 tepesi çevresinde 2 × 13 θ × 48 × 48 (±48 m) kırpıntı (c ağırlıklı oy + ağırlıksız yoğunluk) + küresel v0 metrikleri; küçük 3B U-Net (364 bin parametre) → hücre logitleri + "boş" logiti, softmax tümü üzerinde. Kayıp: pozitif ∧ GT kırpıntıda → θ-marjinal konum NLL; negatif ∨ GT dışarıda → −log p(boş). Eğitim 01, 08, 09, 10; erken durdurma ve ana skor seçimi (S25 = argmax çevresinde 25 m kütlesi, ya da Snull = 1 − p(boş)) val 04'te. Karar kuralı plandaki gibi: calib'de v0'ı AUROC ve başarı@25'te geçmezse ana yöntem v0 | Tam hacim (13 × 500² × 41 bin) diske sığmıyor; doğru/yanlış kararı tepe çevresinde veriliyor. "Boş" sınıfı planın "negatiflerde kütleyi düşüren terimi"nin olasılıkçı karşılığı. Yön kaybı yok: Phi1 yön etiketi gürültülü (GT yönü çoğu zaman ±6° dışında) |
 | F3-7 | **3D sonucu: inceltici karar kuralını geçmiyor, ana M2 yöntemi v0 kalır.** Calib'de AUROC 0,951 (v0 0,940), ama başarı tavanı 0,217 (v0 0,233); kural ikisini birden istiyor. Ek tohum çalıştırılmadı | Tek tohumla bile tavan farkı (−1,6 puan) ve aynı-etiket AUROC farkı (−0,002 [−0,012; +0,009]) sonucu değiştirecek büyüklükte değil; ek tohum yalnız aynı sonucu doğrulardı. Kural sonuçtan önce yazılmıştı (F3-6) |
 | F3-8 | **F3-5 düzeltmesi, H2 ön-kaydı h2_v2:** "doğru" iki yöntemde de ortak konum kestiriminden (satırın dönmesinde RANSAC merkezi) hesaplanır; eşleme kuralı aynı (4a'nın başarı@25'i). Böylece iki yöntemin tavanı aynı olur ve kural her zaman tanımlı. 2v için hedef tavanı aşarsa hedef = tavan (işaretli). Hacim tepesinin konum başarısı ayrı bilgi satırında. S modelinin eğitim hedefi değiştirilmedi (hacim tepesi etiketi); ölçütler (i, ii) aynı | H2 ret kararını sınıyor; 3B–3C teşhisinde konumun iki yöntemde eşdeğer olduğu (≤ 25 m 0,186 / 0,181), farkın 25 m sınırındaki K1 gürültüsü olduğu yalnız eğitim verisiyle gösterilmişti. Kendi-etiket karşılaştırması kalitesiz konumu ödüllendiriyor (3D'de görüldü). Kural tanımsız kaldığı için değiştirildi; yön (v0 lehine mi, aleyhine mi) bilinmeden seçildi, calib'de iki etiketle de v0 4a'nın altında |
+| F3-9 | **H2 ön-kaydı v3:** S ortak etiketle eğitilir (`target_label: shared`) ve öznitelikler inlier sayısını da içerir (`log1p_inliers`); M1 dönmesi birleşik modelden (F2-11). Seçim yalnız eğitim bölgelerinde bölge-dışarıda doğrulamayla: inlier 0,964, hacim S 0,968, hacim + inlier 0,969. h2_v3 calib'den önce commit edildi (`839715c`). **Bundan sonra H2'nin yeni sürümü yapılmaz**; test h2_v3 ile | v2'de S hacim-tepesi etiketiyle eğitilmişti, değerlendirme ortak etiketle (uyumsuzluk). Calib'e bakarak sürüm üretmeye devam etmek, sonuca göre yöntem seçmek olur |
 | F3-4 | Hacim metrikleri test bölmesinde Faz 6'ya kadar çıkarılmaz (`60_m2_features.py` reddeder) | Ön-kayıt disiplini |
 
 ## 3A. Oylama hacmi v0 — `guvenloc/m2_volume.py`, `configs/m2.yaml`
@@ -151,3 +152,19 @@ ret skorunda değil, yayılma/çok tepe gibi belirsizlik çıktılarında (MIMAR
   ön-kaydıyla aynen koşulacak.
 
 Kararlar F3-1…F3-8. Test bölgelerine (02, 03, 06) dokunulmadı.
+
+## F3-9. H2 v3 — kuru deneme (`docs/sonuclar/faz3/h2_calib.md`)
+
+| satır | başarı@25 | yanlış kabul | FAR-neg | AUROC [GA] |
+|---|---|---|---|---|
+| 4a RANSAC + inlier (τ = 709) | 0,249 | **0,142** | 0,062 | **0,945** [0,933; 0,956] |
+| 5a hacim + inlier, S (v3) | 0,249 | 0,185 | 0,088 | 0,937 [0,927; 0,947] |
+| 5a (v2, karşılaştırma) | 0,247 | 0,343 | 0,272 | 0,924 |
+
+AUROC farkı −0,008 [−0,016; +0,001] (v2: −0,020); McNemar yalnız 4a 82 / yalnız 5a 216, p = 4,5e−15.
+**H2 (i) ✗, (ii) ✗.** v3 farkı büyük ölçüde kapattı ama eğitimde görülen küçük üstünlük (+0,005)
+calib bölgelerine taşınmadı: inlier sayısı tek başına bölgeler arası daha kararlı; çok öznitelikli lojistik
+model eğitim bölgelerine uyuyor. Bu, Faz 1'deki eşik kaymasıyla (eğitim %5 → calib %5,5–6,8) aynı olgu ve
+Faz 4'ün (conformal kalibrasyon) gerekçesi.
+
+**Sonuç:** H2 bu veriyle sağlanmıyor; yeni sürüm yapılmayacak (F3-9). Test h2_v3 ile koşulacak.
