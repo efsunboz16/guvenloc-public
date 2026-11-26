@@ -138,3 +138,34 @@ mutlak kuzey öğrenilemiyor; ne düzenleme (A) ne eğitim bölgelerinin uydu ha
 "veri az ama görev öğrenilebilir" değil, "bu girdiden görev bu ölçekte öğrenilemez" tarafında. Sıradaki seçenekler:
 C (M1'i drone karesi + uydu karosu → göreli dönme modeline çevirmek; H1 tasarımını değiştirir, danışmana
 danışılmalı) veya D (olumsuz sonucu raporlayıp satır 2'nin 4 dönmesiyle devam).
+
+## 2C-C. Öneri C fizibilitesi: göreli dönme modeli genelliyor (kolay kurulumda)
+
+Model `M.C8RelRot` (1,04 M parametre): drone karesi ve kuzey-yukarı uydu karosu aynı C8 eşdeğer gövdeden
+geçer (ağırlık paylaşımı); her biri 32 regular alan → uzaysal ortalama → (32, 8) betimleyici; 8 grup kayması
+üzerinden kosinüs korelasyonu → 36 bölmeye Fourier interpolasyonu. Drone dalında eşdeğerlik tam; işaret
+`tests/test_m1_equivariance.py::test_relrot_sign` ile sınanıyor (yanlış işarette düşüyor).
+
+Veri `scripts/54_m1c_prep.py`: karo kenarı = 1,5 × drone merkez karesinin ayak izi, merkez GT'den ≤ 0,25 ×
+ayak izi kaydırılmış; eğitim karesi başına 3 karo (yalnız 01/08/09/10 haritası), val/eval karesi başına 1 karo
+(04, 05, 11 haritası yalnız değerlendirmede — çıkarımda karo zaten verilir). Eğitim `scripts/55_m1c_train.py`
+(tohum 0, 20 epoch × 130 adım, sert oynatma, her epoch val 04 → erken durdurma). İzleme `scripts/m1_izle.py --c`.
+Koşu ≈ 1,5 sa.
+
+| yapılandırma | en iyi epoch | val 04 (12 açı) | val < 10° | calib (0°) | 05 | 11 | calib < 10° | calib < 45° |
+|---|---|---|---|---|---|---|---|---|
+| C1 (lr 1e-3) | 18 | 4,5° | %78 | 7,8° | 17,2° | 4,4° | %55 | %73 |
+| **C2 (lr 3e-3) — val'e göre seçilen** | 17 | **4,4°** | %80 | **7,7°** | 12,9° | 5,1° | %56 | %73 |
+| C3 (lr 1e-3, gri) | 20 | 4,7° | %79 | 6,2° | 15,7° | 3,4° | %63 | %80 |
+
+- **Mutlak kuzey modeline göre fark:** calib 43–84° → 6–8°; val 57–71° → 4,4–4,7°. Calib medyanı hedefin
+  (≤ 10°) altında, ama yalnız kolay kurulumda ve tek tohumda.
+- **Kuyruk:** calib karelerinin %20–27'sinde hata > 45° (eşleşme bulunamayan kareler). Bunlar için RoMa'ya
+  2 aday ya da satır 2'ye geri dönüş gerekecek — 2D'de güven/entropi eşiğiyle ele alınmalı.
+- 05 (dağlık, 1.800 m+ irtifa) 11'den belirgin zor (13–17° vs 3–5°). Calib etiketleri ham Phi1 (düzeltilmemiş,
+  bölge başına birkaç derece sapma olabilir) → gerçek hata biraz farklı olabilir.
+
+**Sınırlar (sonraki adım):** sistemdeki karo ≈ 3× ayak izi ve merkez kayması ≤ 200 m. Karo büyüdükçe drone
+karesi karonun küçük bir parçası olur ve küresel ortalama betimleyici zayıflar. Sıradaki deney: gerçek karo
+boyutu (`tile_size_for`, adaptive) ile aynı modeli sınamak; gerekirse uydu dalında uzaysal maksimum
+(drone betimleyicisini karo konumları üzerinde kaydırma) eklemek. Tasarım değişikliği danışman onayına bağlı.
