@@ -1,0 +1,58 @@
+deney D1_olcek başlıyor: lr 0.003 tohum 0 {'name': 'D1', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': False, 'sat_frac': 0.0, 'early_stop': True, 'eval_every': 10, 'weight_decay': 0.0001} {'zoom': True, 'rot90': False}
+  deney D1_olcek epoch 1: kayıp 2.824, val medyan hata (12 açı) 10.42°, (0°) 11.61° [251 s]
+  deney D1_olcek epoch 2: kayıp 1.965, val medyan hata (12 açı) 14.49°, (0°) 15.37° [430 s]
+  deney D1_olcek epoch 3: kayıp 1.778, val medyan hata (12 açı) 14.66°, (0°) 15.68° [608 s]
+  deney D1_olcek epoch 4: kayıp 1.663, val medyan hata (12 açı) 10.66°, (0°) 11.33° [778 s]
+  deney D1_olcek epoch 5: kayıp 1.612, val medyan hata (12 açı) 12.68°, (0°) 13.22° [963 s]
+  deney D1_olcek epoch 6: kayıp 1.570, val medyan hata (12 açı) 11.62°, (0°) 12.52° [1135 s]
+  deney D1_olcek epoch 7: kayıp 1.542, val medyan hata (12 açı) 11.92°, (0°) 12.56° [1305 s]
+  deney D1_olcek epoch 8: kayıp 1.514, val medyan hata (12 açı) 12.16°, (0°) 12.56° [1475 s]
+  deney D1_olcek epoch 9: kayıp 1.497, val medyan hata (12 açı) 11.82°, (0°) 12.28° [1644 s]
+  deney D1_olcek epoch 10: kayıp 1.487, val medyan hata (12 açı) 11.03°, (0°) 12.39° [1814 s]
+  deney D1_olcek epoch 11: kayıp 1.478, val medyan hata (12 açı) 10.77°, (0°) 11.85° [1984 s]
+  deney D1_olcek epoch 12: kayıp 1.475, val medyan hata (12 açı) 11.00°, (0°) 12.13° [2153 s]
+deney D1_olcek bitti: en iyi epoch 1, val 10.4° (04; ≤10° 0.425, ≤45° 0.764), calib 13.4° (05: 18.7°, 11: 9.5°), calib ≤10° 0.428, ≤45° 0.642
+deney D2_olcek_rot90 başlıyor: lr 0.003 tohum 0 {'name': 'D2', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': False, 'sat_frac': 0.0, 'early_stop': True, 'eval_every': 10, 'weight_decay': 0.0001} {'zoom': True, 'rot90': True}
+  deney D2_olcek_rot90 epoch 1: kayıp 2.824, val medyan hata (12 açı) 13.57°, (0°) 14.54° [170 s]
+  deney D2_olcek_rot90 epoch 2: kayıp 1.963, val medyan hata (12 açı) 12.48°, (0°) 13.42° [340 s]
+  deney D2_olcek_rot90 epoch 3: kayıp 1.762, val medyan hata (12 açı) 12.76°, (0°) 13.46° [509 s]
+  deney D2_olcek_rot90 epoch 4: kayıp 1.674, val medyan hata (12 açı) 12.19°, (0°) 13.27° [680 s]
+  deney D2_olcek_rot90 epoch 5: kayıp 1.605, val medyan hata (12 açı) 9.99°, (0°) 10.81° [850 s]
+  deney D2_olcek_rot90 epoch 6: kayıp 1.568, val medyan hata (12 açı) 10.39°, (0°) 11.36° [1020 s]
+  deney D2_olcek_rot90 epoch 7: kayıp 1.540, val medyan hata (12 açı) 9.44°, (0°) 10.54° [1189 s]
+  deney D2_olcek_rot90 epoch 8: kayıp 1.519, val medyan hata (12 açı) 10.76°, (0°) 11.25° [1359 s]
+  deney D2_olcek_rot90 epoch 9: kayıp 1.498, val medyan hata (12 açı) 10.49°, (0°) 10.70° [1529 s]
+  deney D2_olcek_rot90 epoch 10: kayıp 1.489, val medyan hata (12 açı) 10.26°, (0°) 11.29° [1699 s]
+  deney D2_olcek_rot90 epoch 11: kayıp 1.481, val medyan hata (12 açı) 10.48°, (0°) 11.21° [1869 s]
+  deney D2_olcek_rot90 epoch 12: kayıp 1.476, val medyan hata (12 açı) 10.89°, (0°) 11.61° [2039 s]
+deney D2_olcek_rot90 bitti: en iyi epoch 7, val 9.4° (04; ≤10° 0.461, ≤45° 0.790), calib 9.8° (05: 15.0°, 11: 6.3°), calib ≤10° 0.502, ≤45° 0.747
+aşama 2: seçilen D2_olcek_rot90 (val 12 açı medyanı)
+deney D2_olcek_rot90_s1 başlıyor: lr 0.003 tohum 1 {'name': 'D2', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': False, 'sat_frac': 0.0, 'early_stop': True, 'eval_every': 10, 'weight_decay': 0.0001} {'zoom': True, 'rot90': True}
+  deney D2_olcek_rot90_s1 epoch 1: kayıp 2.868, val medyan hata (12 açı) 14.31°, (0°) 15.82° [240 s]
+  deney D2_olcek_rot90_s1 epoch 2: kayıp 1.961, val medyan hata (12 açı) 14.45°, (0°) 16.10° [410 s]
+  deney D2_olcek_rot90_s1 epoch 3: kayıp 1.764, val medyan hata (12 açı) 14.04°, (0°) 14.29° [579 s]
+  deney D2_olcek_rot90_s1 epoch 4: kayıp 1.669, val medyan hata (12 açı) 9.31°, (0°) 9.60° [749 s]
+  deney D2_olcek_rot90_s1 epoch 5: kayıp 1.605, val medyan hata (12 açı) 9.72°, (0°) 9.78° [919 s]
+  deney D2_olcek_rot90_s1 epoch 6: kayıp 1.568, val medyan hata (12 açı) 10.20°, (0°) 10.18° [1089 s]
+  deney D2_olcek_rot90_s1 epoch 7: kayıp 1.539, val medyan hata (12 açı) 9.64°, (0°) 9.90° [1258 s]
+  deney D2_olcek_rot90_s1 epoch 8: kayıp 1.516, val medyan hata (12 açı) 9.20°, (0°) 9.44° [1428 s]
+  deney D2_olcek_rot90_s1 epoch 9: kayıp 1.499, val medyan hata (12 açı) 8.86°, (0°) 9.72° [1597 s]
+  deney D2_olcek_rot90_s1 epoch 10: kayıp 1.486, val medyan hata (12 açı) 9.48°, (0°) 10.00° [1766 s]
+  deney D2_olcek_rot90_s1 epoch 11: kayıp 1.478, val medyan hata (12 açı) 9.92°, (0°) 10.37° [1935 s]
+  deney D2_olcek_rot90_s1 epoch 12: kayıp 1.475, val medyan hata (12 açı) 9.93°, (0°) 10.31° [2104 s]
+deney D2_olcek_rot90_s1 bitti: en iyi epoch 9, val 8.9° (04; ≤10° 0.508, ≤45° 0.782), calib 10.3° (05: 13.3°, 11: 7.0°), calib ≤10° 0.490, ≤45° 0.754
+deney D2_olcek_rot90_s2 başlıyor: lr 0.003 tohum 2 {'name': 'D2', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': False, 'sat_frac': 0.0, 'early_stop': True, 'eval_every': 10, 'weight_decay': 0.0001} {'zoom': True, 'rot90': True}
+  deney D2_olcek_rot90_s2 epoch 1: kayıp 2.842, val medyan hata (12 açı) 13.24°, (0°) 12.88° [169 s]
+  deney D2_olcek_rot90_s2 epoch 2: kayıp 1.983, val medyan hata (12 açı) 9.62°, (0°) 9.65° [338 s]
+  deney D2_olcek_rot90_s2 epoch 3: kayıp 1.792, val medyan hata (12 açı) 10.13°, (0°) 10.06° [507 s]
+  deney D2_olcek_rot90_s2 epoch 4: kayıp 1.677, val medyan hata (12 açı) 11.55°, (0°) 12.28° [677 s]
+  deney D2_olcek_rot90_s2 epoch 5: kayıp 1.617, val medyan hata (12 açı) 8.97°, (0°) 8.92° [847 s]
+  deney D2_olcek_rot90_s2 epoch 6: kayıp 1.574, val medyan hata (12 açı) 12.52°, (0°) 13.31° [1016 s]
+  deney D2_olcek_rot90_s2 epoch 7: kayıp 1.544, val medyan hata (12 açı) 9.52°, (0°) 10.64° [1186 s]
+  deney D2_olcek_rot90_s2 epoch 8: kayıp 1.518, val medyan hata (12 açı) 9.45°, (0°) 10.43° [1356 s]
+  deney D2_olcek_rot90_s2 epoch 9: kayıp 1.501, val medyan hata (12 açı) 8.84°, (0°) 9.36° [1526 s]
+  deney D2_olcek_rot90_s2 epoch 10: kayıp 1.487, val medyan hata (12 açı) 9.21°, (0°) 9.58° [1695 s]
+  deney D2_olcek_rot90_s2 epoch 11: kayıp 1.481, val medyan hata (12 açı) 9.69°, (0°) 10.15° [1865 s]
+  deney D2_olcek_rot90_s2 epoch 12: kayıp 1.479, val medyan hata (12 açı) 9.48°, (0°) 9.86° [2034 s]
+deney D2_olcek_rot90_s2 bitti: en iyi epoch 9, val 8.8° (04; ≤10° 0.522, ≤45° 0.787), calib 10.2° (05: 16.1°, 11: 6.2°), calib ≤10° 0.493, ≤45° 0.757
+M1V2_BITTI

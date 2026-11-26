@@ -353,6 +353,10 @@ class Matcher:
 ## Faz 2 — Modül 1: Kuzey kanonikleştirici (İP2, Ay 2–4)
 
 **Hedef 2 / H1:** medyan yön hatası ≤ 10°; kare başına RoMa v2 çağrısı ≤ 1,5; başarı@25 m dört yönlü yöntemden anlamlı biçimde düşük değil.
+> **Güncelleme (26.11.2026, kararlar F2-5…F2-10, `docs/faz2_m1.md`):** Modül 1 tek kareden mutlak kuzey yerine
+> drone karesi + uydu karosu → göreli dönme olarak yeniden tanımlandı (mutlak kuzey bu veriyle öğrenilemedi —
+> olumsuz bulgu raporlanır). H1 ölçütleri aynı kaldı; işlemsel tanımı `configs/h1.yaml` (eşdeğersizlik payı
+> 3 puan; v2: satır 4 = 4e "M1-C güvene bağlı bütçe", F2-10).
 **Sorumlu:** Efsun. İkinci sorumlu: Üye B. **Ablasyon satırı 4.** Çıktı: `v0.1`.
 
 ### 2A. Etiketler (Hafta 1)
@@ -386,6 +390,12 @@ class Matcher:
 - Başarı@25: satır 4 vs satır 2/3 → McNemar (Holm).
 
 **Faz 2 bitti sayılır:** Hedef 2 ölçütleri; `docs/faz2_m1.md`; `v0.1`.
+> **Kapanış (26.11.2026, `v0.1`):** Faz 2, H1 calib'de sağlanmadan, olumsuz ve açıklanmış sonuçla kapatıldı.
+> Ön-kayıt v2 (`configs/h1.yaml`, satır 4e, karar F2-10): (i) 10,1 ± 0,2° (eşikte), (ii) 1,38 çağrı ✓,
+> (iii) ✗. Kahin tavanı (4k) gösteriyor ki (iii), RoMa v2'nin dönmeye dayanıklılığı nedeniyle hiçbir dönme
+> kestiricisiyle ≤ 1,5 çağrıda sağlanamıyor. Ölçütler değiştirilmedi; test kararı Faz 6'da.
+> v0.1 = M1-C `D2_olcek_rot90_s2` (5,8 ms, 4 MB) + satır 4c/4e. Katkı: aynı maliyette satır 1'e göre
+> +3,3 puan (4a); satır 2 ile eşdeğer başarı 1,7 kat hızlı (4c). Ayrıntı: `docs/faz2_m1.md` "Faz 2 özeti".
 **B planı:** tekdüze/simetrik arazide doğruluk yetersizse 8 kaba bölmeye inilir veya en olası iki yön RoMa v2'ye verilir (hâlâ 4 yönden ucuz).
 
 ---

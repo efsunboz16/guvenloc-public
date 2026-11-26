@@ -124,9 +124,9 @@ harici diske kopyalanıp aynı komutla doğrulanır (isteğe bağlı).
 
 - [x] `docs/faz1_tekrarlama.md` tabloları dolu (26.11; kontrol listesinde `sigma_scale`, C4 kaynağı, PR/etiket açık)
 - [x] INTERFACES §1–2 onayı (K3, 25.11)
-- [ ] PR #2: CI yeşil → `main`'e birleştir
-- [ ] `git tag v0.0 && git push origin v0.0`
-- [ ] Danışmana tek sayfalık özet. Özellikle belirtin: karo boyutu artık sabit değil, kare başına
+- [x] PR #2: CI yeşil → `main`'e birleştirildi (26.11, `c57d4f9`)
+- [x] `v0.0` etiketi (26.11)
+- [x] Danışmana tek sayfalık özet hazırlandı (26.11, Claude Docs: "GüvenLoc — Faz 1 Özeti (v0.0)"). Özellikle belirtin: karo boyutu artık sabit değil, kare başına
       (MIMARI'deki kuralın kare başına uygulanması; yalnızca eğitimde, önceden konan kuralla seçildi);
       önbellek `base` ayarında (donanım kısıtı); WxBS ve MegaDepth tekrarlama sonuçları.
 
