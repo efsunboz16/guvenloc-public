@@ -78,15 +78,18 @@ def fit(neg_scores, pos_scores, pos_err, pos_sigma, alpha: float, beta: float,
                        n_pos_acc=np.bincount(g, minlength=len(edges) + 1))
 
 
-def evaluate(cal: Calibration, scores, is_pos, err, sigma, hard_frac: float = 0.25) -> dict:
-    """FAR-neg, kabul koşullu kapsama (genel ve σ̂'ye göre en belirsiz hard_frac dilimi), ortalama yarıçap."""
+def evaluate(cal: Calibration, scores, is_pos, err, sigma, hard_frac: float = 0.25, hard_by=None) -> dict:
+    """FAR-neg, kabul koşullu kapsama (genel ve en belirsiz hard_frac dilimi), ortalama yarıçap.
+
+    hard_by: "zor" dilimi tanımlayan belirsizlik (varsayılan sigma; sabit yarıçaplı satırda gerçek σ̂ verilir)."""
     scores, is_pos = np.asarray(scores, float), np.asarray(is_pos, bool)
     err, sigma = np.asarray(err, float), np.asarray(sigma, float)
+    hb = sigma if hard_by is None else np.asarray(hard_by, float)
     acc = cal.accept(scores)
     ap = acc & is_pos
     rad = cal.radius(sigma)
     cov = err[ap] <= rad[ap]
-    hard = sigma[ap] >= np.quantile(sigma[ap], 1 - hard_frac) if ap.sum() else np.zeros(0, bool)
+    hard = hb[ap] >= np.quantile(hb[ap], 1 - hard_frac) if ap.sum() else np.zeros(0, bool)
     return {"far_neg": float(acc[~is_pos].mean()), "n_neg": int((~is_pos).sum()),
             "k_neg_acc": int(acc[~is_pos].sum()), "accept_pos": float(acc[is_pos].mean()),
             "n_pos_acc": int(ap.sum()), "coverage": float(cov.mean()) if ap.sum() else math.nan,

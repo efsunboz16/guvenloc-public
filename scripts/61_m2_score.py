@@ -39,6 +39,22 @@ def feat_matrix(df: pd.DataFrame, names) -> np.ndarray:
     return np.column_stack([np.asarray(cols[n], float) for n in names])
 
 
+def load_split(split: str, pairs: pd.DataFrame) -> pd.DataFrame:
+    """Hacim metrikleri + RANSAC öznitelikleri + etiketler; (çift, dönme) satırları."""
+    v = pd.read_csv(OUT / f"vol_feats_v1_{split}.csv")
+    r = pd.read_csv(f"results/faz1/baselines/feats_v1_{split}_px5.csv")[["pair_id", "rot", "n_inliers", "cx", "cy", "valid"]]
+    d = v.merge(r, on=["pair_id", "rot"]).join(pairs[["label", "gt_x", "gt_y", "tile_size_m", "tile_px", "region"]],
+                                                on="pair_id")
+    d["is_pos"] = d.label == "pos"
+    d["ok_m2"] = M.good_label(d.is_pos, d.err_m)
+    mpp = d.tile_size_m / d.tile_px
+    e_r = np.where(d.valid & (d.n_inliers > 0), np.hypot(d.cx - d.gt_x, d.cy - d.gt_y) * mpp, np.inf)
+    d["err_ransac"] = np.where(d.is_pos, e_r, np.nan)
+    d["ok_ransac"] = M.good_label(d.is_pos, d.err_ransac)
+    d["block"] = d.region + "_" + (d.pair_id.str.split("_").str[1].astype(int) // BLOCK).astype(str)
+    return d
+
+
 def fit_logistic(X: np.ndarray, y: np.ndarray, C: float, iters: int = 50):
     """L2 lojistik (sklearn kuralı: ½‖w‖² + C Σ logloss; kesişim cezasız), Newton–IRLS."""
     mu, sd = X.mean(0), X.std(0) + 1e-9
@@ -92,21 +108,7 @@ def main() -> int:
     pairs = pd.read_csv("data/pairs/pairs_v1.csv", dtype={"region": str}).set_index("pair_id")
     feats = h2["score_model"]["features"]
 
-    def load(split):
-        v = pd.read_csv(OUT / f"vol_feats_v1_{split}.csv")
-        r = pd.read_csv(f"results/faz1/baselines/feats_v1_{split}_px5.csv")[["pair_id", "rot", "n_inliers", "cx", "cy", "valid"]]
-        d = v.merge(r, on=["pair_id", "rot"]).join(pairs[["label", "gt_x", "gt_y", "tile_size_m", "tile_px", "region"]],
-                                                    on="pair_id")
-        d["is_pos"] = d.label == "pos"
-        d["ok_m2"] = M.good_label(d.is_pos, d.err_m)
-        mpp = d.tile_size_m / d.tile_px
-        e_r = np.where(d.valid & (d.n_inliers > 0), np.hypot(d.cx - d.gt_x, d.cy - d.gt_y) * mpp, np.inf)
-        d["err_ransac"] = np.where(d.is_pos, e_r, np.nan)
-        d["ok_ransac"] = M.good_label(d.is_pos, d.err_ransac)
-        d["block"] = d.region + "_" + (d.pair_id.str.split("_").str[1].astype(int) // BLOCK).astype(str)
-        return d
-
-    tr, ca = load("train"), load("calib")
+    tr, ca = load_split("train", pairs), load_split("calib", pairs)
     tcol = {"peak": "ok_m2", "shared": "ok_ransac"}[h2["score_model"].get("target_label", "peak")]
     model = fit_logistic(feat_matrix(tr, feats), tr[tcol].to_numpy(float), float(h2["score_model"]["C"]))
     tr["S"] = predict(model, feat_matrix(tr, feats))

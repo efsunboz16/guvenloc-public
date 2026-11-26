@@ -28,12 +28,7 @@ def run(mondrian=None, normalize=True, seed=0):
         sh_c = sh if normalize else np.ones_like(sh)
         cal = C.fit(s[~p], s[p], e[p], sh_c[p], ALPHA, BETA, mondrian_bins=mondrian)
         s2, p2, e2, sh2 = draw(rng, N)
-        r = C.evaluate(cal, s2, p2, e2, sh2 if normalize else np.ones_like(sh2))
-        if not normalize:                                     # zor çeyrek σ̂'ye göre tanımlı kalmalı
-            acc = cal.accept(s2) & p2
-            hard = sh2[acc] >= np.quantile(sh2[acc], 0.75)
-            r["coverage_hard"] = float((e2[acc] <= cal.q[0])[hard].mean())
-        out.append(r)
+        out.append(C.evaluate(cal, s2, p2, e2, sh2 if normalize else np.ones_like(sh2), hard_by=sh2))
     return {k: np.mean([o[k] for o in out]) for k in ("far_neg", "coverage", "coverage_hard")}
 
 
