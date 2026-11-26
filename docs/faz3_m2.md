@@ -14,6 +14,7 @@
 | F3-5 | **H2 eşleme kuralı kusurlu (kuru denemede bulundu):** her yöntem kendi konumunu kullandığından başarı tavanları farklı; 5a'nın tavanı (tümü kabul 0,233) 4a'nın hedefinin (0,247) altında → "≥ hedef olan en büyük eşik" yok, kural her şeyi kabul ediyor. `h2.yaml` henüz değiştirilmedi; nihai M2 (v0 ya da inceltici) seçildikten sonra, **test öncesi** yeni kararla düzeltilecek | Kural sonuca bakılarak değil, tanımsız kaldığı için düzeltilecek; ölçütler (i, ii) aynı kalacak |
 | F3-6 | **Öğrenilmiş inceltici (3D) tasarımı:** girdi v0 tepesi çevresinde 2 × 13 θ × 48 × 48 (±48 m) kırpıntı (c ağırlıklı oy + ağırlıksız yoğunluk) + küresel v0 metrikleri; küçük 3B U-Net (364 bin parametre) → hücre logitleri + "boş" logiti, softmax tümü üzerinde. Kayıp: pozitif ∧ GT kırpıntıda → θ-marjinal konum NLL; negatif ∨ GT dışarıda → −log p(boş). Eğitim 01, 08, 09, 10; erken durdurma ve ana skor seçimi (S25 = argmax çevresinde 25 m kütlesi, ya da Snull = 1 − p(boş)) val 04'te. Karar kuralı plandaki gibi: calib'de v0'ı AUROC ve başarı@25'te geçmezse ana yöntem v0 | Tam hacim (13 × 500² × 41 bin) diske sığmıyor; doğru/yanlış kararı tepe çevresinde veriliyor. "Boş" sınıfı planın "negatiflerde kütleyi düşüren terimi"nin olasılıkçı karşılığı. Yön kaybı yok: Phi1 yön etiketi gürültülü (GT yönü çoğu zaman ±6° dışında) |
 | F3-7 | **3D sonucu: inceltici karar kuralını geçmiyor, ana M2 yöntemi v0 kalır.** Calib'de AUROC 0,951 (v0 0,940), ama başarı tavanı 0,217 (v0 0,233); kural ikisini birden istiyor. Ek tohum çalıştırılmadı | Tek tohumla bile tavan farkı (−1,6 puan) ve aynı-etiket AUROC farkı (−0,002 [−0,012; +0,009]) sonucu değiştirecek büyüklükte değil; ek tohum yalnız aynı sonucu doğrulardı. Kural sonuçtan önce yazılmıştı (F3-6) |
+| F3-8 | **F3-5 düzeltmesi, H2 ön-kaydı h2_v2:** "doğru" iki yöntemde de ortak konum kestiriminden (satırın dönmesinde RANSAC merkezi) hesaplanır; eşleme kuralı aynı (4a'nın başarı@25'i). Böylece iki yöntemin tavanı aynı olur ve kural her zaman tanımlı. 2v için hedef tavanı aşarsa hedef = tavan (işaretli). Hacim tepesinin konum başarısı ayrı bilgi satırında. S modelinin eğitim hedefi değiştirilmedi (hacim tepesi etiketi); ölçütler (i, ii) aynı | H2 ret kararını sınıyor; 3B–3C teşhisinde konumun iki yöntemde eşdeğer olduğu (≤ 25 m 0,186 / 0,181), farkın 25 m sınırındaki K1 gürültüsü olduğu yalnız eğitim verisiyle gösterilmişti. Kendi-etiket karşılaştırması kalitesiz konumu ödüllendiriyor (3D'de görüldü). Kural tanımsız kaldığı için değiştirildi; yön (v0 lehine mi, aleyhine mi) bilinmeden seçildi, calib'de iki etiketle de v0 4a'nın altında |
 | F3-4 | Hacim metrikleri test bölmesinde Faz 6'ya kadar çıkarılmaz (`60_m2_features.py` reddeder) | Ön-kayıt disiplini |
 
 ## 3A. Oylama hacmi v0 — `guvenloc/m2_volume.py`, `configs/m2.yaml`
@@ -105,3 +106,29 @@ val AUROC düşüyor (0,946 → 0,931): ağ konumu iyileştirdikçe ret skorunu 
    val'de ölçülebilir ek bilgi katmıyor; ağ 2 epoch'ta doyuyor.
 3. H2'nin bu tasarımla sağlanması beklenmiyor. Test öncesi açık kalan iş F3-5: eşleme kuralının düzeltilmesi.
    Bu düzeltme v0 için yeni bir karar olarak yazılacak.
+
+## F3-5 düzeltmesi — H2 kuru denemesi, h2_v2 (`docs/sonuclar/faz3/h2_calib.md`)
+
+Ortak etiketle (RANSAC merkezi ≤ 25 m) eşleme artık kuruluyor:
+
+| satır | başarı@25 | yanlış kabul | FAR-neg | AUROC [GA] |
+|---|---|---|---|---|
+| 4a RANSAC + inlier (τ = 709) | 0,247 | **0,144** | 0,063 | **0,944** [0,932; 0,955] |
+| 5a hacim + S | 0,247 | 0,343 | 0,272 | 0,924 [0,909; 0,938] |
+| 5a, yalnız destek | 0,247 | 0,176 | 0,071 | 0,940 |
+| 2 4 yön · RANSAC + inlier | 0,319 | 0,148 | 0,055 | 0,927 |
+| 2v 4 yön · hacim + S (hedef tavana indirildi) | 0,316 | 0,758 | 0,819 | 0,915 |
+
+McNemar 5a vs 4a: yalnız 4a'da yanlış kabul 83, yalnız 5a'da 699 (p ≈ 1e−122). AUROC farkı
+−0,020 [−0,033; −0,006]. **H2 (i) ✗, (ii) ✗**: v0 hacmi ret kararında RANSAC + inlier'ı geçmiyor,
+calib'de anlamlı biçimde gerisinde.
+
+S'nin hacim-tepesi etiketiyle eğitilmiş olması (ön-kayıtta öyle; değiştirilmedi) ortak etikette bir
+uyumsuzluk yaratıyor. Ancak yalnız eğitim bölgeleriyle yapılan bölge-dışarıda teşhiste (3B–3C), ortak
+etiketle eğitilmiş S de inlier sayısıyla yalnız berabere kalıyordu (0,962 = 0,962). Yani S hedefi
+değiştirilse de H2'nin sağlanması beklenmiyor. Bunu calib'e bakarak yeniden ayarlamıyorum.
+
+**Faz 3 durumu:** eşleme kuralı artık test için tanımlı (h2_v2). v0 da inceltici de (F3-7) calib'de H2'yi
+desteklemiyor. Test (Faz 6) ön-kayıtla aynen koşulacak; beklenen sonuç H2'nin reddi. M2'nin olası değeri
+ret skorunda değil, yayılma/çok tepe gibi belirsizlik çıktılarında (MIMARI'deki "karar için olasılık
+çıktısı" kullanımı).

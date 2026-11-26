@@ -126,12 +126,13 @@ def main() -> int:
     tgt = res["4a"]["success@25"]
     for key, col in [("5a", "S")] + [(f"5a-{n}", f"S_{n}") for n in singles]:
         sc = a4[col].to_numpy(float)
-        res[key] = row_stats(sc, a4.ok_m2.to_numpy(), isp, match_tau(sc, a4.ok_m2.to_numpy(), isp, tgt),
+        res[key] = row_stats(sc, a4.ok_ransac.to_numpy(), isp, match_tau(sc, a4.ok_ransac.to_numpy(), isp, tgt),
                              blocks, B, seed)
     fa4 = (a4.n_inliers.to_numpy() >= tau4) & ~a4.ok_ransac.to_numpy()
-    fa5 = (a4.S.to_numpy() >= res["5a"]["tau"]) & ~a4.ok_m2.to_numpy()
+    fa5 = (a4.S.to_numpy() >= res["5a"]["tau"]) & ~a4.ok_ransac.to_numpy()
     mc = S.mcnemar(~fa5, ~fa4)              # a_only: 5a yanlış kabul etmedi, 4a etti
-    ok4, ok5 = a4.ok_ransac.to_numpy(), a4.ok_m2.to_numpy()
+    ok4 = ok5 = a4.ok_ransac.to_numpy()        # h2_v2: ortak etiket (F3-8)
+    loc = {"4a_ransac": float(a4.ok_ransac[isp].mean()), "5a_peak": float(a4.ok_m2[isp].mean())}
     sc4, sc5 = a4.n_inliers.to_numpy(float), a4.S.to_numpy(float)
     dauc = S.cluster_bootstrap_ci(lambda i: M.auroc(sc5[i], ok5[i]) - M.auroc(sc4[i], ok4[i]), blocks, B=B, seed=seed)
 
@@ -143,11 +144,13 @@ def main() -> int:
     res["2"] = row_stats(best_i.n_inliers.to_numpy(float), best_i.ok_ransac.to_numpy(), best_i.is_pos.to_numpy(),
                          float(sel["tau_inliers"][2]), b2, B, seed)
     sc = best_s.S.to_numpy(float)
-    res["2v"] = row_stats(sc, best_s.ok_m2.to_numpy(), best_s.is_pos.to_numpy(),
-                          match_tau(sc, best_s.ok_m2.to_numpy(), best_s.is_pos.to_numpy(), res["2"]["success@25"]),
-                          best_s.block.to_numpy(), B, seed)
+    ok2v, isp2v = best_s.ok_ransac.to_numpy(), best_s.is_pos.to_numpy()
+    ceil2v = float(ok2v[isp2v].mean())
+    tgt2 = min(res["2"]["success@25"], ceil2v)
+    res["2v"] = row_stats(sc, ok2v, isp2v, match_tau(sc, ok2v, isp2v, tgt2), best_s.block.to_numpy(), B, seed)
+    res["2v"]["fallback"] = bool(tgt2 < res["2"]["success@25"])
     fa2 = (best_i.n_inliers.to_numpy() >= res["2"]["tau"]) & ~best_i.ok_ransac.to_numpy()
-    fa2v = (sc >= res["2v"]["tau"]) & ~best_s.ok_m2.to_numpy()
+    fa2v = (sc >= res["2v"]["tau"]) & ~ok2v
     mc2 = S.mcnemar(~fa2v, ~fa2)
 
     crit = h2["criteria"]
@@ -162,7 +165,10 @@ def main() -> int:
              "2": "4 yön · RANSAC + inlier", "2v": "4 yön · hacim + S (en yüksek S)"}
     lines = ["# Faz 3 — H2 kuru denemesi (calib 05, 11), `configs/h2.yaml`", "",
              (f"S: lojistik, eğitim {len(tr)} (çift, dönme); öznitelikler {feats}. Eşik eşleme: 5a/5a-x başarı@25'i "
-             f"4a'ya ({tgt:.3f}), 2v satır 2'ye. Doğru = pozitif ∧ hata ≤ 25 m; yanlış kabul = kabul ∧ ¬doğru."), "",
+             f"4a'ya ({tgt:.3f}), 2v satır 2'ye. Doğru = pozitif ∧ hata ≤ 25 m, hata ortak konumdan (RANSAC "
+             f"merkezi, h2_v2 / F3-8); yanlış kabul = kabul ∧ ¬doğru."), "",
+             (f"Konum (bilgi, pozitiflerde ≤ 25 m): RANSAC merkezi {loc['4a_ransac']:.3f}, hacim tepesi "
+              f"{loc['5a_peak']:.3f}." + (" 2v hedefi tavana indirildi (fallback)." if res['2v']['fallback'] else "")), "",
              "| satır | yöntem | τ | başarı@25 | yanlış kabul (tüm) | FAR-neg | FAR-loc | AUROC [GA] |",
              "|---|---|---|---|---|---|---|---|"]
     for k, nm in names.items():
@@ -181,7 +187,7 @@ def main() -> int:
     md = OUT / "h2_calib.md"
     md.write_text("\n".join(lines) + "\n", encoding="utf-8")
     (OUT / "h2_calib.json").write_text(json.dumps(
-        {"rows": res, "mcnemar_5a_4a": mc, "mcnemar_2v_2": mc2, "auroc_diff": list(dauc), "h2": h2res,
+        {"version": h2["version"], "rows": res, "localization": loc, "mcnemar_5a_4a": mc, "mcnemar_2v_2": mc2, "auroc_diff": list(dauc), "h2": h2res,
          "model": {k: np.asarray(v).tolist() for k, v in model.items()}, "features": feats},
         indent=2, ensure_ascii=False, default=float), encoding="utf-8")
     print("\n".join(lines))
