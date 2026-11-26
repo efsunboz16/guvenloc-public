@@ -11,8 +11,8 @@ import pandas as pd
 import pytest
 
 pytest.importorskip("torch")  # CI'da GPU paketleri kurulmaz (pipeline → m2_volume)
-from guvenloc import pipeline as P  # noqa: E402
-from guvenloc.geo import EARTH_R  # noqa: E402
+from guvenloc import pipeline as P
+from guvenloc.geo import EARTH_R
 
 ROOT = Path(__file__).resolve().parents[1]
 FEATS = ["log1p_support", "support_frac", "rho", "spread_m", "entropy_bits", "log1p_sum_c", "frac_dropped",
