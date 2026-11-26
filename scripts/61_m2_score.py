@@ -39,10 +39,10 @@ def feat_matrix(df: pd.DataFrame, names) -> np.ndarray:
     return np.column_stack([np.asarray(cols[n], float) for n in names])
 
 
-def load_split(split: str, pairs: pd.DataFrame) -> pd.DataFrame:
-    """Hacim metrikleri + RANSAC öznitelikleri + etiketler; (çift, dönme) satırları."""
-    v = pd.read_csv(OUT / f"vol_feats_v1_{split}.csv")
-    r = pd.read_csv(f"results/faz1/baselines/feats_v1_{split}_px5.csv")[["pair_id", "rot", "n_inliers", "cx", "cy", "valid"]]
+def load_split(split: str, pairs: pd.DataFrame, tag: str = "v1") -> pd.DataFrame:
+    """Hacim metrikleri + RANSAC öznitelikleri + etiketler; (çift, dönme) satırları. tag: v1 | decoy_v1."""
+    v = pd.read_csv(OUT / f"vol_feats_{tag}_{split}.csv")
+    r = pd.read_csv(f"results/faz1/baselines/feats_{tag}_{split}_px5.csv")[["pair_id", "rot", "n_inliers", "cx", "cy", "valid"]]
     d = v.merge(r, on=["pair_id", "rot"]).join(pairs[["label", "gt_x", "gt_y", "tile_size_m", "tile_px", "region"]],
                                                 on="pair_id")
     d["is_pos"] = d.label == "pos"

@@ -29,9 +29,12 @@ ROTS = (0, 90, 180, 270)
 OUT = Path("results/faz3/m2")
 
 
+CACHE = {"dir": "cache/v1"}
+
+
 def load(job):
     pid, rot = job
-    z = np.load(pair_file("cache/v1", pid, rot))
+    z = np.load(pair_file(CACHE["dir"], pid, rot))
     meta = json.loads(str(z["meta"]))
     return pid, rot, {k: z[k] for k in ("u", "v", "c", "Sigma_A", "Sigma_B")}, meta
 
@@ -42,12 +45,16 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--splits", nargs="+", default=["train", "calib"])
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--pairs", default="data/pairs/pairs_v1.csv")
+    ap.add_argument("--cache", default="cache/v1")
+    ap.add_argument("--tag", default="v1", help="çıktı: vol_feats_<tag>_<split>.csv (tuzak: decoy_v1)")
     a = ap.parse_args()
+    CACHE["dir"] = a.cache
     if "test" in a.splits:
         sys.exit("test bölmesi Faz 6'ya kadar kapalı")
     base = yaml.safe_load(Path("configs/base.yaml").read_text(encoding="utf-8"))
     mcfg = yaml.safe_load(Path("configs/m2.yaml").read_text(encoding="utf-8"))
-    pairs = pd.read_csv("data/pairs/pairs_v1.csv", dtype={"region": str, "tile_region": str}).set_index("pair_id")
+    pairs = pd.read_csv(a.pairs, dtype={"region": str, "tile_region": str}).set_index("pair_id")
     for split in a.splits:
         pp = pairs[pairs.split == split]
         if a.limit:
@@ -70,12 +77,12 @@ def main() -> int:
                           f"{el / (k + 1) * (len(jobs) - k - 1) / 60:.0f} dk)", flush=True)
         df = pd.DataFrame(rows)
         tag = f"_n{a.limit}" if a.limit else ""
-        df.to_csv(OUT / f"vol_feats_v1_{split}{tag}.csv", index=False)
+        df.to_csv(OUT / f"vol_feats_{a.tag}_{split}{tag}.csv", index=False)
         pos = df.merge(pp[["label"]], left_on="pair_id", right_index=True)
         pos = pos[pos.label == "pos"]
         print(f"{split}: {len(df)} satır, {time.time() - t0:.0f} s; pozitif (tüm dönmeler) tepe hatası medyan "
               f"{pos.err_m.median():.1f} m, ≤ 25 m %{100 * (pos.err_m <= 25).mean():.1f}", flush=True)
-        if not a.limit:
+        if not a.limit and a.tag == "v1":
             log_run("60_m2_features.py", Path("configs/m2.yaml"), 0, split, "n_rows", len(df))
     return 0
 

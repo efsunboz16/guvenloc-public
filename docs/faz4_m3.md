@@ -8,6 +8,8 @@
 |---|---|---|
 | F4-1 | **H3 ön-kaydı** `configs/h3.yaml` (h3_v1, sonuçlardan önce, `0015cfd`). Satır 6 = 5a (h2_v3 S, M1-C birleşimi 4a dönmesi, hacim tepesi) + split conformal; σ̂ = hacim tepe yayılımı `spread_m` (≥ 2 m); α = 0,05, β = 0,10; kalibrasyon 05 + 11 birlikte. Ölçütler testte: FAR-neg ≤ 0,05, kabul koşullu kapsama ≥ 0,88 genelde ve σ̂'nin en büyük çeyreğinde. İkincil satırlar: 6-std (sabit yarıçap), 6-M (Mondrian σ̂ dilimleri, B planı), 6-inl (inlier skoru) | MIMARI 4B–4F'nin işlemsel tanımı. 6-std "uyarlamalı"nın katkısını, 6-M B planını, 6-inl M2'siz eşdeğeri gösterir |
 | F4-2 | Kabul kesin büyüklükle (S > τ) | Sürekli skorlarda plandaki S ≥ τ ile aynı; eşitlikte garantiyi korur |
+| F4-4 | **Tuzak karo normalizasyonu, benzetim** (`scripts/65_m3_decoy.py`): kare başına sahte eşleşme düzeyi bilinen yanlış bir karoyla ölçülür; S_norm = S − S(tuzak), inlier_norm = log1p(n) − log1p(n_tuzak). Benzetimde tuzak = komşu karenin easy0 çifti (karenin üç çiftinde de aynı). Seçim yalnız eğitim bölgelerinde, bölge-dışarıda; kural sonuçtan önce yazıldı: ort. \|FAR − α\| ve en büyük FAR birlikte düşmeli, AUROC kaybı ≤ 0,005. **Sonuç: kuralı geçen yok → ham S kalır** | F4-3'teki FAR kayması (05 ≫ 11) eğitim bölgeleri arasında da var: ham S'de FAR 0,012–0,243 |
+| F4-5 | **Gerçek tuzak çiftleri** (`scripts/66_m3_decoy_pairs.py`, `cache/decoy_v1`): her kare × başka bölgeden rastgele karo (komşu karenin easy0 konumu), aynı karede, 4 dönme; train + calib (test Faz 6'da). Aynı aileler, aynı seçim kuralı (F4-4), yalnız tuzak kaynağı değişti. Sonuçtan önce commit edildi | Benzetimde AUROC kaybının olası kaynağı tuzağın başka kareden gelmesi (karenin kendi sahte eşleşme düzeyini değil komşusununkini ölçüyor). Dağıtımdaki kurulum zaten aynı kare; maliyet +1 RoMa çağrısı/kare (≈ 257 ms) |
 | F4-3 | Kuru denemeler (karar değil): 05 → 11, 11 → 05, 05+11 → 04 (S 04 dışarıda bırakılarak yeniden eğitilir; 04 M1-C eğitiminde yok) | Test açılmadan bölge kaymasının büyüklüğünü görmek (MIMARI risk tablosu, Faz 4) |
 
 ## 4A. Sentetik doğrulama — `guvenloc/m3_conformal.py`, `tests/test_m3_coverage.py`
@@ -43,3 +45,16 @@ Satır 6 (ana), FAR-neg / kapsama / zor çeyrek / yarıçap medyanı:
 
 **Durum:** M3 kodu ve H3 ön-kaydı tamam; ön-kayıttaki kurulum (05+11) tek bağımsız bölgede (04) üç ölçütü de
 sağlıyor. Testte iki risk var: FAR-neg'in daha zor bir bölgeye taşınmaması ve "zor çeyrek" kapsaması.
+
+## F4-4. Tuzak normalizasyonu — benzetim (`docs/sonuclar/faz4/decoy_sel.md`)
+
+Eğitim bölgeleri, bölge-dışarıda (S ve τ dışarıda bırakılan bölge olmadan), satır 2 dönmesi:
+
+| skor | FAR 01 / 04 / 08 / 09 / 10 | ort. \|FAR − α\| | en büyük FAR | AUROC | doğru poz. kabul |
+|---|---|---|---|---|---|
+| inlier | 0,161 / 0,004 / 0,061 / 0,005 / 0,111 | 0,055 | 0,161 | 0,952 | 0,914 |
+| inlier_norm | 0,124 / 0,014 / 0,047 / 0,018 / 0,160 | 0,051 | 0,160 | 0,822 | 0,616 |
+| S | 0,184 / 0,012 / 0,019 / 0,016 / 0,243 | 0,086 | 0,243 | **0,959** | 0,991 |
+| S_norm | 0,097 / 0,045 / 0,042 / 0,025 / 0,035 | **0,020** | **0,097** | 0,927 | 0,717 |
+
+S_norm FAR taşınmasını belirgin biçimde düzeltiyor, ama AUROC'u 0,03 düşürüyor (kural ≤ 0,005) → geçmiyor.
