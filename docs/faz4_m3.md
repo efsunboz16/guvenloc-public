@@ -10,6 +10,7 @@
 | F4-2 | Kabul kesin büyüklükle (S > τ) | Sürekli skorlarda plandaki S ≥ τ ile aynı; eşitlikte garantiyi korur |
 | F4-4 | **Tuzak karo normalizasyonu, benzetim** (`scripts/65_m3_decoy.py`): kare başına sahte eşleşme düzeyi bilinen yanlış bir karoyla ölçülür; S_norm = S − S(tuzak), inlier_norm = log1p(n) − log1p(n_tuzak). Benzetimde tuzak = komşu karenin easy0 çifti (karenin üç çiftinde de aynı). Seçim yalnız eğitim bölgelerinde, bölge-dışarıda; kural sonuçtan önce yazıldı: ort. \|FAR − α\| ve en büyük FAR birlikte düşmeli, AUROC kaybı ≤ 0,005. **Sonuç: kuralı geçen yok → ham S kalır** | F4-3'teki FAR kayması (05 ≫ 11) eğitim bölgeleri arasında da var: ham S'de FAR 0,012–0,243 |
 | F4-5 | **Gerçek tuzak çiftleri** (`scripts/66_m3_decoy_pairs.py`, `cache/decoy_v1`): her kare × başka bölgeden rastgele karo (komşu karenin easy0 konumu), aynı karede, 4 dönme; train + calib (test Faz 6'da). Aynı aileler, aynı seçim kuralı (F4-4), yalnız tuzak kaynağı değişti. Sonuçtan önce commit edildi | Benzetimde AUROC kaybının olası kaynağı tuzağın başka kareden gelmesi (karenin kendi sahte eşleşme düzeyini değil komşusununkini ölçüyor). Dağıtımdaki kurulum zaten aynı kare; maliyet +1 RoMa çağrısı/kare (≈ 257 ms) |
+| F4-6 | **Tuzak hattı kapandı, ham S kalır** (F4-5 sonucu, kural değiştirilmeden): gerçek tuzakta da kuralı geçen yok. h3_v1 ön-kaydı olduğu gibi Faz 6'ya gider; tuzak normalizasyonu ikincil bulgu olarak raporlanır, H3 ölçütleri ve skor değişmez | S_norm FAR'ı yine düzeltiyor (ort. sapma 0,086 → 0,026, en büyük 0,243 → 0,097) ama AUROC 0,959 → 0,926 ve doğru pozitif kabulü 0,991 → 0,724. Benzetimle neredeyse aynı: AUROC kaybı tuzağın kaynağından değil, normalizasyonun kendisinden (tuzak skoru gürültüsü farka ekleniyor). Testte (02, 03, 06) FAR-neg > 0,05 riski açık kalır |
 | F4-3 | Kuru denemeler (karar değil): 05 → 11, 11 → 05, 05+11 → 04 (S 04 dışarıda bırakılarak yeniden eğitilir; 04 M1-C eğitiminde yok) | Test açılmadan bölge kaymasının büyüklüğünü görmek (MIMARI risk tablosu, Faz 4) |
 
 ## 4A. Sentetik doğrulama — `guvenloc/m3_conformal.py`, `tests/test_m3_coverage.py`
@@ -58,3 +59,20 @@ Eğitim bölgeleri, bölge-dışarıda (S ve τ dışarıda bırakılan bölge o
 | S_norm | 0,097 / 0,045 / 0,042 / 0,025 / 0,035 | **0,020** | **0,097** | 0,927 | 0,717 |
 
 S_norm FAR taşınmasını belirgin biçimde düzeltiyor, ama AUROC'u 0,03 düşürüyor (kural ≤ 0,005) → geçmiyor.
+
+## F4-5. Tuzak normalizasyonu — gerçek tuzak çiftleri (`docs/sonuclar/faz4/decoy_sel_real.md`)
+
+Aynı kurulum (eğitim bölgeleri, bölge-dışarıda, satır 2 dönmesi); tuzak = aynı kare × başka bölgeden karo, 10.350 çift:
+
+| skor | FAR 01 / 04 / 08 / 09 / 10 | ort. \|FAR − α\| | en büyük FAR | AUROC | doğru poz. kabul |
+|---|---|---|---|---|---|
+| inlier | 0,161 / 0,004 / 0,061 / 0,005 / 0,111 | 0,055 | 0,161 | 0,952 | 0,914 |
+| inlier_norm | 0,130 / 0,013 / 0,048 / 0,016 / 0,132 | 0,047 | 0,132 | 0,824 | 0,635 |
+| S | 0,184 / 0,012 / 0,019 / 0,016 / 0,243 | 0,086 | 0,243 | **0,959** | 0,991 |
+| S_norm | 0,097 / 0,046 / 0,031 / 0,022 / 0,083 | **0,026** | **0,097** | 0,926 | 0,724 |
+
+İki normalize skor da FAR'ı düşürüyor, ama AUROC kaybı 0,03 (S) ve 0,13 (inlier); kural (≤ 0,005) geçmiyor → **ham S kalır (F4-6)**.
+Benzetim ile gerçek tuzak sonuçları birbirine çok yakın: düzeltme etkisi ve ayırt edicilik kaybı tuzağın nereden geldiğine
+bağlı değil. Ödünleşim açık: tuzak, bölgeler arası FAR taşınmasını yaklaşık üçte bire indiriyor, karşılığında doğru konumların
+yaklaşık %27'si reddediliyor.
+
