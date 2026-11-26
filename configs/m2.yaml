@@ -1,0 +1,13 @@
+# Modül 2 v0 — oylama hacmi (MIMARI 3A–3B; guvenloc/m2_volume.py VolumeCfg ile aynı adlar). Karar F3-1…F3-2.
+cell_m: 2.0               # x,y hücresi
+sigma0_m: 4.0             # model hatası payı (düzlem varsayımı, ölçek, 1° θ adımı); ince hacim
+sigma0_coarse_m: 12.0     # kaba θ araması (5° adım → karo kenarında ≈ 10 m kayma)
+coarse_step_deg: 5.0      # tam çember kaba arama (F3-1: M1'den bağımsız θ)
+fine_half_deg: 6.0
+fine_step_deg: 1.0
+m1_half_deg: 15.0         # theta_center (M1) verilirse plandaki kurulum
+sigma_cap_m: 30.0         # σ_i > 30 m eşleşmeler atılır
+n_bins: 6                 # izotrop σ dilimleri (splat yaklaşımı, F3-2)
+spread_radius_m: 50.0
+nms_radius_m: 50.0
+support_radius_m: 25.0    # başarı@25 ile aynı yarıçap
