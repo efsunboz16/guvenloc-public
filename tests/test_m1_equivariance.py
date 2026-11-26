@@ -1,12 +1,13 @@
 """Modül 1 (m1_canon) — dönme kuralları ve C8 eşdeğerliği (MIMARI 2B birim testi).
 
-escnn CI'da kurulu değil → ağ testleri atlanır; sunucuda çalışır (CPU yeter).
+torch/escnn CI'da kurulu değil → modül atlanır; sunucuda çalışır (CPU yeter).
 """
 import numpy as np
 import pytest
-import torch
 
-from guvenloc import m1_canon as M
+torch = pytest.importorskip("torch")  # CI'da GPU paketleri kurulmaz
+
+from guvenloc import m1_canon as M  # noqa: E402
 
 
 def smooth_input(b=2, s=M.IN_SIZE, seed=0):
