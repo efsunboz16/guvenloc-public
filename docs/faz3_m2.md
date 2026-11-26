@@ -132,3 +132,22 @@ değiştirilse de H2'nin sağlanması beklenmiyor. Bunu calib'e bakarak yeniden 
 desteklemiyor. Test (Faz 6) ön-kayıtla aynen koşulacak; beklenen sonuç H2'nin reddi. M2'nin olası değeri
 ret skorunda değil, yayılma/çok tepe gibi belirsizlik çıktılarında (MIMARI'deki "karar için olasılık
 çıktısı" kullanımı).
+
+## Faz 3 özeti (kapanış 26.11.2026, `v0.2`)
+
+- **v0 oylama hacmi (3A):** `guvenloc/m2_volume.py`, eğitimsiz; konumda RANSAC homografisiyle eşdeğer
+  (eğitimde ≤ 25 m 0,186 / 0,181; tepe ile RANSAC merkezi arası medyan 2,1 m). Çift × dönme başına ≈ 60 ms.
+- **Ret skoru S (3B):** eğitim bölgelerinde bölge-dışarıda çapraz doğrulamada inlier sayısıyla berabere
+  (aynı etiketle 0,962 = 0,962). En güçlü metrik "destek"; ρ ve H ek bilgi katmıyor.
+- **H2 (3C), h2_v2, calib:** ✗. Yanlış kabul 5a 0,343 / 4a 0,144; AUROC farkı −0,020 [−0,033; −0,006].
+  Ölçütler (i, ii) değiştirilmedi; yalnız tanımsız kalan eşleme kuralı ortak etiketle düzeltildi (F3-8).
+- **Öğrenilmiş inceltici (3D):** 3B U-Net + boş sınıfı, 364 bin parametre. Karar kuralını geçmedi (F3-7):
+  calib tavanı 0,217 (v0 0,233), aynı etiketle AUROC farkı −0,002 [−0,012; +0,009].
+- **Neden olmadı:** (1) eşleşme sayısının ötesinde ayırt edici bilgi hacimde yok ya da bu veri miktarıyla
+  öğrenilemiyor; (2) K1 GT kayması (medyan 18–31 m) 25 m etiketini sınırda gürültülü yapıyor; bu her iki
+  yöntemin tavanını da sınırlıyor.
+- **Sonraki fazlara:** M3'e (karar) v0'ın ret skoru olarak inlier sayısı ya da destek verilebilir; hacmin
+  yayılma ve çok tepe çıktıları belirsizlik sinyali olarak denenmeye değer (ölçülmedi). Test (Faz 6) h2_v2
+  ön-kaydıyla aynen koşulacak.
+
+Kararlar F3-1…F3-8. Test bölgelerine (02, 03, 06) dokunulmadı.

@@ -445,6 +445,13 @@ P(x, y, θ) ∝ Σ_i c_i · N((x, y); m_i(θ), Σ_i^map + σ_0² I)
 - Karar: v0'ı kalibrasyon bölgelerinde AUROC ve başarı@25'te geçmezse ana yöntem v0 kalır, inceltici ablasyonda ayrı satır olur (rapordaki B planı).
 
 **Faz 3 bitti sayılır (Hedef 3):** satır 5'in anlamlı üstünlüğü (p < 0,05); `docs/faz3_m2.md`; `v0.2`.
+> **Kapanış (26.11.2026, `v0.2`):** Faz 3, H2 calib'de sağlanmadan, olumsuz ve açıklanmış sonuçla kapatıldı.
+> Ön-kayıt `configs/h2.yaml` h2_v2 (ortak konum etiketi, karar F3-8; v1'in eşleme kuralı tanımsızdı, F3-5).
+> Satır 5a (v0 hacim + S): yanlış kabul 0,343 vs 4a 0,144, AUROC farkı −0,020 [−0,033; −0,006]; (i) ✗, (ii) ✗.
+> Öğrenilmiş inceltici (3D) karar kuralını geçmedi (başarı tavanı 0,217 < v0 0,233; aynı etiketle AUROC farkı
+> −0,002), ana M2 v0 kalır (F3-7). Neden: ret bilgisi inlier sayısında zaten var (hacmin "destek" metriği onun
+> yumuşak sürümü); 25 m etiketi K1 GT kaymasıyla (18–31 m) sınırda gürültülü. Ölçütler değiştirilmedi; test
+> kararı Faz 6'da. v0.2 = M1-C (v0.1) + oylama hacmi v0 (`m2_volume.py`), uçtan uca. Ayrıntı: `docs/faz3_m2.md` "Faz 3 özeti".
 **B planı:** alçak irtifada düzlem varsayımı bozulursa sonuçlar irtifaya göre ayrı raporlanır ve geçerli irtifa aralığı belirtilir.
 
 ---
