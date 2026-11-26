@@ -7,7 +7,7 @@ import pytest
 
 torch = pytest.importorskip("torch")  # CI'da GPU paketleri kurulmaz
 
-from guvenloc import m1_canon as M  # noqa: E402
+from guvenloc import m1_canon as M
 
 
 def smooth_input(b=2, s=M.IN_SIZE, seed=0):
