@@ -2,6 +2,7 @@
 
   python scripts/72_m4_filter.py --tune     # eğitim bölgeleri (01, 04, 08, 09, 10): ızgara → results/faz5/m4/tune.json
   python scripts/72_m4_filter.py --dry      # seçilen ayarla calib (05, 11): satır 6 / 7 / 7-noupd / 7-cv, κ
+  python scripts/72_m4_filter.py --traj     # seçilen ayarla eğitim + calib yörüngeleri → traj.csv (izleme paneli)
   (test bölgeleri 02, 03, 06: Faz 6, tek sefer — bu betik reddeder)
 
 Girdi: 71_m4_measure.py (kare başına P(x, y), tek kare kararı), 70_m4_sequences.py (drone↔drone hareket).
@@ -107,7 +108,9 @@ def run(R: dict, cfg: F.FilterCfg, mode: str = "7") -> pd.DataFrame:
         rows.append({"region": r.region, "num": r.num, "accept": acc, "started": started,
                      "reset": reset,
                      "err6": float(np.hypot(*(R["single"][k] - g))), "err7": float(np.hypot(xy[0] - g[0], xy[1] - g[1])),
-                     "spread": spread, "radius6": R["q"] * r.sigma_hat})
+                     "spread": spread, "radius6": R["q"] * r.sigma_hat,
+                     "e6": float(R["single"][k][0]), "n6": float(R["single"][k][1]), "e7": float(xy[0]),
+                     "n7": float(xy[1]), "ge": float(g[0]), "gn": float(g[1])})
     return pd.DataFrame(rows)
 
 
@@ -200,17 +203,28 @@ def dry(params: dict, h4: dict) -> int:
     return 0
 
 
+def traj(params: dict, h4: dict) -> None:
+    cfg = F.FilterCfg(**json.loads((OUT / "tune.json").read_text(encoding="utf-8"))["selected"])
+    regs = h4["tuning_regions"] + h4["calibration_regions"]
+    df = pd.concat([run(load_region(r, params), cfg) for r in regs], ignore_index=True)
+    df.to_csv(OUT / "traj.csv", index=False)
+    print(f"yazıldı: {OUT / 'traj.csv'} ({len(df)} kare)")
+
+
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("--tune", action="store_true")
     ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--traj", action="store_true")
     a = ap.parse_args()
     h4 = yaml.safe_load(Path("configs/h4.yaml").read_text(encoding="utf-8"))
     params = json.loads(Path("results/faz4/m3/m3_params_h3_v1.json").read_text(encoding="utf-8"))
     if a.tune:
         tune(params, h4)
+    if a.traj:
+        traj(params, h4)
     if a.dry:
         return dry(params, h4)
     return 0
