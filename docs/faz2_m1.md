@@ -18,8 +18,9 @@
 | F2-7 | Ana tabloda **satır 4 = 4d** (M1-C ardışık, en çok 2 dönme; H1 bu satırda sınanır); **4c** (kabul edilince dur, en çok 4) ikincil çalışma noktası olarak aynı tabloda | 4d önerideki çağrı bütçesine uyan politika; 4c "aynı başarı, daha az çağrı" sonucunu gösterir. İkisi de calib görülmeden tanımlandı, eşikleri eğitimden |
 | F2-8 | "Tek dik bakışlı kareden mutlak kuzey bu veriyle (4 eğitim uçuşu) öğrenilemiyor" bulgusu raporda H1 altında **olumsuz sonuç** olarak yer alır (2C, 2C-v2 tabloları, şans düzeyi karşılaştırması) | Olumsuz sonuç bilgi taşıyor ve C'ye geçişin gerekçesi |
 | F2-9 | v0.1 M1-C modeli = **D2_olcek_rot90** (karesi başına 4 karo, uydu ölçek U(0,85; 1,18) + 90° dönme oynatması), tohum **s2** (val 04 en iyi, 8,8°); calib sonuçları 3 tohum ortalaması ± ss ile raporlanır | Seçim ön-kayıtlı kurala göre (val 04, 12 açı medyanı). Calib'de C5'in 4d başarısı biraz daha yüksek (0,282 vs 0,270 ± 0,007) ama calib'e göre seçmek ön-kaydı bozar |
+| F2-10 | H1 ön-kaydı v2 (`configs/h1.yaml`): H1 satırı **4d → 4e** (güvene bağlı bütçe). 4e'nin tek parametresi q, calib'den önce yalnız val 04'te seçilir: pozitif kare başına çağrı ≤ 1,45 altında başarı@25 en büyük. Ölçütler (i–iii) aynı. 4d ve 4c aynı tabloda kalır | 4d sabit 2 çağrılık bütçeyle M1-C'nin emin olmadığı karelerde doğru dönmeye ulaşamıyordu. Satır değişikliği calib kuru denemesinden sonra yapıldı (calib geliştirme kümesi); test bölgelerine dokunulmadı. Commit `a231e75`, calib koşusundan önce |
 
-Kararlar F2-5…F2-9 kullanıcı onayıyla alındı (26.11); danışmana not ile bildirildi.
+Kararlar F2-5…F2-10 kullanıcı onayıyla alındı (26.11); danışmana not ile bildirildi.
 
 ## 2A. Etiketler ve etiket gürültüsü (`scripts/50_m1_labels.py`)
 
@@ -295,3 +296,56 @@ Sonuç: M1-C'yi daha da keskinleştirmek H1 (iii)'ü kurtarmaz; açığı kapata
 (b) güvene bağlı bütçe (M1-C emin değilse 3.–4. dönmeye izin; ortalama çağrıyı ≤ 1,5'te tutacak eşik
 eğitim/val'den seçilir). (b) yeni bir politika olduğundan H1 satırını değiştirmez; ancak ön-kayıt güncellemesi
 (yeni karar) ile ve testten önce satır 4 yapılabilir.
+
+### 2D (devam). Güvene bağlı bütçe (4e) ve kahin tavanı (4k): H1 (iii) bu RoMa ile ulaşılamaz
+
+**4e (karar F2-10).** M1-C'nin dönme olasılıkları sıralanır. Sıralı toplamı ≥ q olan en az k dönme (1–4)
+bütçe olur. Bu dönmeler sırayla denenir, ilk inlier ≥ τ_k olanda durulur. τ_k eğitim negatiflerinden
+seçilir: k dönmenin maksimumu için FAR-neg ≤ 0,05 (τ_1…τ_4 = 709 / 1.055 / 1.289 / 1.462). q, calib'den
+önce val 04'te seçildi (`--sec`, `results/faz2/m1/q_sel_*.json`): tohum 0 / 1 / 2 için q = 0,90 / 0,925 /
+0,95, val'de çağrı/poz 1,32 / 1,35 / 1,41. Val 04'te eğri çok düz: 1 çağrıda 0,194, 4 çağrıda 0,220.
+
+**4k (kahin, yöntem değil).** 4d ile aynı politika, ama dönme sırası M1-C'den değil gerçek yönden gelir
+(en yakın çeyrek önce). Kusursuz bir dönme kestiricisinin ≤ 2 çağrıda ulaşabileceği tavanı verir. Modelden
+bağımsızdır.
+
+| satır | çağrı/poz | başarı@25 (3 tohum) | − satır 2 [GA] |
+|---|---|---|---|
+| 1 RoMa 0° | 1 | 0,214 | |
+| 2 4 yön | 4 | 0,319 | |
+| 4a M1-C tek çağrı | 1 | 0,248 ± 0,008 | |
+| 4c M1-C ardışık | 2,35 | 0,311 ± 0,001 | −0,008 [−0,017; +0,001] |
+| 4d M1-C en çok 2 | 1,49 | 0,270 ± 0,007 | ≈ −0,05 [alt −0,06…−0,08] |
+| **4e M1-C güvene bağlı** | **1,38** (1,35 / 1,38 / 1,40) | 0,267 ± 0,006 | ≈ −0,05 [alt −0,06…−0,08] |
+| **4k kahin, en çok 2** | 1,45 | **0,297** | **−0,022 [−0,032; −0,011]** |
+
+H1 (v2, satır 4e), calib: (i) 9,9° ✓ / 10,3° ✗ / 10,2° ✗; (ii) 1,35–1,40 ✓; (iii) ✗ → **sağlanmıyor**.
+
+- 4e, 4d ile aynı başarıyı %7 daha az çağrıyla veriyor. Açığı kapatmıyor: M1-C'nin güveni, yanlış çeyrekteki
+  kareleri yeterince ayırmıyor (2C-C'de de zayıftı).
+- **Asıl bulgu: kusursuz M1-C bile (iii)'ü geçemiyor.** 4k'nin GA alt sınırı −0,032 < −0,03; McNemar 4k <
+  satır 2, p = 8,8e-4. Neden: RoMa v2 bu veride dönmeye büyük ölçüde dayanıklı. Pozitif (çift, dönme)
+  başına başarı@25 (τ = 709):
+
+  | dönme, gerçek yöne göre | başarı@25 | medyan inlier |
+  |---|---|---|
+  | doğru çeyrek (< 45°) | 0,275 | 1.833 |
+  | komşu (45–135°) | 0,221 | 716 |
+  | ters (> 135°) | 0,214 | 676 |
+
+  Doğru dönme inlier sayısını 2,5 kat artırıyor ama başarıyı yalnız ≈ 5–6 puan. Herhangi bir dönmede
+  başarılı olan 377 karenin 85'inde doğru çeyrek başarısız, başka bir dönme başarılı. Satır 2'nin
+  satır 1'e üstünlüğü (+10,5 puan) yaklaşık yarı yarıya iki kaynaktan geliyor: doğru yönü bulmak ve
+  **dört bağımsız deneme**. İkincisi RoMa'nın dönmeye bağlı rastgeleliğinden geliyor; hiçbir dönme
+  kestiricisi bunu ≤ 1,5 çağrıda karşılayamaz.
+- M1-C, kusursuz bir kestiricinin satır 1'e göre kazancının (0,297 − 0,214 = 8,3 puan) ≈ %67'sini yakalıyor
+  (4d: 5,6 puan).
+
+**Sonuç ve H1'in durumu.** Ölçütler ön-kayıtlı; değiştirilmiyor. H1 testte büyük olasılıkla sağlanmayacak.
+Bunun nedeni M1-C'nin kalitesi değil, (iii)'ün varsayımı: "RoMa'ya doğru dönme verilirse dört yönlü
+taramanın başarısı korunur". Bu varsayım RoMa v2 için tutmuyor. Raporda H1 sonucu böyle verilecek: 4k
+tavanıyla birlikte, olumsuz ama açıklanmış. Testte de raporlanacak, ön-kayıt gerektirmeyen ikincil
+bulgular:
+(a) aynı maliyette (1 çağrı) satır 1'den anlamlı kazanç (4a, +3,4 puan);
+(b) satır 2 ile eşdeğer başarıda çağrıyı 4'ten 2,35'e indirme (4c);
+(c) ≤ 1,5 çağrıda kusursuz kestiricinin tavanına yakınlık (4e/4d ile 4k karşılaştırması).

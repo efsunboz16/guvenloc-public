@@ -22,6 +22,8 @@ Satır 4 politikaları (çağrı/kare):
       negatiflerinde k dönmenin maksimumu için FAR-neg ≤ α (k=1: 4a, k=2: 4b, k=3: 3'lü alt kümeler,
       k=4: satır 2) → her kare için FAR-neg ≤ α. q yalnız doğrulama bölgesi 04'te seçilir (--sec):
       pozitif kare başına çağrı ≤ configs/h1.yaml q_selection.calls_max altında başarı@25 en büyük.  (1–4)
+  4k  kahin (tavan, yöntem değil): 4d, ama dönme sırası M1 yerine gerçek yönden (en yakın çeyrek önce)
+      → kusursuz bir dönme kestiricisiyle ≤ 2 çağrıda ulaşılabilecek başarı.                (1–2)
 Eşikler (4a, 4b) eğitim negatiflerinde FAR-neg ≤ α ile; M1 negatiflerde de çalıştırılmalı ama eğitim
 bölgelerinde örneklem içi → eğitimde dönme seçimi yerine: 4a için 4 dönmenin hepsi havuzlanır, 4b için
 komşu dönme çiftlerinin maksimumu (M1'in ilk 2'si neredeyse hep komşu). Calib'e dokunulmaz.
@@ -242,6 +244,13 @@ def main() -> int:
             rec("4d", max(order[:2], key=lambda x: g.loc[x].n_inliers), 2, False)
         j = np.argsort(-probs[k], kind="stable")
         rec("4e", *policy_4e(order, probs[k][j], g.n_inliers.to_dict(), q_e, tk))
+        ko = sorted(ROTS, key=lambda x, h=m.gt_heading: abs((h % 360 - x + 180) % 360 - 180))
+        for c, r in enumerate(ko[:2], 1):
+            if g.loc[r].n_inliers >= taus["4b"]:
+                rec("4k", r, c, True)
+                break
+        else:
+            rec("4k", max(ko[:2], key=lambda x: g.loc[x].n_inliers), 2, False)
     r4 = pd.DataFrame(rows)
     base = base.assign(row=base.row.astype(str), calls=base.row.map({1: 1, 2: 4, 3: 4}))
     allr = pd.concat([base, r4], ignore_index=True)
@@ -257,14 +266,14 @@ def main() -> int:
         summ[row] = d
     piv = allr[allr.is_pos].assign(ok=lambda x: x.accept & (x.err_m <= 25)).pivot(
         index="pair_id", columns="row", values="ok")
-    comps = [("4a", "1"), ("4d", "1"), ("4d", "2"), ("4c", "2"), ("4a", "2"), ("4e", "1"), ("4e", "2")]
+    comps = [("4a", "1"), ("4d", "1"), ("4d", "2"), ("4c", "2"), ("4a", "2"), ("4e", "1"), ("4e", "2"), ("4k", "2")]
     tests = [S.mcnemar(piv[i].to_numpy(bool), piv[j].to_numpy(bool)) for i, j in comps]
     padj = S.holm([t["p"] for t in tests])
     ok = allr[allr.is_pos].assign(ok=lambda x: x.accept & (x.err_m <= 25))
     okp = ok.pivot(index="pair_id", columns="row", values="ok").astype(float)
     blocks = ok.drop_duplicates("pair_id").set_index("pair_id").loc[okp.index, "block"].to_numpy()
     diffs = {}
-    for r4 in ("4c", "4d", "4e"):
+    for r4 in ("4c", "4d", "4e", "4k"):
         dv = (okp[r4] - okp[str(h1["reference_row"])]).to_numpy()
         diffs[r4] = S.cluster_bootstrap_ci(lambda i, dv=dv: dv[i].mean(), blocks,
                                            B=int(h1["bootstrap"]["B"]) if not a.quick else 200, seed=seed)
@@ -282,7 +291,8 @@ def main() -> int:
     h1res["H1"] = bool(h1res["i"] and h1res["ii"] and h1res["iii"])
     names = {"1": "RoMa (0°)", "2": "4 yön + en çok inlier", "3": "4 yön + en düşük entropi",
              "4a": "M1-C tek çağrı", "4b": "M1-C ilk 2 dönme", "4c": "M1-C ardışık (τ₂ ile dur)",
-             "4d": "M1-C ardışık, en çok 2", "4e": f"M1-C güvene bağlı bütçe (q = {q_e})"}
+             "4d": "M1-C ardışık, en çok 2", "4e": f"M1-C güvene bağlı bütçe (q = {q_e})",
+             "4k": "kahin dönme, en çok 2 (tavan)"}
     tag = f"{a.model}_calib"
     lines = [f"# Satır 4 (M1-C → RoMa) — calib, model `{a.model}`", "",
              (f"Eşikler: satır 1–3 {taus_b}; satır 4 {taus} (eğitim negatifleri, FAR-neg ≤ {alpha}). "
