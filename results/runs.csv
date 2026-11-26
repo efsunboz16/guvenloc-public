@@ -361,3 +361,4 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-26T16:58:17,61_m2_score.py,f1a948f7e123,0,c01327a,calib,row2v_success@25,0.29257,
 2026-11-26T16:58:17,61_m2_score.py,f1a948f7e123,0,c01327a,calib,row2v_false_accept,0.89961,
 2026-11-26T16:58:17,61_m2_score.py,f1a948f7e123,0,c01327a,calib,row2v_auroc,0.92838,
+2026-11-26T18:07:37,63_m2_refiner.py,982a1abaf56c,0,72f8da1,calib,row5r_auroc,0.95125,

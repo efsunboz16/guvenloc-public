@@ -1,0 +1,30 @@
+scripts/63_m2_refiner.py:150: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  X = torch.from_numpy(np.load(DATA / f"crops_{split}.npy", mmap_mode="r")[:])
+eğitim 32544 (çift, dönme), val 04 8856, calib 12392; eğitimde GT kırpıntıda %9.3
+tohum 0 epoch 1/15: kayıp 1.4082, val AUROC S25 0.9394, Snull 0.9198, val başarı tavanı 0.163 [44 s]
+tohum 0 epoch 2/15: kayıp 0.7061, val AUROC S25 0.9481, Snull 0.9311, val başarı tavanı 0.162 [87 s]
+tohum 0 epoch 3/15: kayıp 0.6959, val AUROC S25 0.9457, Snull 0.9364, val başarı tavanı 0.159 [130 s]
+tohum 0 epoch 4/15: kayıp 0.6910, val AUROC S25 0.9438, Snull 0.9417, val başarı tavanı 0.161 [173 s]
+tohum 0 epoch 5/15: kayıp 0.6891, val AUROC S25 0.9359, Snull 0.9321, val başarı tavanı 0.159 [216 s]
+tohum 0 epoch 6/15: kayıp 0.6846, val AUROC S25 0.9442, Snull 0.9445, val başarı tavanı 0.158 [259 s]
+tohum 0 epoch 7/15: kayıp 0.6828, val AUROC S25 0.9375, Snull 0.9423, val başarı tavanı 0.163 [303 s]
+tohum 0 epoch 8/15: kayıp 0.6812, val AUROC S25 0.9339, Snull 0.9441, val başarı tavanı 0.161 [346 s]
+tohum 0 epoch 9/15: kayıp 0.6796, val AUROC S25 0.9351, Snull 0.9404, val başarı tavanı 0.165 [389 s]
+tohum 0 epoch 10/15: kayıp 0.6771, val AUROC S25 0.9314, Snull 0.9425, val başarı tavanı 0.165 [432 s]
+tohum 0 epoch 11/15: kayıp 0.6756, val AUROC S25 0.9315, Snull 0.9445, val başarı tavanı 0.168 [474 s]
+tohum 0 epoch 12/15: kayıp 0.6727, val AUROC S25 0.9318, Snull 0.9431, val başarı tavanı 0.170 [517 s]
+tohum 0 epoch 13/15: kayıp 0.6717, val AUROC S25 0.9318, Snull 0.9446, val başarı tavanı 0.170 [560 s]
+tohum 0 epoch 14/15: kayıp 0.6700, val AUROC S25 0.9317, Snull 0.9450, val başarı tavanı 0.173 [604 s]
+tohum 0 epoch 15/15: kayıp 0.6695, val AUROC S25 0.9311, Snull 0.9436, val başarı tavanı 0.173 [647 s]
+tohum 0 bitti: en iyi epoch 2, ana skor s25 (val), calib: {"4a": {"auroc": 0.943703096316562, "ceiling@25": 0.2530573847601129, "auroc_same_label_ransac": 0.943703096316562}, "5a_v0": {"auroc": 0.9400608375778156, "ceiling@25": 0.2333019755409219, "auroc_same_label_ransac": 0.9400184756656036}, "5r": {"auroc": 0.9512530255467123, "ceiling@25": 0.21730950141110067, "auroc_same_label_ransac": 0.9417504050586004}, "equal_accept_rate": {"accept_rate": 0.22885732730794062, "fa_4a": 0.14396384764364106, "fa_5r": 0.15461588121368625, "succ_4a": 0.24741298212605833, "succ_5r": 0.21636876763875823, "mcnemar": {"a_only": 148, "b_only": 181, "p": 0.07753639446526363}}, "auroc_diff_5r_4a": [0.0075499292301502985, -0.002986979395355885, 0.018233052714962953], "auroc_diff_same_label": [-0.001952691257961603, -0.012317242899750922, 0.008913206476137914]}
+# Faz 3D — öğrenilmiş inceltici, calib (4a dönmesi, M1-C v0.1)
+
+| tohum | ana skor (val) | val AUROC | satır | AUROC (kendi etiketi) | AUROC (RANSAC etiketi) | başarı tavanı |
+|---|---|---|---|---|---|---|
+| 0 | s25 | 0.9481 | 4a | 0.9437 | 0.9437 | 0.253 |
+| 0 | s25 | 0.9481 | 5a_v0 | 0.9401 | 0.9400 | 0.233 |
+| 0 | s25 | 0.9481 | 5r | 0.9513 | 0.9418 | 0.217 |
+
+Tohum 0: AUROC farkı 5r − 4a +0.0075 [-0.0030, +0.0182]; aynı etiketle -0.0020 [-0.0123, +0.0089]. Eşit kabul oranında (%22.9): yanlış kabul 4a 0.144 / 5r 0.155, başarı@25 0.247 / 0.216, McNemar p = 7.75e-02 (yalnız 4a yanlış kabul 148, yalnız 5r 181).
+
+M2R_BITTI
