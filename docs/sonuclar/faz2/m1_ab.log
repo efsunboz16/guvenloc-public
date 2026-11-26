@@ -1,0 +1,75 @@
+deney v1_es başlıyor: {'name': 'v1_es', 'widths': (16, 32, 64, 96, 128), 'aug': 'light', 'gray': False, 'sat_frac': 0.0, 'early_stop': True, 'eval_every': 5, 'weight_decay': 0.0001}
+scripts/52_m1_train.py:204: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  tot += float(loss)
+  deney v1_es epoch 5: kayıp 1.811, val medyan hata (12 açı) 59.20°, (0°) 60.27° [73 s]
+  deney v1_es epoch 10: kayıp 1.620, val medyan hata (12 açı) 65.81°, (0°) 66.55° [122 s]
+  deney v1_es epoch 15: kayıp 1.578, val medyan hata (12 açı) 56.81°, (0°) 59.42° [171 s]
+  deney v1_es epoch 20: kayıp 1.511, val medyan hata (12 açı) 58.89°, (0°) 61.61° [220 s]
+  deney v1_es epoch 25: kayıp 1.492, val medyan hata (12 açı) 61.75°, (0°) 63.55° [268 s]
+  deney v1_es epoch 30: kayıp 1.469, val medyan hata (12 açı) 59.22°, (0°) 59.70° [317 s]
+  deney v1_es epoch 35: kayıp 1.464, val medyan hata (12 açı) 61.64°, (0°) 62.92° [366 s]
+  deney v1_es epoch 40: kayıp 1.458, val medyan hata (12 açı) 61.86°, (0°) 63.21° [415 s]
+deney v1_es bitti: en iyi epoch 15, val 56.8° (04), calib 55.4° (05: 27.5°, 11: 95.2°), calib ≤10° oranı 0.077
+deney A1_sert başlıyor: {'name': 'A1_sert', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': False, 'sat_frac': 0.0, 'early_stop': True, 'eval_every': 5, 'weight_decay': 0.0001}
+  deney A1_sert epoch 5: kayıp 2.047, val medyan hata (12 açı) 68.81°, (0°) 68.72° [50 s]
+  deney A1_sert epoch 10: kayıp 1.838, val medyan hata (12 açı) 72.06°, (0°) 71.27° [99 s]
+  deney A1_sert epoch 15: kayıp 1.741, val medyan hata (12 açı) 70.00°, (0°) 70.51° [149 s]
+  deney A1_sert epoch 20: kayıp 1.665, val medyan hata (12 açı) 73.54°, (0°) 74.42° [198 s]
+  deney A1_sert epoch 25: kayıp 1.606, val medyan hata (12 açı) 72.44°, (0°) 73.24° [248 s]
+  deney A1_sert epoch 30: kayıp 1.566, val medyan hata (12 açı) 69.82°, (0°) 70.28° [297 s]
+  deney A1_sert epoch 35: kayıp 1.547, val medyan hata (12 açı) 70.76°, (0°) 71.44° [347 s]
+  deney A1_sert epoch 40: kayıp 1.542, val medyan hata (12 açı) 70.98°, (0°) 70.85° [396 s]
+deney A1_sert bitti: en iyi epoch 5, val 68.8° (04), calib 70.8° (05: 16.7°, 11: 114.8°), calib ≤10° oranı 0.143
+deney A2_sert_gri başlıyor: {'name': 'A2_sert_gri', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': True, 'sat_frac': 0.0, 'early_stop': True, 'eval_every': 5, 'weight_decay': 0.0001}
+  deney A2_sert_gri epoch 5: kayıp 2.224, val medyan hata (12 açı) 72.52°, (0°) 72.60° [50 s]
+  deney A2_sert_gri epoch 10: kayıp 1.983, val medyan hata (12 açı) 67.77°, (0°) 68.68° [100 s]
+  deney A2_sert_gri epoch 15: kayıp 1.846, val medyan hata (12 açı) 70.97°, (0°) 73.53° [149 s]
+  deney A2_sert_gri epoch 20: kayıp 1.767, val medyan hata (12 açı) 68.93°, (0°) 69.64° [199 s]
+  deney A2_sert_gri epoch 25: kayıp 1.679, val medyan hata (12 açı) 68.29°, (0°) 69.50° [249 s]
+  deney A2_sert_gri epoch 30: kayıp 1.617, val medyan hata (12 açı) 65.41°, (0°) 65.41° [298 s]
+  deney A2_sert_gri epoch 35: kayıp 1.587, val medyan hata (12 açı) 65.97°, (0°) 66.92° [348 s]
+  deney A2_sert_gri epoch 40: kayıp 1.582, val medyan hata (12 açı) 66.40°, (0°) 67.18° [397 s]
+deney A2_sert_gri bitti: en iyi epoch 30, val 65.4° (04), calib 62.2° (05: 15.6°, 11: 124.0°), calib ≤10° oranı 0.156
+deney A3_sert_gri_kucuk başlıyor: {'name': 'A3_sert_gri_kucuk', 'widths': (8, 16, 32, 48, 64), 'aug': 'strong', 'gray': True, 'sat_frac': 0.0, 'early_stop': True, 'eval_every': 5, 'weight_decay': 0.001}
+  deney A3_sert_gri_kucuk epoch 5: kayıp 2.285, val medyan hata (12 açı) 70.05°, (0°) 69.37° [38 s]
+  deney A3_sert_gri_kucuk epoch 10: kayıp 2.034, val medyan hata (12 açı) 69.42°, (0°) 68.25° [62 s]
+  deney A3_sert_gri_kucuk epoch 15: kayıp 1.907, val medyan hata (12 açı) 68.68°, (0°) 67.89° [87 s]
+  deney A3_sert_gri_kucuk epoch 20: kayıp 1.815, val medyan hata (12 açı) 68.39°, (0°) 68.39° [111 s]
+  deney A3_sert_gri_kucuk epoch 25: kayıp 1.741, val medyan hata (12 açı) 65.87°, (0°) 67.12° [135 s]
+  deney A3_sert_gri_kucuk epoch 30: kayıp 1.678, val medyan hata (12 açı) 66.18°, (0°) 65.97° [160 s]
+  deney A3_sert_gri_kucuk epoch 35: kayıp 1.655, val medyan hata (12 açı) 68.19°, (0°) 68.46° [184 s]
+  deney A3_sert_gri_kucuk epoch 40: kayıp 1.649, val medyan hata (12 açı) 67.77°, (0°) 67.24° [208 s]
+deney A3_sert_gri_kucuk bitti: en iyi epoch 25, val 65.9° (04), calib 60.1° (05: 14.5°, 11: 124.2°), calib ≤10° oranı 0.172
+deney B1_sert_uydu50 başlıyor: {'name': 'B1_sert_uydu50', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': False, 'sat_frac': 0.5, 'early_stop': True, 'eval_every': 5, 'weight_decay': 0.0001}
+  deney B1_sert_uydu50 epoch 5: kayıp 2.143, val medyan hata (12 açı) 74.96°, (0°) 75.28° [50 s]
+  deney B1_sert_uydu50 epoch 10: kayıp 1.913, val medyan hata (12 açı) 76.24°, (0°) 79.03° [100 s]
+  deney B1_sert_uydu50 epoch 15: kayıp 1.760, val medyan hata (12 açı) 76.84°, (0°) 77.07° [150 s]
+  deney B1_sert_uydu50 epoch 20: kayıp 1.687, val medyan hata (12 açı) 75.17°, (0°) 76.81° [200 s]
+  deney B1_sert_uydu50 epoch 25: kayıp 1.642, val medyan hata (12 açı) 71.45°, (0°) 71.37° [250 s]
+  deney B1_sert_uydu50 epoch 30: kayıp 1.599, val medyan hata (12 açı) 71.08°, (0°) 73.23° [300 s]
+  deney B1_sert_uydu50 epoch 35: kayıp 1.582, val medyan hata (12 açı) 71.22°, (0°) 72.88° [351 s]
+  deney B1_sert_uydu50 epoch 40: kayıp 1.572, val medyan hata (12 açı) 71.40°, (0°) 73.34° [401 s]
+deney B1_sert_uydu50 bitti: en iyi epoch 30, val 71.1° (04), calib 49.4° (05: 22.8°, 11: 80.1°), calib ≤10° oranı 0.152
+deney B2_sert_gri_uydu50 başlıyor: {'name': 'B2_sert_gri_uydu50', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': True, 'sat_frac': 0.5, 'early_stop': True, 'eval_every': 5, 'weight_decay': 0.0001}
+  deney B2_sert_gri_uydu50 epoch 5: kayıp 2.562, val medyan hata (12 açı) 76.72°, (0°) 76.71° [50 s]
+  deney B2_sert_gri_uydu50 epoch 10: kayıp 2.282, val medyan hata (12 açı) 75.18°, (0°) 75.06° [100 s]
+  deney B2_sert_gri_uydu50 epoch 15: kayıp 2.092, val medyan hata (12 açı) 74.09°, (0°) 74.33° [151 s]
+  deney B2_sert_gri_uydu50 epoch 20: kayıp 1.939, val medyan hata (12 açı) 70.06°, (0°) 70.10° [201 s]
+  deney B2_sert_gri_uydu50 epoch 25: kayıp 1.826, val medyan hata (12 açı) 71.53°, (0°) 72.94° [251 s]
+  deney B2_sert_gri_uydu50 epoch 30: kayıp 1.771, val medyan hata (12 açı) 75.08°, (0°) 75.81° [302 s]
+  deney B2_sert_gri_uydu50 epoch 35: kayıp 1.717, val medyan hata (12 açı) 72.86°, (0°) 73.24° [353 s]
+  deney B2_sert_gri_uydu50 epoch 40: kayıp 1.704, val medyan hata (12 açı) 72.77°, (0°) 73.27° [403 s]
+deney B2_sert_gri_uydu50 bitti: en iyi epoch 20, val 70.1° (04), calib 42.6° (05: 68.5°, 11: 40.8°), calib ≤10° oranı 0.157
+deney B3_yalniz_uydu başlıyor: {'name': 'B3_yalniz_uydu', 'widths': (16, 32, 64, 96, 128), 'aug': 'strong', 'gray': False, 'sat_frac': 1.0, 'early_stop': True, 'eval_every': 5, 'weight_decay': 0.0001}
+  deney B3_yalniz_uydu epoch 5: kayıp 1.784, val medyan hata (12 açı) 66.29°, (0°) 65.88° [50 s]
+  deney B3_yalniz_uydu epoch 10: kayıp 1.628, val medyan hata (12 açı) 68.12°, (0°) 70.29° [101 s]
+  deney B3_yalniz_uydu epoch 15: kayıp 1.559, val medyan hata (12 açı) 70.51°, (0°) 75.23° [151 s]
+  deney B3_yalniz_uydu epoch 20: kayıp 1.514, val medyan hata (12 açı) 71.48°, (0°) 74.47° [201 s]
+  deney B3_yalniz_uydu epoch 25: kayıp 1.491, val medyan hata (12 açı) 66.05°, (0°) 70.91° [251 s]
+  deney B3_yalniz_uydu epoch 30: kayıp 1.479, val medyan hata (12 açı) 64.18°, (0°) 70.93° [301 s]
+  deney B3_yalniz_uydu epoch 35: kayıp 1.468, val medyan hata (12 açı) 66.98°, (0°) 72.34° [351 s]
+  deney B3_yalniz_uydu epoch 40: kayıp 1.471, val medyan hata (12 açı) 65.67°, (0°) 70.97° [402 s]
+deney B3_yalniz_uydu bitti: en iyi epoch 30, val 64.2° (04), calib 84.1° (05: 101.3°, 11: 52.5°), calib ≤10° oranı 0.093
+val'e göre en iyi yapılandırma: v1_es (56.8°)
+M1_AB_BITTI_KOD=0

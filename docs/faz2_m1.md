@@ -101,3 +101,40 @@ Eşdeğerlik (eğitilmiş ağ, calib): 90° tam (0,0°), 45° medyan 3,0°, 20°
 taşınan bir "kuzey ipucu" (gölge yönü, yol/bina düzeni) öğretmeye yetmiyor; yeni bölgedeki hata rastgele değil,
 sistematik (±90° kümeleri) — ağ başka bölgenin ipucunu yanlış yöne bağlıyor. Hiperparametre (lr) farkı küçük
 (63–67°); tohumlar arası fark küçük → sorun veri/görev kaynaklı, ayardan değil.
+
+## 2C-v2. Öneri A (sert düzenleme) ve B (uydu kırpıntıları): ikisi de işe yaramadı
+
+`python scripts/52_m1_train.py ab --lr 3e-3 --epochs 40` (tohum 0, her 5 epoch'ta val 04 → erken durdurma);
+uydu kırpıntıları `scripts/53_m1_sat_prep.py` (yalnız eğitim bölgeleri 01/08/09/10, eğitim karesi başına 3,
+GT çevresinde ≤ 300 m, kenar = drone ayak izi × U(0,8; 1,25), φ = 0; 8.280 kırpıntı). İzleme:
+`scripts/m1_izle.py --ab`. Seçim yalnız val'e göre; calib her yapılandırma için **teşhis** amaçlı. Koşu ≈ 1 sa.
+
+| yapılandırma | ne | en iyi epoch | val 04 (12 açı) | calib (0°) | 05 | 11 | calib < 10° |
+|---|---|---|---|---|---|---|---|
+| v1_es | v1 + erken durdurma | 15 | **56,8°** | 55,4° | 27,5° | 95,2° | %7,7 |
+| A1_sert | renk/doygunluk/ölçek/bulanıklık oynatma | 5 | 68,8° | 70,8° | 16,7° | 114,8° | %14,3 |
+| A2_sert_gri | A1 + gri ton | 30 | 65,4° | 62,2° | 15,6° | 124,0° | %15,6 |
+| A3_sert_gri_kucuk | A2 + küçük ağ, wd 1e-3 | 25 | 65,9° | 60,1° | 14,5° | 124,2° | %17,2 |
+| B1_sert_uydu50 | A1 + yığının yarısı uydu | 30 | 71,1° | 49,4° | 22,8° | 80,1° | %15,2 |
+| B2_sert_gri_uydu50 | B1 + gri ton | 20 | 70,1° | 42,6° | 68,5° | 40,8° | %15,7 |
+| B3_yalniz_uydu | yalnız uydu | 30 | 64,2° | 84,1° | 101,3° | 52,5° | %9,3 |
+
+Şans düzeyi (düzgün rastgele tahmin): medyan hata 90°, < 10° oranı %5,6; 90°'nin katlarına göre (mod 90)
+< 10° oranı %22. Belirsizlik çözümlemesi (`results/faz2/m1/m1_ab_ambiguity.json`, docs/sonuclar kopyası):
+
+- **Doğrulama 04'te bütün yapılandırmalar şans düzeyinde:** < 10° oranı %2–9 (şans %5,6), mod 90 %21–29
+  (şans %22). Yani "4 yönden biri doğru" türünde bir belirsizlik bile öğrenilmemiş — M1, satır 2'nin 4 dönmesini
+  daraltacak bilgi de vermiyor.
+- **Calib'deki küçük farklar bölgeye özgü yanlılık:** 05 ve 11 yapılandırmadan yapılandırmaya yer değiştiriyor
+  (B2: 05 68°, 11 41°; A3: 05 15°, 11 124°). Calib toplamındaki 42–84° aralığı gürültü; hiçbiri hedefin
+  (≤ 10°) yakınında değil.
+- **Uydu kırpıntıları öğreniliyor ama taşınmıyor:** B1/B2/B3 eğitim uydu kırpıntılarında %86–100 doğru
+  (örneklem içi), drone karesinde şans düzeyi → uydu–drone alan farkı ve aynı 4 bölge.
+- Erken durdurma tek başına val'i 64° → 57°'ye indirdi ama v1'de de 10. epoch'ta val 68° idi: ağ ezberlemeden
+  önce de genellemiyordu.
+
+**Sonuç (H1 için olumsuz bulgu):** Bu veriyle (4 eğitim uçuşu) tek dik bakışlı drone karesinden bölgeden bağımsız
+mutlak kuzey öğrenilemiyor; ne düzenleme (A) ne eğitim bölgelerinin uydu haritası (B) bunu değiştiriyor. Sorun
+"veri az ama görev öğrenilebilir" değil, "bu girdiden görev bu ölçekte öğrenilemez" tarafında. Sıradaki seçenekler:
+C (M1'i drone karesi + uydu karosu → göreli dönme modeline çevirmek; H1 tasarımını değiştirir, danışmana
+danışılmalı) veya D (olumsuz sonucu raporlayıp satır 2'nin 4 dönmesiyle devam).
