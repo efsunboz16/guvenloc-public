@@ -84,10 +84,11 @@ def test_relrot_sign():
     """Aynı görüntü: drone = uydu saat yönünde 90k° döndürülmüş → φ = −90k° (mod 360) en yüksek logit."""
     pytest.importorskip("escnn")
     torch.manual_seed(0)
-    net = M.C8RelRot(widths=(4, 8, 8, 8, 8), n_desc=4).eval()
     x = smooth_input(b=3, seed=1)
-    with torch.no_grad():
-        for k in (0, 1, 2, 3):
-            pred = M.predict_deg(net(M.rotate_cw_90k(x, k), x))
-            exp = torch.full_like(pred, (-90.0 * k) % 360)
-            assert float(M.angular_error_deg(pred, exp).max()) < 6.0, (k, pred)
+    for pool in ("mean", "window"):
+        net = M.C8RelRot(widths=(4, 8, 8, 8, 8), n_desc=4, sat_pool=pool, window=3).eval()
+        with torch.no_grad():
+            for k in (0, 1, 2, 3):
+                pred = M.predict_deg(net(M.rotate_cw_90k(x, k), x))
+                exp = torch.full_like(pred, (-90.0 * k) % 360)
+                assert float(M.angular_error_deg(pred, exp).max()) < 6.0, (pool, k, pred)

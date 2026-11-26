@@ -12,6 +12,8 @@ Dönme kuralı: içerik saat yönünde α döndürülürse φ' = φ − α (mod 
 """
 from __future__ import annotations
 
+import math
+
 import cv2
 import numpy as np
 import torch
@@ -196,12 +198,19 @@ class C8RelRot(nn.Module):
     drone betimleyicisi 8 grup kayması üzerinden uyduyla ilişkilendirilir: c_k = <roll(d_drone, ROLL_SIGN·k),
     d_uydu>. c_k, k·45° yönü için logit → 36 bölmeye Fourier interpolasyonu (C8Canon ile aynı çıktı).
     Drone girdisi 45°·k döndürülünce çıktı tam 4,5k bölme kayar; uydu girdisi döndürülmez.
+
+    sat_pool = "mean": uydu betimleyicisi de küresel ortalama (karo ≈ drone ayak izi iken).
+    sat_pool = "window": uydu öznitelik haritası `window` hücrelik kayan pencereyle ortalanır, her konumda
+    korelasyon alınır, konumlar üzerinde yumuşak maksimum (logsumexp/γ) → karo drone ayak izinden çok büyükken
+    (gerçek karo ≈ 3×) drone karesinin karodaki yerini model kendisi arar.
     """
 
     ROLL_SIGN = -1   # tests/test_m1_equivariance.py::test_relrot_sign sayısal olarak sınar
 
-    def __init__(self, widths: tuple[int, ...] = (16, 32, 64, 96, 128), n_desc: int = 32):
+    def __init__(self, widths: tuple[int, ...] = (16, 32, 64, 96, 128), n_desc: int = 32,
+                 sat_pool: str = "mean", window: int = 5):
         super().__init__()
+        self.sat_pool, self.window = sat_pool, window
         from escnn import gspaces
         from escnn import nn as enn
 
@@ -222,16 +231,35 @@ class C8RelRot(nn.Module):
         self.n_desc = n_desc
         self.register_buffer("interp", fourier_interp_matrix(sign=REGULAR_SIGN))
         self.log_beta = nn.Parameter(torch.tensor(2.3))   # kosinüs benzerliği ölçeği (≈ 10)
+        self.log_gamma = nn.Parameter(torch.tensor(2.3))  # konum yumuşak maksimumunun keskinliği (window)
+
+    def _features(self, x: torch.Tensor) -> torch.Tensor:
+        return self.head(self.body(self.enn.GeometricTensor(x, self.in_type))).tensor   # (B, D·8, h, w)
 
     def describe(self, x: torch.Tensor) -> torch.Tensor:
-        y = self.head(self.body(self.enn.GeometricTensor(x, self.in_type))).tensor
-        d = y.mean(dim=(2, 3)).view(len(x), self.n_desc, N_GROUP)
+        d = self._features(x).mean(dim=(2, 3)).view(len(x), self.n_desc, N_GROUP)
         return F.normalize(d.flatten(1), dim=1).view_as(d)
 
-    def forward(self, drone: torch.Tensor, sat: torch.Tensor) -> torch.Tensor:
-        dd, ds = self.describe(drone), self.describe(sat)
-        c = torch.stack([(dd.roll(self.ROLL_SIGN * k, dims=2) * ds).sum((1, 2)) for k in range(N_GROUP)], 1)
+    def describe_sat(self, x: torch.Tensor) -> torch.Tensor:
+        """(B, D, 8) [mean] ya da (B, D, 8, P) [window] — açıdan bağımsız, değerlendirmede önbelleğe alınabilir."""
+        if self.sat_pool == "mean":
+            return self.describe(x)
+        y = F.avg_pool2d(self._features(x), self.window, stride=1)
+        d = y.flatten(2).view(len(x), self.n_desc, N_GROUP, -1)
+        return d / d.flatten(1, 2).norm(dim=1).clamp_min(1e-6)[:, None, None]
+
+    def score(self, dd: torch.Tensor, ds: torch.Tensor) -> torch.Tensor:
+        rolls = torch.stack([dd.roll(self.ROLL_SIGN * k, dims=2) for k in range(N_GROUP)], 1)  # (B, 8, D, 8)
+        if ds.dim() == 3:
+            c = (rolls * ds[:, None]).sum((2, 3))
+        else:
+            cp = torch.einsum("bkdn,bdnp->bkp", rolls, ds)
+            g = torch.exp(self.log_gamma)
+            c = (torch.logsumexp(g * cp, dim=2) - math.log(cp.shape[2])) / g
         return torch.exp(self.log_beta) * c @ self.interp.T   # (B, 36)
+
+    def forward(self, drone: torch.Tensor, sat: torch.Tensor) -> torch.Tensor:
+        return self.score(self.describe(drone), self.describe_sat(sat))
 
     def n_params(self) -> int:
         return sum(p.numel() for p in self.parameters() if p.requires_grad)

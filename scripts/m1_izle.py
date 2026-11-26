@@ -4,6 +4,7 @@
   python scripts/m1_izle.py --once
   python scripts/m1_izle.py --ab     # öneri A/B deneyleri (52_m1_train.py ab, logs/m1_ab.log)
   python scripts/m1_izle.py --c      # öneri C fizibilitesi (55_m1c_train.py, logs/m1c.log)
+  python scripts/m1_izle.py --cg     # öneri C, gerçek karo (55_m1c_train.py --veri gercek, logs/m1c_gercek.log)
 """
 from __future__ import annotations
 
@@ -146,10 +147,15 @@ def main() -> None:
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--ab", action="store_true", help="A/B deneylerini izle (logs/m1_ab.log)")
     ap.add_argument("--c", action="store_true", help="öneri C fizibilitesini izle (logs/m1c.log)")
+    ap.add_argument("--cg", action="store_true", help="öneri C gerçek karo (logs/m1c_gercek.log)")
     ap.add_argument("--epochs", type=int, default=None)
     a = ap.parse_args()
-    if a.c:
-        global LOG
+    global LOG
+    if a.cg:
+        LOG = ROOT / "logs/m1c_gercek.log"
+        AB_PLAN[:] = ["C4_ortalama", "C5_pencere"]
+        AB.update(on=True, epochs=a.epochs or 20)
+    elif a.c:
         LOG = ROOT / "logs/m1c.log"
         AB_PLAN[:] = C_PLAN
         AB.update(on=True, epochs=a.epochs or 20)

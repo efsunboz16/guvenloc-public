@@ -1,6 +1,11 @@
 """Faz 2C (öneri C fizibilitesi) – her M1 karesi için kuzey-yukarı uydu karosu → data/m1/relsat_321.npy.
 
   python scripts/54_m1c_prep.py
+  python scripts/54_m1c_prep.py --gercek       # sistemdeki gerçek karo → data/m1/relsat_real_513.npy
+
+--gercek: val/eval için pairs_v1 pozitif karosunun kendisi (tile_lat/lon, tile_size_m = ayak izi köşegeni
++ 400 m, merkez GT'den ≤ 200 m); eğitim için aynı karo + aynı kuralla 1 rastgele karo daha (karesi başına 2).
+Karo 513 px (drone girdisi 257 px / merkez karesi → çözünürlük oranı ≈ 1,3–1,85).
 
 Karo kenarı = 1,5 × drone merkez karesinin ayak izi (0,98 × AGL × 2652/3976 m); merkez GT'den diskte düzgün
 kaydırılmış, yarıçap ≤ 0,25 × ayak izi. Kolay kurulum: sistemdeki gerçek karo (ayak izi köşegeni + 400 m,
@@ -11,6 +16,7 @@ kendi haritası; val/eval haritası yalnız değerlendirmede kullanılır (çık
 """
 from __future__ import annotations
 
+import argparse
 import math
 import sys
 import time
@@ -23,7 +29,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from guvenloc.io_visloc import crop_square_m, load_region
-from guvenloc.pairs import offset_latlon
+from guvenloc.pairs import offset_latlon, tile_size_for
 
 DATA = Path("data/UAV_VisLoc_dataset")
 OUT = Path("data/m1/relsat_321.npy")
@@ -32,14 +38,28 @@ PER = {"train": 3, "val": 1, "eval": 1}
 
 
 def main() -> int:
-    cam = yaml.safe_load(Path("configs/pairs.yaml").read_text(encoding="utf-8"))["camera"]
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--gercek", action="store_true")
+    a = ap.parse_args()
+    pcfg = yaml.safe_load(Path("configs/pairs.yaml").read_text(encoding="utf-8"))
+    cam = pcfg["camera"]
     lab = pd.read_csv("data/m1/labels_v2.csv", dtype={"region": str})
     pr = pd.read_csv("data/pairs/pairs_v1.csv", dtype={"region": str}).set_index("pair_id")
-    lab = lab.join(pr[["drone_lat", "drone_lon", "agl_m"]], on="pair_id")
+    lab = lab.join(pr[["drone_lat", "drone_lon", "agl_m", "tile_lat", "tile_lon", "tile_size_m"]], on="pair_id")
     regions = {r: load_region(DATA, r) for r in sorted(lab.region.unique())}
     rng = np.random.default_rng(SEED)
     jobs = []
-    for i, row in enumerate(lab.itertuples()):
+    size, out = SIZE, OUT
+    if a.gercek:
+        size, out = 513, Path("data/m1/relsat_real_513.npy")
+        off_max = float(pcfg["tile_offset_m"])
+        for i, row in enumerate(lab.itertuples()):
+            jobs.append((i, row.m1_role, row.region, row.tile_lat, row.tile_lon, row.tile_size_m, np.nan))
+            if row.m1_role == "train":
+                r, ang = off_max * math.sqrt(rng.uniform()), rng.uniform(0, 2 * math.pi)
+                lat, lon = offset_latlon(row.drone_lat, row.drone_lon, r * math.cos(ang), r * math.sin(ang))
+                jobs.append((i, row.m1_role, row.region, lat, lon, tile_size_for(row.agl_m, pcfg), r))
+    for i, row in enumerate([] if a.gercek else lab.itertuples()):
         fp = cam["footprint_over_agl"] * row.agl_m * cam["image_height_px"] / cam["image_width_px"]
         for _ in range(PER[row.m1_role]):
             r, a = OFF_X * fp * math.sqrt(rng.uniform()), rng.uniform(0, 2 * math.pi)
@@ -47,11 +67,11 @@ def main() -> int:
             jobs.append((i, row.m1_role, row.region, lat, lon, SIDE_X * fp, r))
     t0 = time.time()
     with ThreadPoolExecutor(8) as ex:
-        arr = np.stack(list(ex.map(lambda j: crop_square_m(regions[j[2]], j[3], j[4], j[5], SIZE)[..., :3], jobs)))
-    np.save(OUT, arr)
+        arr = np.stack(list(ex.map(lambda j: crop_square_m(regions[j[2]], j[3], j[4], j[5], size)[..., :3], jobs)))
+    np.save(out, arr)
     pd.DataFrame(jobs, columns=["lab_idx", "m1_role", "region", "lat", "lon", "side_m", "off_m"]).to_csv(
-        OUT.with_suffix(".csv"), index=False)
-    print(f"{OUT}: {arr.shape} {arr.nbytes / 1e9:.2f} GB, {time.time() - t0:.0f} s; "
+        out.with_suffix(".csv"), index=False)
+    print(f"{out}: {arr.shape} {arr.nbytes / 1e9:.2f} GB, {time.time() - t0:.0f} s; "
           f"rol başına {pd.Series([j[1] for j in jobs]).value_counts().to_dict()}")
     return 0
 
