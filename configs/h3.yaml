@@ -1,0 +1,29 @@
+# H3 ön-kaydı (karar F4-1, 26.11.2026) — M3 calib/test sonuçları görülmeden ÖNCE sabitlendi.
+# Ölçüt MIMARI.md "Hedef 4 / H3" ile aynı; yalnız işlemselleştirildi. Değiştirmek yeni karar ister.
+# scripts/64_m3_conformal.py bu dosyayı okur. Test bölgeleri (02, 03, 06) Faz 6'da, tek sefer.
+version: h3_v1
+system:                      # satır 6 = satır 5a (h2_v3) + split conformal
+  base_row: 5a
+  m1_model: D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta   # dönme: M1-C en olası (4a)
+  score: S_h2_v3             # configs/h2.yaml v3 lojistik skoru
+  position: volume_peak      # hacim tepesi (err_m)
+  sigma_hat: spread_m        # hacim tepe yayılımı (m); NaN → 50; alt sınır 2 m (hücre)
+  sigma_floor_m: 2.0
+alpha: 0.05                  # FAR-neg (negatif kabul) ≤ α — τ kalibrasyon negatiflerinden
+beta: 0.10                   # %90 hedefli kabul koşullu kapsama — q̂ kalibrasyonun kabul edilmiş pozitiflerinden
+calibration_regions: ["05", "11"]
+criteria:                    # TEST bölgelerinde (02, 03, 06), Faz 6
+  far_neg_max: 0.05          # nokta tahmini; Clopper–Pearson %95 GA raporlanır
+  coverage_min: 0.88         # genel kapsama (kabul ∧ pozitif)
+  coverage_hard_min: 0.88    # en zor çeyrek: kabul edilmiş test pozitiflerinde σ̂'nin en büyük %25'i
+rows:                        # aynı tabloda raporlanır; H3 kararı yalnız 'main' ile
+  main: "6"                  # σ̂ ile normalize split conformal
+  secondary:
+    "6-std": sabit yarıçap (σ̂ = 1) split conformal — "uyarlamalı"nın katkısı (MIMARI 4E)
+    "6-M": Mondrian, σ̂ dilimleri (4 dilim, grup n < 50 → birleştir) — B planı (MIMARI 4F)
+    "6-inl": aynı conformal, skor = inlier sayısı (satır 4a), konum = RANSAC merkezi, σ̂ = spread_m — bilgi
+bootstrap: {block_frames: 50, B: 2000}
+dry_runs:                    # test öncesi bölge kayması denemeleri (karar değil): kalibre → değerlendir
+  - {fit: ["05"], eval: ["11"]}
+  - {fit: ["11"], eval: ["05"]}
+  - {fit: ["05", "11"], eval: ["04"]}   # 04: M1-C'de görülmedi; S, 04 dışarıda bırakılarak yeniden eğitilir

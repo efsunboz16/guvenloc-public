@@ -27,14 +27,32 @@ from guvenloc.metrics import log_run
 OUT = Path("results/faz3/m2")
 BLOCK = 50
 TAU_4A = 709.0      # Faz 2 satır 4a eşiği: eğitim negatifleri, 4 dönme havuzu, FAR-neg ≤ 0,05 (56_m1c_roma.py)
-M1_DECISIONS = "results/faz2/m1/roma_row4_decisions_D2_olcek_rot90_s2_calib.csv"
+M1_DECISIONS = "results/faz2/m1/roma_row4_decisions_{model}_calib.csv"   # model: configs/h2.yaml m1_model
 
 
 def feat_matrix(df: pd.DataFrame, names) -> np.ndarray:
     cols = {"log1p_support": np.log1p(df.support.clip(lower=0)), "log1p_sum_c": np.log1p(df.sum_c),
             "support_frac": df.support_frac, "rho": df.rho, "spread_m": df.spread_m.fillna(50.0),
             "entropy_bits": df.entropy_bits.fillna(df.entropy_bits.max()), "frac_dropped": df.frac_dropped}
+    if "n_inliers" in df:                                     # h2_v3 (F3-9): inlier sayısı da S'ye girer
+        cols["log1p_inliers"] = np.log1p(df.n_inliers.clip(lower=0))
     return np.column_stack([np.asarray(cols[n], float) for n in names])
+
+
+def load_split(split: str, pairs: pd.DataFrame, tag: str = "v1") -> pd.DataFrame:
+    """Hacim metrikleri + RANSAC öznitelikleri + etiketler; (çift, dönme) satırları. tag: v1 | decoy_v1."""
+    v = pd.read_csv(OUT / f"vol_feats_{tag}_{split}.csv")
+    r = pd.read_csv(f"results/faz1/baselines/feats_{tag}_{split}_px5.csv")[["pair_id", "rot", "n_inliers", "cx", "cy", "valid"]]
+    d = v.merge(r, on=["pair_id", "rot"]).join(pairs[["label", "gt_x", "gt_y", "tile_size_m", "tile_px", "region"]],
+                                                on="pair_id")
+    d["is_pos"] = d.label == "pos"
+    d["ok_m2"] = M.good_label(d.is_pos, d.err_m)
+    mpp = d.tile_size_m / d.tile_px
+    e_r = np.where(d.valid & (d.n_inliers > 0), np.hypot(d.cx - d.gt_x, d.cy - d.gt_y) * mpp, np.inf)
+    d["err_ransac"] = np.where(d.is_pos, e_r, np.nan)
+    d["ok_ransac"] = M.good_label(d.is_pos, d.err_ransac)
+    d["block"] = d.region + "_" + (d.pair_id.str.split("_").str[1].astype(int) // BLOCK).astype(str)
+    return d
 
 
 def fit_logistic(X: np.ndarray, y: np.ndarray, C: float, iters: int = 50):
@@ -90,33 +108,20 @@ def main() -> int:
     pairs = pd.read_csv("data/pairs/pairs_v1.csv", dtype={"region": str}).set_index("pair_id")
     feats = h2["score_model"]["features"]
 
-    def load(split):
-        v = pd.read_csv(OUT / f"vol_feats_v1_{split}.csv")
-        r = pd.read_csv(f"results/faz1/baselines/feats_v1_{split}_px5.csv")[["pair_id", "rot", "n_inliers", "cx", "cy", "valid"]]
-        d = v.merge(r, on=["pair_id", "rot"]).join(pairs[["label", "gt_x", "gt_y", "tile_size_m", "tile_px", "region"]],
-                                                    on="pair_id")
-        d["is_pos"] = d.label == "pos"
-        d["ok_m2"] = M.good_label(d.is_pos, d.err_m)
-        mpp = d.tile_size_m / d.tile_px
-        e_r = np.where(d.valid & (d.n_inliers > 0), np.hypot(d.cx - d.gt_x, d.cy - d.gt_y) * mpp, np.inf)
-        d["err_ransac"] = np.where(d.is_pos, e_r, np.nan)
-        d["ok_ransac"] = M.good_label(d.is_pos, d.err_ransac)
-        d["block"] = d.region + "_" + (d.pair_id.str.split("_").str[1].astype(int) // BLOCK).astype(str)
-        return d
-
-    tr, ca = load("train"), load("calib")
-    model = fit_logistic(feat_matrix(tr, feats), tr.ok_m2.to_numpy(float), float(h2["score_model"]["C"]))
+    tr, ca = load_split("train", pairs), load_split("calib", pairs)
+    tcol = {"peak": "ok_m2", "shared": "ok_ransac"}[h2["score_model"].get("target_label", "peak")]
+    model = fit_logistic(feat_matrix(tr, feats), tr[tcol].to_numpy(float), float(h2["score_model"]["C"]))
     tr["S"] = predict(model, feat_matrix(tr, feats))
     ca["S"] = predict(model, feat_matrix(ca, feats))
     singles = {n: (lambda df, n=n: feat_matrix(df, [n])[:, 0] * (-1 if n in ("rho", "entropy_bits") else 1))
                for n in h2["ablation_single"]}
     for n, f in singles.items():
         ca[f"S_{n}"] = f(ca)
-    print(f"S eğitim AUROC (tüm dönmeler, örneklem içi): {M.auroc(tr.S, tr.ok_m2):.3f}; "
+    print(f"S eğitim AUROC (tüm dönmeler, örneklem içi): {M.auroc(tr.S, tr[tcol]):.3f}; "
           f"inlier eğitim AUROC: {M.auroc(tr.n_inliers, tr.ok_ransac):.3f}")
 
     # 4a/5a: M1-C'nin en olası dönmesi (Faz 2, v0.1 modeli)
-    dec = pd.read_csv(M1_DECISIONS)
+    dec = pd.read_csv(M1_DECISIONS.format(model=h2.get("m1_model", "D2_olcek_rot90_s2")))
     rot_4a = dec[dec.row == "4a"].set_index("pair_id").rot
     a4 = ca.set_index(["pair_id", "rot"]).loc[list(zip(rot_4a.index, rot_4a.to_numpy(), strict=True))].reset_index()
     tau4 = TAU_4A
@@ -166,7 +171,7 @@ def main() -> int:
     lines = ["# Faz 3 — H2 kuru denemesi (calib 05, 11), `configs/h2.yaml`", "",
              (f"S: lojistik, eğitim {len(tr)} (çift, dönme); öznitelikler {feats}. Eşik eşleme: 5a/5a-x başarı@25'i "
              f"4a'ya ({tgt:.3f}), 2v satır 2'ye. Doğru = pozitif ∧ hata ≤ 25 m, hata ortak konumdan (RANSAC "
-             f"merkezi, h2_v2 / F3-8); yanlış kabul = kabul ∧ ¬doğru."), "",
+             f"merkezi, {h2['version']}); yanlış kabul = kabul ∧ ¬doğru."), "",
              (f"Konum (bilgi, pozitiflerde ≤ 25 m): RANSAC merkezi {loc['4a_ransac']:.3f}, hacim tepesi "
               f"{loc['5a_peak']:.3f}." + (" 2v hedefi tavana indirildi (fallback)." if res['2v']['fallback'] else "")), "",
              "| satır | yöntem | τ | başarı@25 | yanlış kabul (tüm) | FAR-neg | FAR-loc | AUROC [GA] |",

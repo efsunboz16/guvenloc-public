@@ -374,3 +374,68 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-26T18:43:33,61_m2_score.py,431086eb7cbe,0,e907f97,calib,row2v_success@25,0.31609,
 2026-11-26T18:43:33,61_m2_score.py,431086eb7cbe,0,e907f97,calib,row2v_false_accept,0.75823,
 2026-11-26T18:43:33,61_m2_score.py,431086eb7cbe,0,e907f97,calib,row2v_auroc,0.91549,
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4a_success@25,0.24929,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4a_far_neg,0.06192,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4a_calls_mean,1.0,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4b_success@25,0.27375,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4b_far_neg,0.06388,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4b_calls_mean,2.0,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4c_success@25,0.30856,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4c_far_neg,0.05504,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4c_calls_mean,3.3612,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4d_success@25,0.26717,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4d_far_neg,0.06388,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4d_calls_mean,1.79729,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4e_success@25,0.26529,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4e_far_neg,0.06192,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:19:09,56_m1c_roma.py,a5ff25e7d6c4,0,9535fdb,calib,row4e_calls_mean,1.90252,model=D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row4a_success@25,0.24929,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row4a_false_accept,0.1417,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row4a_auroc,0.94483,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row5a_success@25,0.24929,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row5a_false_accept,0.18496,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row5a_auroc,0.93683,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2_success@25,0.31891,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2_false_accept,0.14784,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2_auroc,0.92719,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2v_success@25,0.31891,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2v_false_accept,0.35797,
+2026-11-26T19:20:32,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2v_auroc,0.92097,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row4a_success@25,0.24929,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row4a_false_accept,0.1417,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row4a_auroc,0.94483,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row5a_success@25,0.24929,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row5a_false_accept,0.18496,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row5a_auroc,0.93683,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2_success@25,0.31891,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2_false_accept,0.14784,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2_auroc,0.92719,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2v_success@25,0.31891,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2v_false_accept,0.35797,
+2026-11-26T19:20:49,61_m2_score.py,ab577a80fd8e,0,839715c,calib,row2v_auroc,0.92097,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row4a_success@25,0.24929,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row4a_false_accept,0.1417,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row4a_auroc,0.94483,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row5a_success@25,0.24929,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row5a_false_accept,0.18496,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row5a_auroc,0.93683,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row2_success@25,0.31891,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row2_false_accept,0.14784,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row2_auroc,0.92719,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row2v_success@25,0.31891,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row2v_false_accept,0.35797,
+2026-11-26T19:29:35,61_m2_score.py,ab577a80fd8e,0,0015cfd,calib,row2v_auroc,0.92097,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05 → 11,row6_far_neg,0.00254,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05 → 11,row6_coverage,0.99683,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05 → 11,row6_coverage_hard,1.0,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,11 → 05,row6_far_neg,0.2269,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,11 → 05,row6_coverage,0.67278,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,11 → 05,row6_coverage_hard,0.41463,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 04,row6_far_neg,0.02439,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 04,row6_coverage,0.97669,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 04,row6_coverage_hard,0.90741,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 05+11,row6_far_neg,0.04914,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 05+11,row6_coverage,0.90291,
+2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 05+11,row6_coverage_hard,0.77419,
+2026-11-26T21:00:18,30_build_cache.py,49fd69844ed7,0,bd49a3e,"calib,train",sec_per_file,0.268,setting=base seq=False n=10000 shard=0/1
+2026-11-26T22:00:41,67_m3_pipeline.py,0d25f5c085d4,0,02e12c3,e2e,accept_agree,1.0,

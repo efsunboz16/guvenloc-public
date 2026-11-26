@@ -20,6 +20,7 @@
 | F2-8 | "Tek dik bakışlı kareden mutlak kuzey bu veriyle (4 eğitim uçuşu) öğrenilemiyor" bulgusu raporda H1 altında **olumsuz sonuç** olarak yer alır (2C, 2C-v2 tabloları, şans düzeyi karşılaştırması) | Olumsuz sonuç bilgi taşıyor ve C'ye geçişin gerekçesi |
 | F2-9 | v0.1 M1-C modeli = **D2_olcek_rot90** (karesi başına 4 karo, uydu ölçek U(0,85; 1,18) + 90° dönme oynatması), tohum **s2** (val 04 en iyi, 8,8°); calib sonuçları 3 tohum ortalaması ± ss ile raporlanır | Seçim ön-kayıtlı kurala göre (val 04, 12 açı medyanı). Calib'de C5'in 4d başarısı biraz daha yüksek (0,282 vs 0,270 ± 0,007) ama calib'e göre seçmek ön-kaydı bozar |
 | F2-10 | H1 ön-kaydı v2 (`configs/h1.yaml`): H1 satırı **4d → 4e** (güvene bağlı bütçe). 4e'nin tek parametresi q, calib'den önce yalnız val 04'te seçilir: pozitif kare başına çağrı ≤ 1,45 altında başarı@25 en büyük. Ölçütler (i–iii) aynı. 4d ve 4c aynı tabloda kalır | 4d sabit 2 çağrılık bütçeyle M1-C'nin emin olmadığı karelerde doğru dönmeye ulaşamıyordu. Satır değişikliği calib kuru denemesinden sonra yapıldı (calib geliştirme kümesi); test bölgelerine dokunulmadı. Commit `a231e75`, calib koşusundan önce |
+| F2-11 | **H1 ön-kaydı v3:** M1-C = 3 tohumun birleşimi (softmax ortalaması) + test zamanı döndürme (0°, 10°, 20°, 30°, çıktı geri hizalanır). Varyant val 04'te, önceden yazılan kuralla seçildi (0°'de medyan yön hatası en küçük; ≤ 0,1° farkta daha ucuz olan): 8,99° (tek model) → 7,80°. q yeniden val 04'te seçildi (0,875). Ölçütler aynı | Calib'de (i) 10,19° ile kıl payı kaçıyordu; bu bir model iyileştirmesi, ölçüt değişikliği değil. Seçim calib'e bakmadan yapıldı. Maliyet 5,8 → 31,8 ms/kare (bir RoMa `base` çağrısı 257 ms) |
 
 Kararlar F2-5…F2-10 kullanıcı onayıyla alındı (26.11); danışmana not ile bildirildi.
 
@@ -409,3 +410,24 @@ ile aynı sürede +3,3 puan veriyor.
   1,7 kat hızlı (4c).
 - MIMARI.md "Faz 2 bitti sayılır" koşulu (Hedef 2 ölçütleri) calib'de sağlanmıyor. Faz 2, H1 olumsuz ve
   açıklanmış olarak kapatılabilir; v0.1 = `D2_olcek_rot90_s2` + satır 4c/4e politikaları.
+
+## F2-11. M1-C birleşimi ve H1 v3 — `scripts/58_m1c_ens.py` (`docs/sonuclar/faz2/ens_sel.json`)
+
+**Val 04 (seçim; pozitifler, kare 0°):**
+
+| varyant | medyan yön hatası | ≤ 45° | ileri geçiş |
+|---|---|---|---|
+| tek model (`D2_olcek_rot90_s2`, v0.1) | 8,99° | %78,6 | 1 |
+| tek model + TTA | 8,55° | %79,9 | 4 |
+| 3 tohum | 8,29° | %82,0 | 3 |
+| **3 tohum + TTA (seçildi)** | **7,80°** | %82,9 | 12 |
+
+**Calib, h1_v3 (`docs/sonuclar/faz2/roma_row4_ens3tta_calib.md`):** (i) medyan yön hatası **8,9°** ≤ 10° ✓
+(v2'de 10,2°); (ii) çağrı/pozitif kare 1,38 ✓; (iii) 4e − 2 = −0,054 [−0,072; −0,036] ✗.
+Kâhin tavanı (4k) değişmedi (−0,022 [−0,032; −0,011]): (iii) hiçbir dönme kestiricisiyle ≤ 1,5 çağrıda
+sağlanamıyor. Diğer satırlar: 4a 0,249 (v0.1: 0,247), 4c 0,309 (satır 2'ye fark −0,010).
+
+**Süre:** 31,8 ms/kare (3090, bf16; v0.1 5,8 ms), ek bellek 0,03 GB. Satır 4e'de kare başına beklenen
+süreye etkisi ≈ +26 ms (≈ 1,4 × 257 ms RoMa çağrısının yanında %7).
+
+**H1 durumu (calib):** 3 ölçütten 2'si sağlanıyor; (iii)'ün sağlanamazlığı kâhinle gösterildi.

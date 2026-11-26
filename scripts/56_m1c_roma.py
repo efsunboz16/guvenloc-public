@@ -77,32 +77,58 @@ def tiles_for(pairs: pd.DataFrame, path: Path) -> np.ndarray:
     return arr
 
 
-@torch.no_grad()
-def m1_rot_probs(model: str, pairs: pd.DataFrame, tiles: np.ndarray) -> np.ndarray:
-    """(N, 4) dönme olasılıkları (ROTS sırasıyla) + (N,) φ̂."""
+TTA_DEG = (0.0, 10.0, 20.0, 30.0)     # F2-11: C8 eşdeğer ağda 45°'nin katları yapı gereği aynı; ara açılar farklı örnekleme
+
+
+def _net(model: str):
     import re
     base = re.sub(r"_s\d+$", "", model)          # tohum eki (55_m1c_train.py --seeds)
     _lr, cfg, pool = (C55.CONFIGS_GERCEK[base] if base in C55.CONFIGS_GERCEK else C55.CONFIGS_V2[base][:3])
-    C55.MODE["veri"] = "gercek"
     net = M.C8RelRot(sat_pool=pool).cuda()
     net.load_state_dict(torch.load(f"cache/models/m1c_{model}.pt", map_location="cuda")["state_dict"])
-    net.eval()
+    return net.eval(), cfg
+
+
+@torch.no_grad()
+def m1_rot_probs(model: str, pairs: pd.DataFrame, tiles: np.ndarray) -> np.ndarray:
+    """(N, 4) dönme olasılıkları (ROTS sırasıyla) + (N,) φ̂.
+
+    model: tek ad, ya da "A+B+C" (tohum birleşimi, softmax ortalaması); "@tta" eki → drone karesi TTA_DEG
+    açılarıyla döndürülüp çıktılar geri hizalanır (F2-11)."""
+    C55.MODE["veri"] = "gercek"
+    tta = model.endswith("@tta")
+    names = model.removesuffix("@tta").split("+")
+    angles = TTA_DEG if tta else (0.0,)
+    nets = [_net(n) for n in names]
     lab = pd.read_csv("data/m1/labels_v2.csv", dtype={"region": str})
     frames = np.load("data/m1/frames_321.npy", mmap_mode="r")
     fidx = pd.Series(np.arange(len(lab)), index=lab.drone_path)[pairs.drone_path].to_numpy()
-    centers = torch.tensor(M.bin_centers_deg(), device="cuda", dtype=torch.float32)
     probs, phis = [], []
     for i in range(0, len(pairs), 64):
         d = torch.from_numpy(np.ascontiguousarray(frames[fidx[i:i + 64]])).cuda()
         s = torch.from_numpy(tiles[i:i + 64]).cuda()
-        with torch.autocast("cuda", dtype=torch.bfloat16):
-            lg = net(C55.T.make_batch(d, torch.zeros(len(d), device="cuda"), False, cfg),
-                     C55.make_sat(s, False, cfg)).float()
-        p = lg.softmax(1)
-        pr = torch.stack([(p * ((torch.remainder(centers - r + 45, 360) < 90).float())).sum(1) for r in ROTS], 1)
-        probs.append(pr.cpu().numpy())
-        phis.append(M.predict_deg(lg).cpu().numpy())
+        pr, ph = probs_arrays(nets, angles, d, s)
+        probs.append(pr)
+        phis.append(ph)
     return np.concatenate(probs), np.concatenate(phis)
+
+
+@torch.no_grad()
+def probs_arrays(nets, angles, d: torch.Tensor, s: torch.Tensor):
+    """d: (B, 321, 321, 3) uint8 drone (51_m1_prep), s: (B, 513, 513, 3) uint8 karo, cuda → ((B, 4), (B,) φ̂)."""
+    centers = torch.tensor(M.bin_centers_deg(), device="cuda", dtype=torch.float32)
+    p = 0.0
+    for net, cfg in nets:
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            ds = net.describe_sat(C55.make_sat(s, False, cfg))
+            for a in angles:
+                al = torch.full((len(d),), a, device="cuda")
+                lg = net.score(net.describe(C55.T.make_batch(d, al, False, cfg)), ds).float()
+                # drone saat yönünde a → tahmin −a kayar; geri hizalama: +a/BIN_DEG bölme
+                p = p + torch.roll(lg.softmax(1), round(a / M.BIN_DEG), 1)
+    p = p / (len(nets) * len(angles))
+    pr = torch.stack([(p * ((torch.remainder(centers - r + 45, 360) < 90).float())).sum(1) for r in ROTS], 1)
+    return pr.cpu().numpy(), M.predict_deg(p.clamp_min(1e-12).log()).cpu().numpy()
 
 
 def train_taus(alpha: float, tau2: int) -> dict:
