@@ -5,6 +5,7 @@
   python scripts/m1_izle.py --ab     # öneri A/B deneyleri (52_m1_train.py ab, logs/m1_ab.log)
   python scripts/m1_izle.py --c      # öneri C fizibilitesi (55_m1c_train.py, logs/m1c.log)
   python scripts/m1_izle.py --cg     # öneri C, gerçek karo (55_m1c_train.py --veri gercek, logs/m1c_gercek.log)
+  python scripts/m1_izle.py --v2     # iyileştirme turu (55_m1c_train.py --veri gercek4, logs/m1c_v2.log)
 """
 from __future__ import annotations
 
@@ -96,7 +97,7 @@ def alive() -> bool:
 def render() -> Group:
     runs, chosen, tail, done, summary = parse()
     keys = list(runs)
-    plan = [(n, 0) for n in AB_PLAN] if AB["on"] else PLAN
+    plan = ([(n, 0) for n in AB_PLAN] + [k for k in runs if k[0] not in AB_PLAN]) if AB["on"] else PLAN
     n_ep = AB["epochs"] if AB["on"] else EPOCHS
     if AB["on"]:
         keys = [k for k in plan if k in runs]
@@ -148,10 +149,15 @@ def main() -> None:
     ap.add_argument("--ab", action="store_true", help="A/B deneylerini izle (logs/m1_ab.log)")
     ap.add_argument("--c", action="store_true", help="öneri C fizibilitesini izle (logs/m1c.log)")
     ap.add_argument("--cg", action="store_true", help="öneri C gerçek karo (logs/m1c_gercek.log)")
+    ap.add_argument("--v2", action="store_true", help="iyileştirme turu (logs/m1c_v2.log)")
     ap.add_argument("--epochs", type=int, default=None)
     a = ap.parse_args()
     global LOG
-    if a.cg:
+    if a.v2:
+        LOG = ROOT / "logs/m1c_v2.log"
+        AB_PLAN[:] = ["D1_olcek", "D2_olcek_rot90"]
+        AB.update(on=True, epochs=a.epochs or 12)
+    elif a.cg:
         LOG = ROOT / "logs/m1c_gercek.log"
         AB_PLAN[:] = ["C4_ortalama", "C5_pencere"]
         AB.update(on=True, epochs=a.epochs or 20)

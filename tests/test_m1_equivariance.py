@@ -92,3 +92,7 @@ def test_relrot_sign():
                 pred = M.predict_deg(net(M.rotate_cw_90k(x, k), x))
                 exp = torch.full_like(pred, (-90.0 * k) % 360)
                 assert float(M.angular_error_deg(pred, exp).max()) < 6.0, (pool, k, pred)
+                # uydu saat yönünde 90k° döndürülünce (drone kuzey-yukarı) φ = +90k (eğitimdeki rot90 oynatması)
+                pred = M.predict_deg(net(x, M.rotate_cw_90k(x, k)))
+                exp = torch.full_like(pred, (90.0 * k) % 360)
+                assert float(M.angular_error_deg(pred, exp).max()) < 6.0, ("uydu", pool, k, pred)

@@ -4,6 +4,10 @@
   python scripts/55_m1c_train.py --only C1_1e-3
   python scripts/55_m1c_train.py --veri gercek       # sistemdeki gerçek karo (513 px) → m1c_gercek.json
 
+--veri gercek4 (iyileştirme turu): eğitim karesi başına 4 karo (54 --gercek --ek 3), karolar CPU belleğinde;
+D1 = + uydu ölçek oynatması (U(0,85; 1,18)), D2 = D1 + uydu 90°·k dönmesi (hedef φ − α + 90k: model mutlak
+kuzeye değil göreli hizaya dayanmak zorunda). --seeds ile tohum tekrarı (ad sonuna _s<k>).
+
 --veri gercek: karo = pairs_v1 pozitif karosu (ayak izi köşegeni + 400 m ≈ 3× merkez karesi, kayma ≤ 200 m),
 54_m1c_prep.py --gercek. Uydu karosu döndürülmez, maskelenmez, yeniden boyutlandırılmaz (513 px); renk
 oynatması drone ile aynı, ölçek oynatması yok. C4 = küresel ortalama (C2 ile aynı model), C5 = kayan pencere.
@@ -43,6 +47,10 @@ CONFIGS_GERCEK = {
     "C4_ortalama": (3e-3, T.Cfg("C4", aug="strong", early_stop=True), "mean"),
     "C5_pencere": (3e-3, T.Cfg("C5", aug="strong", early_stop=True), "window"),
 }
+CONFIGS_V2 = {
+    "D1_olcek": (3e-3, T.Cfg("D1", aug="strong", early_stop=True), "window", {"zoom": True, "rot90": False}),
+    "D2_olcek_rot90": (3e-3, T.Cfg("D2", aug="strong", early_stop=True), "window", {"zoom": True, "rot90": True}),
+}
 CONFIGS = {
     "C1_1e-3": (1e-3, T.Cfg("C1", aug="strong", early_stop=True)),
     "C2_3e-3": (3e-3, T.Cfg("C2", aug="strong", early_stop=True)),
@@ -50,8 +58,23 @@ CONFIGS = {
 }
 
 
-SAT = {"kolay": "data/m1/relsat_321", "gercek": "data/m1/relsat_real_513"}
-MODE = {"veri": "kolay"}
+SAT = {"kolay": "data/m1/relsat_321", "gercek": "data/m1/relsat_real_513", "gercek4": "data/m1/relsat_real4_513"}
+MODE = {"veri": "kolay", "zoom": False, "rot90": False}
+
+
+def get_sat(sat, j):
+    """Uydu karoları GPU'da ya da (büyük veri) CPU'da olabilir."""
+    return sat[j] if sat.device == j.device else sat[j.cpu()].to(j.device, non_blocking=True)
+
+
+def sat_zoom(x: torch.Tensor) -> torch.Tensor:
+    """Uydu karosu ölçek oynatması (döndürmesiz), (B,3,S,S) normalize edilmiş."""
+    B = len(x)
+    z = torch.exp(torch.empty(B, device=x.device).uniform_(math.log(0.85), math.log(1.18)))
+    theta = torch.zeros(B, 2, 3, device=x.device)
+    theta[:, 0, 0] = theta[:, 1, 1] = 1 / z
+    grid = F.affine_grid(theta, x.shape, align_corners=False)
+    return F.grid_sample(x, grid, mode="bilinear", padding_mode="zeros", align_corners=False)
 
 
 def make_sat(imgs_uint8, train: bool, cfg):
@@ -72,14 +95,17 @@ def make_sat(imgs_uint8, train: bool, cfg):
         x = (0.299 * x[:, :1] + 0.587 * x[:, 1:2] + 0.114 * x[:, 2:3]).expand(-1, 3, -1, -1)
     mean = torch.tensor(T.MEAN, device=dev).view(1, 3, 1, 1)
     std = torch.tensor(T.STD, device=dev).view(1, 3, 1, 1)
-    return (x - mean) / std
+    x = (x - mean) / std
+    return sat_zoom(x) if train and MODE["zoom"] else x
 
 
 def load(dev):
     lab = pd.read_csv("data/m1/labels_v2.csv", dtype={"region": str})
     rs = pd.read_csv(SAT[MODE["veri"]] + ".csv", dtype={"region": str})
     frames = torch.from_numpy(np.load("data/m1/frames_321.npy")).to(dev)
-    sat = torch.from_numpy(np.load(SAT[MODE["veri"]] + ".npy")).to(dev)
+    sat = torch.from_numpy(np.load(SAT[MODE["veri"]] + ".npy"))
+    if MODE["veri"] != "gercek4":       # gercek4 ≈ 10 GB → CPU'da kalır, yığın başına taşınır
+        sat = sat.to(dev)
     phi = torch.tensor(lab.phi_corr.to_numpy(), dtype=torch.float32, device=dev)
     lidx = torch.tensor(rs.lab_idx.to_numpy(), device=dev)
     rows = {r: torch.tensor(np.flatnonzero(rs.m1_role.to_numpy() == r), device=dev) for r in ("train", "val", "eval")}
@@ -95,7 +121,7 @@ def predict_all(net, D, srows, cfg) -> dict:
     for i in range(0, len(srows), 64):
         j = srows[i:i + 64]
         with torch.autocast("cuda", dtype=torch.bfloat16):
-            ds = net.describe_sat(make_sat(sat[j], False, cfg))
+            ds = net.describe_sat(make_sat(get_sat(sat, j), False, cfg))
             for a in T.EVAL_ANGLES:
                 al = torch.full((len(j),), a, device=frames.device)
                 lg = net.score(net.describe(T.make_batch(frames[lidx[j]], al, False, cfg)), ds).float()
@@ -141,10 +167,17 @@ def train(name, lr, cfg, D, epochs, seed=0, sat_pool="mean") -> dict:
         for i in range(spe):
             j = perm[i * BATCH:(i + 1) * BATCH]
             alpha = torch.rand(len(j), generator=g, device=dev) * 360.0
-            target = M.soft_targets(torch.remainder(phi[lidx[j]] - alpha, 360.0), sigma_bins=1.0)
+            sx = make_sat(get_sat(sat, j), True, cfg)
+            beta = torch.zeros_like(alpha)
+            if MODE["rot90"]:   # uydu saat yönünde 90k° → hedef φ − α + 90k
+                k = torch.randint(4, (len(j),), generator=g, device=dev)
+                for q in (1, 2, 3):
+                    if (k == q).any():
+                        sx[k == q] = M.rotate_cw_90k(sx[k == q], q)
+                beta = 90.0 * k.float()
+            target = M.soft_targets(torch.remainder(phi[lidx[j]] - alpha + beta, 360.0), sigma_bins=1.0)
             with torch.autocast("cuda", dtype=torch.bfloat16):
-                lg = net(T.make_batch(frames[lidx[j]], alpha, True, cfg),
-                         make_sat(sat[j], True, cfg)).float()
+                lg = net(T.make_batch(frames[lidx[j]], alpha, True, cfg), sx).float()
             loss = -(target * F.log_softmax(lg, 1)).sum(1).mean()
             opt.zero_grad(set_to_none=True)
             loss.backward()
@@ -173,7 +206,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--epochs", type=int, default=20)
     ap.add_argument("--only", nargs="*")
-    ap.add_argument("--veri", choices=["kolay", "gercek"], default="kolay")
+    ap.add_argument("--veri", choices=["kolay", "gercek", "gercek4"], default="kolay")
+    ap.add_argument("--seeds", type=int, nargs="*", default=[0])
     ap.add_argument("--batch", type=int, default=64)
     a = ap.parse_args()
     MODE["veri"] = a.veri
@@ -182,14 +216,22 @@ def main() -> int:
     torch.backends.cudnn.benchmark = True
     D = load("cuda")
     OUT.mkdir(parents=True, exist_ok=True)
-    out_p = OUT / ("m1c.json" if a.veri == "kolay" else "m1c_gercek.json")
-    configs = ({k: (lr, c, "mean") for k, (lr, c) in CONFIGS.items()} if a.veri == "kolay" else CONFIGS_GERCEK)
+    out_p = OUT / {"kolay": "m1c.json", "gercek": "m1c_gercek.json", "gercek4": "m1c_v2.json"}[a.veri]
+    if a.veri == "kolay":
+        configs = {k: (lr, c, "mean", {}) for k, (lr, c) in CONFIGS.items()}
+    elif a.veri == "gercek":
+        configs = {k: (lr, c, p, {}) for k, (lr, c, p) in CONFIGS_GERCEK.items()}
+    else:
+        configs = CONFIGS_V2
     res = json.loads(out_p.read_text(encoding="utf-8")) if out_p.exists() else {}
-    for name, (lr, cfg, pool) in configs.items():
-        if a.only and name not in a.only:
+    for (cname, (lr, cfg, pool, ex)), seed in [(c, sd) for c in configs.items() for sd in a.seeds]:
+        if a.only and cname not in a.only:
             continue
-        print(f"deney {name} başlıyor: lr {lr:g} {asdict(cfg)}", flush=True)
-        r = train(name, lr, cfg, D, a.epochs, sat_pool=pool)
+        name = cname if seed == 0 else f"{cname}_s{seed}"
+        MODE["zoom"], MODE["rot90"] = ex.get("zoom", False), ex.get("rot90", False)
+        print(f"deney {name} başlıyor: lr {lr:g} tohum {seed} {asdict(cfg)} {ex}", flush=True)
+        r = train(name, lr, cfg, D, a.epochs, seed=seed, sat_pool=pool)
+        r["extras"], r["seed"] = ex, seed
         res[name] = r
         v, c = r["val"], r["calib"]
         print(f"deney {name} bitti: en iyi epoch {r['best_epoch']}, val {v['median_err_all']:.1f}° (04; ≤10° "

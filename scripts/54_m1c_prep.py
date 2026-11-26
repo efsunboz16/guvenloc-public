@@ -2,6 +2,7 @@
 
   python scripts/54_m1c_prep.py
   python scripts/54_m1c_prep.py --gercek       # sistemdeki gerçek karo → data/m1/relsat_real_513.npy
+  python scripts/54_m1c_prep.py --gercek --ek 3   # eğitim karesi başına 1 + 3 karo → relsat_real4_513.npy
 
 --gercek: val/eval için pairs_v1 pozitif karosunun kendisi (tile_lat/lon, tile_size_m = ayak izi köşegeni
 + 400 m, merkez GT'den ≤ 200 m); eğitim için aynı karo + aynı kuralla 1 rastgele karo daha (karesi başına 2).
@@ -40,6 +41,7 @@ PER = {"train": 3, "val": 1, "eval": 1}
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--gercek", action="store_true")
+    ap.add_argument("--ek", type=int, default=1, help="--gercek: eğitim karesi başına ek rastgele karo")
     a = ap.parse_args()
     pcfg = yaml.safe_load(Path("configs/pairs.yaml").read_text(encoding="utf-8"))
     cam = pcfg["camera"]
@@ -51,11 +53,12 @@ def main() -> int:
     jobs = []
     size, out = SIZE, OUT
     if a.gercek:
-        size, out = 513, Path("data/m1/relsat_real_513.npy")
+        size = 513
+        out = Path("data/m1/relsat_real_513.npy" if a.ek == 1 else f"data/m1/relsat_real{a.ek + 1}_513.npy")
         off_max = float(pcfg["tile_offset_m"])
         for i, row in enumerate(lab.itertuples()):
             jobs.append((i, row.m1_role, row.region, row.tile_lat, row.tile_lon, row.tile_size_m, np.nan))
-            if row.m1_role == "train":
+            for _ in range(a.ek if row.m1_role == "train" else 0):
                 r, ang = off_max * math.sqrt(rng.uniform()), rng.uniform(0, 2 * math.pi)
                 lat, lon = offset_latlon(row.drone_lat, row.drone_lon, r * math.cos(ang), r * math.sin(ang))
                 jobs.append((i, row.m1_role, row.region, lat, lon, tile_size_for(row.agl_m, pcfg), r))
@@ -67,8 +70,14 @@ def main() -> int:
             jobs.append((i, row.m1_role, row.region, lat, lon, SIDE_X * fp, r))
     t0 = time.time()
     with ThreadPoolExecutor(8) as ex:
-        arr = np.stack(list(ex.map(lambda j: crop_square_m(regions[j[2]], j[3], j[4], j[5], size)[..., :3], jobs)))
-    np.save(out, arr)
+        arr = np.lib.format.open_memmap(out, mode="w+", dtype=np.uint8, shape=(len(jobs), size, size, 3))
+
+        def put(k):
+            j = jobs[k]
+            arr[k] = crop_square_m(regions[j[2]], j[3], j[4], j[5], size)[..., :3]
+
+        list(ex.map(put, range(len(jobs))))
+    arr.flush()
     pd.DataFrame(jobs, columns=["lab_idx", "m1_role", "region", "lat", "lon", "side_m", "off_m"]).to_csv(
         out.with_suffix(".csv"), index=False)
     print(f"{out}: {arr.shape} {arr.nbytes / 1e9:.2f} GB, {time.time() - t0:.0f} s; "
