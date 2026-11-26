@@ -2,6 +2,7 @@
 
 > Dal `faz2/m1`. Plan: MIMARI.md "Faz 2". Hedef (H1, ablasyon satırı 4): medyan yön hatası ≤ 10°, kare başına
 > RoMa v2 çağrısı ≤ 1,5, başarı@25 satır 2'den (calib 0,319, 4 çağrı) anlamlı biçimde düşük değil.
+> İşlemsel tanım ve ön-kayıt: karar F2-6, `configs/h1.yaml`. Modül 1 = göreli dönme (F2-5).
 
 ## Kararlar (26.11)
 
@@ -11,6 +12,13 @@
 | F2-2 | Doğrulama uçuşu (λ, öğrenme oranı seçimi) önceden konan kuralla seçilir: grubunu başka eğitim bölgesiyle paylaşmayan, ≥ 500 kareli adaylardan etiket gürültüsü (medyan \|d\|) en küçük olan → **04** | 08/09 aynı coğrafi grup (sızıntı); 10 yalnızca 144 kare; 01'in etiketi gürültülü (9,5°) |
 | F2-3 | Eğitim bölgeleri **01, 08, 09, 10** (2.760 kare); doğrulama 04 (738 kare) | Plan "6 eğitim bölgesi" diyordu; 07 dışlandığı için eğitim kümesi 5 bölge |
 | F2-4 | Eğitim/doğrulama etiketi **φ_corr = Phi1 + c(bölge, uçuş yönü)**; c = o yöndeki güvenilir karelerde RoMa yönü − Phi1 farkının medyanı (n ≥ 20, değilse c = 0). Calib (değerlendirme) etiketleri ham Phi1 | Etiket gürültüsü uçuş yönüne bağlı ve sistematik (2A); düzeltme bacaklar arası çok tutarlı (aşağıda). Plandan sapma: etiket yalnız Phi1 değil, Phi1 + RoMa'dan bölge/yön düzeltmesi |
+
+| F2-5 | **Modül 1 yeniden tanımlandı (öneri C):** "tek drone karesinden mutlak kuzey" yerine **drone karesi + kuzey-yukarı uydu karosu → göreli dönme** (`M.C8RelRot`). Çıktı (φ, 36 bölme), etiketler, C8 eşdeğer gövde aynı; karo çıkarımda zaten verilir | Mutlak kuzey bu veriyle öğrenilemedi (2C, 2C-v2: şans düzeyi); göreli dönme genelliyor (2C-C). Plandan sapma — danışmana bilgi notuyla iletildi |
+| F2-6 | **H1 ölçütleri değişmedi**, yalnız işlemselleştirildi ve test öncesi `configs/h1.yaml`'a ön-kaydedildi: (i) M1-C medyan yön hatası ≤ 10° (pozitif çiftler, 0°); (ii) doğru karoda kare başına ortalama RoMa çağrısı ≤ 1,5; (iii) başarı@25 farkı (satır 4 − satır 2) için 50 karelik blok bootstrap %95 GA alt sınırı > −0,03 (eşdeğersizlik payı 3 puan). Üçü birden | Modül değişti diye başarı ölçütünü değiştirmek hedefi sonuca göre kaydırmak olurdu. "Anlamlı biçimde düşük değil" McNemar p ≥ 0,05 olarak okunursa düşük güç ödüllendirilir → açık bir pay (δ = 0,03) ile eşdeğersizlik testi |
+| F2-7 | Ana tabloda **satır 4 = 4d** (M1-C ardışık, en çok 2 dönme; H1 bu satırda sınanır); **4c** (kabul edilince dur, en çok 4) ikincil çalışma noktası olarak aynı tabloda | 4d önerideki çağrı bütçesine uyan politika; 4c "aynı başarı, daha az çağrı" sonucunu gösterir. İkisi de calib görülmeden tanımlandı, eşikleri eğitimden |
+| F2-8 | "Tek dik bakışlı kareden mutlak kuzey bu veriyle (4 eğitim uçuşu) öğrenilemiyor" bulgusu raporda H1 altında **olumsuz sonuç** olarak yer alır (2C, 2C-v2 tabloları, şans düzeyi karşılaştırması) | Olumsuz sonuç bilgi taşıyor ve C'ye geçişin gerekçesi |
+
+Kararlar F2-5…F2-8 kullanıcı onayıyla alındı (26.11); danışmana not ile bildirildi.
 
 ## 2A. Etiketler ve etiket gürültüsü (`scripts/50_m1_labels.py`)
 
@@ -233,3 +241,11 @@ McNemar (başarı@25, pozitifler, Holm): 4a > 1 (79 vs 37, p = 2,4e-4); 4d > 1 (
 Sonuç: M1-C, RoMa çağrı sayısı–başarı eğrisini satır 1–2 arasında içeriden geçiriyor: aynı başarıda ~%40
 daha az çağrı (4c) ya da hedef bütçede (≤ 1,5 çağrı) satır 1'e göre anlamlı kazanç (4d). Satır 2'nin
 başarısını ≤ 1,5 çağrıda yakalamak için M1-C'nin < 45° oranının (%74) artması gerek.
+
+### 2D (devam). H1 ön-kaydının calib'de kuru denemesi (C5 modeli)
+
+`configs/h1.yaml` ile `scripts/56_m1c_roma.py`: başarı@25 farkı (satır − 2), blok bootstrap %95 GA —
+4c: −0,003 [−0,008; +0,005] (satır 2 ile eşdeğer, pay içinde); 4d: −0,037 [−0,051; −0,023].
+Satır 4d'de: (i) yön hatası 11,9° ✗; (ii) 1,48 çağrı ✓; (iii) GA alt sınırı −0,051 ✗ → **H1 calib'de sağlanmıyor**.
+4d'nin açığı M1-C'nin < 45° oranından (%74) geliyor; iyileştirme turu (karesi başına 4 karo, uydu ölçek/90°
+oynatması, 3 tohum) bunu hedefliyor. Test kararı Faz 6'da, bu ölçütlerle.

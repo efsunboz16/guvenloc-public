@@ -72,7 +72,9 @@ def tiles_for(pairs: pd.DataFrame, path: Path) -> np.ndarray:
 @torch.no_grad()
 def m1_rot_probs(model: str, pairs: pd.DataFrame, tiles: np.ndarray) -> np.ndarray:
     """(N, 4) dönme olasılıkları (ROTS sırasıyla) + (N,) φ̂."""
-    _lr, cfg, pool = C55.CONFIGS_GERCEK[model]
+    import re
+    base = re.sub(r"_s\d+$", "", model)          # tohum eki (55_m1c_train.py --seeds)
+    _lr, cfg, pool = (C55.CONFIGS_GERCEK[base] if base in C55.CONFIGS_GERCEK else C55.CONFIGS_V2[base][:3])
     C55.MODE["veri"] = "gercek"
     net = M.C8RelRot(sat_pool=pool).cuda()
     net.load_state_dict(torch.load(f"cache/models/m1c_{model}.pt", map_location="cuda")["state_dict"])
@@ -179,10 +181,27 @@ def main() -> int:
     comps = [("4a", "1"), ("4d", "1"), ("4d", "2"), ("4c", "2"), ("4a", "2")]
     tests = [S.mcnemar(piv[i].to_numpy(bool), piv[j].to_numpy(bool)) for i, j in comps]
     padj = S.holm([t["p"] for t in tests])
+    h1 = yaml.safe_load(Path("configs/h1.yaml").read_text(encoding="utf-8"))
+    ok = allr[allr.is_pos].assign(ok=lambda x: x.accept & (x.err_m <= 25))
+    okp = ok.pivot(index="pair_id", columns="row", values="ok").astype(float)
+    blocks = ok.drop_duplicates("pair_id").set_index("pair_id").loc[okp.index, "block"].to_numpy()
+    diffs = {}
+    for r4 in ("4c", "4d"):
+        dv = (okp[r4] - okp[str(h1["reference_row"])]).to_numpy()
+        diffs[r4] = S.cluster_bootstrap_ci(lambda i, dv=dv: dv[i].mean(), blocks,
+                                           B=int(h1["bootstrap"]["B"]) if not a.quick else 200, seed=seed)
     pos = pairs[pairs.label == "pos"]
     m1_err = M.angular_error_deg(torch.tensor(phi_hat[pairs.label.to_numpy() == "pos"]),
                                  torch.tensor(pos.gt_heading.to_numpy() % 360, dtype=torch.float32)).numpy()
 
+    crit = h1["criteria"]
+    r4 = h1["row"]
+    h1res = {"heading_median_deg": float(np.median(m1_err)), "calls_per_pos_frame": summ[r4]["calls_mean_pos"],
+             "diff_vs_ref": diffs[r4][0], "diff_ci": [diffs[r4][1], diffs[r4][2]]}
+    h1res["i"] = h1res["heading_median_deg"] <= crit["heading_median_deg_max"]
+    h1res["ii"] = h1res["calls_per_pos_frame"] <= crit["calls_per_pos_frame_max"]
+    h1res["iii"] = diffs[r4][1] > -crit["noninferiority_margin"]
+    h1res["H1"] = bool(h1res["i"] and h1res["ii"] and h1res["iii"])
     names = {"1": "RoMa (0°)", "2": "4 yön + en çok inlier", "3": "4 yön + en düşük entropi",
              "4a": "M1-C tek çağrı", "4b": "M1-C ilk 2 dönme", "4c": "M1-C ardışık (τ₂ ile dur)",
              "4d": "M1-C ardışık, en çok 2"}
@@ -203,6 +222,14 @@ def main() -> int:
               "| Karşılaştırma | yalnız ilki | yalnız ikincisi | p | p (Holm) |", "|---|---|---|---|---|"]
     for (i, j), t, pa in zip(comps, tests, padj, strict=True):
         lines.append(f"| {i} vs {j} | {t['a_only']} | {t['b_only']} | {t['p']:.2e} | {pa:.2e} |")
+    lines += ["", f"Başarı@25 farkı (satır − {h1['reference_row']}), blok bootstrap %95 GA: "
+              + "; ".join(f"{k}: {v[0]:+.3f} [{v[1]:+.3f}, {v[2]:+.3f}]" for k, v in diffs.items()), "",
+              (f"H1 ön-kaydı (`configs/h1.yaml`, satır {r4}): (i) medyan yön hatası "
+              f"{h1res['heading_median_deg']:.1f}° ≤ {crit['heading_median_deg_max']}° → {'✓' if h1res['i'] else '✗'}; "
+              f"(ii) çağrı/pozitif kare {h1res['calls_per_pos_frame']:.2f} ≤ {crit['calls_per_pos_frame_max']} → "
+              f"{'✓' if h1res['ii'] else '✗'}; (iii) GA alt sınırı {diffs[r4][1]:+.3f} > "
+              f"−{crit['noninferiority_margin']} → {'✓' if h1res['iii'] else '✗'}. "
+              f"**H1 {'sağlandı' if h1res['H1'] else 'sağlanmadı'}** (calib; karar testte verilir).")]
     lines += ["", "Bölge kırılımı (başarı@25 · çağrı/kare):", "", "| bölge | " + " | ".join(names) + " |",
               "|---|" + "---|" * len(names)]
     for reg, gg in allr[allr.is_pos].groupby("region"):
@@ -217,7 +244,8 @@ def main() -> int:
     (OUT / f"roma_row4_{tag}.json").write_text(json.dumps(
         {"taus": taus, "taus_baseline": taus_b, "summary": summ,
          "mcnemar": [{"a": i, "b": j, **t, "p_holm": float(pa)} for (i, j), t, pa in zip(comps, tests, padj, strict=True)],
-         "m1_median_err": float(np.median(m1_err)), "m1_acc45": float((m1_err <= 45).mean())},
+         "m1_median_err": float(np.median(m1_err)), "m1_acc45": float((m1_err <= 45).mean()),
+         "diff_vs_ref": {k: list(v) for k, v in diffs.items()}, "h1": h1res},
         indent=2, ensure_ascii=False, default=float), encoding="utf-8")
     print("\n".join(lines))
     for row in ("4a", "4b", "4c", "4d"):

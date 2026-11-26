@@ -1,0 +1,16 @@
+# H1 ön-kaydı (karar F2-6, 26.11.2026) — test bölgelerine (02, 03, 06) dokunmadan ÖNCE sabitlendi.
+# Ölçütler MIMARI.md "Hedef 2 / H1" ile aynı; yalnız işlemselleştirildi. Değiştirmek yeni karar ister.
+# scripts/56_m1c_roma.py bu dosyayı okuyup calib/test'te karar verir.
+version: h1_v1
+module: M1-C            # drone karesi + uydu karosu → göreli dönme (karar F2-5)
+row: 4d                 # H1 satır 4 = "M1-C ardışık, en çok 2 dönme" (karar F2-7); 4c ikincil çalışma noktası
+reference_row: 2        # dört yönlü yöntem (4 yön + en çok inlier)
+criteria:
+  heading_median_deg_max: 10.0     # (i) M1-C medyan yön hatası, pozitif çiftler, kare olduğu gibi (0°)
+  calls_per_pos_frame_max: 1.5     # (ii) doğru karoda (pozitif) kare başına ortalama RoMa çağrısı
+  noninferiority_margin: 0.03      # (iii) başarı@25 farkı (satır 4 − satır 2): blok bootstrap %95 GA alt sınırı > −0,03
+bootstrap:
+  block_frames: 50                 # 50 karelik uçuş blokları (Faz 1 ile aynı)
+  B: 2000
+alpha_far_neg: 0.05                # eşikler yalnız eğitim negatiflerinden
+model_selection: val 04 (12 açı medyan yön hatası); calib yalnız raporlama, test Faz 6

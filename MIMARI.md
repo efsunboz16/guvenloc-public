@@ -353,6 +353,10 @@ class Matcher:
 ## Faz 2 — Modül 1: Kuzey kanonikleştirici (İP2, Ay 2–4)
 
 **Hedef 2 / H1:** medyan yön hatası ≤ 10°; kare başına RoMa v2 çağrısı ≤ 1,5; başarı@25 m dört yönlü yöntemden anlamlı biçimde düşük değil.
+> **Güncelleme (26.11.2026, kararlar F2-5…F2-8, `docs/faz2_m1.md`):** Modül 1 tek kareden mutlak kuzey yerine
+> drone karesi + uydu karosu → göreli dönme olarak yeniden tanımlandı (mutlak kuzey bu veriyle öğrenilemedi —
+> olumsuz bulgu raporlanır). H1 ölçütleri aynı kaldı; işlemsel tanımı `configs/h1.yaml` (eşdeğersizlik payı
+> 3 puan, satır 4 = "M1-C ardışık, en çok 2 dönme").
 **Sorumlu:** Efsun. İkinci sorumlu: Üye B. **Ablasyon satırı 4.** Çıktı: `v0.1`.
 
 ### 2A. Etiketler (Hafta 1)
