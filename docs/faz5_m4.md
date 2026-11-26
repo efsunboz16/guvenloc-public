@@ -45,7 +45,8 @@ sıçrıyor (uydu↔GPS 378 m), 08'de 57 m: bu bölgelerde tek kare tepeleri gü
   Bootstrap alt sınırı 0,198 eşiğe çok yakın: azalma 05'in yanlış tepelerinden geliyor, bloklar arası değişken.
 - **Kazancın kaynağı drone↔drone odometrisi:** sabit hız (7-cv) neredeyse hiç kazanç vermiyor (0,067, p = 0,94).
   M3 kapısı (7 vs 7-noupd) küçük ama tutarlı katkı veriyor (0,376 vs 0,334).
-- **Zayıf yanlar:** (1) yarıçap büyük (medyan 173 m, tek kare q̂σ̂'nin medyanı ≈ 120 m); (2) κ bölgeler arası taşınmıyor
+- **Yarıçap:** filtre medyanı 173 m; tek kare q̂σ̂ medyanı 277 m (kabul edilenlerde 206 m) → filtre bölgesi daha dar.
+- **Zayıf yanlar:** (1) yarıçap yine de geniş (173 m); (2) κ bölgeler arası taşınmıyor
   (11 → 05 kapsama 0,789), H3'teki FAR kaymasının aynısı; (3) GT gürültü tabanı (F5-2) yüzünden kabul edilmiş karelerde
   kazanç sınırlı: başarı@25 yalnız 0,235 → 0,298.
 
