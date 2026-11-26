@@ -345,3 +345,5 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-26T15:53:48,56_m1c_roma.py,a5ff25e7d6c4,0,a231e75,calib,row4e_success@25,0.26999,model=D2_olcek_rot90_s2
 2026-11-26T15:53:48,56_m1c_roma.py,a5ff25e7d6c4,0,a231e75,calib,row4e_far_neg,0.06192,model=D2_olcek_rot90_s2
 2026-11-26T15:53:48,56_m1c_roma.py,a5ff25e7d6c4,0,a231e75,calib,row4e_calls_mean,2.01743,model=D2_olcek_rot90_s2
+2026-11-26T15:59:33,57_m1c_2e.py,bbfb10f88b8d,0,f80c067,calib,m1c_ms_bf16,5.497,model=D2_olcek_rot90_s2
+2026-11-26T16:01:50,57_m1c_2e.py,bbfb10f88b8d,0,f80c067,calib,m1c_ms_bf16,5.766,model=D2_olcek_rot90_s2

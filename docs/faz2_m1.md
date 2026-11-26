@@ -349,3 +349,62 @@ bulgular:
 (a) aynı maliyette (1 çağrı) satır 1'den anlamlı kazanç (4a, +3,4 puan);
 (b) satır 2 ile eşdeğer başarıda çağrıyı 4'ten 2,35'e indirme (4c);
 (c) ≤ 1,5 çağrıda kusursuz kestiricinin tavanına yakınlık (4e/4d ile 4k karşılaştırması).
+
+## 2E. Değerlendirme: ara açı eşdeğerliği ve hız — `scripts/57_m1c_2e.py`
+
+Çıktı `results/faz2/m1/m1c_2e.md`. v0.1 modeli `D2_olcek_rot90_s2` (F2-9); eşdeğerlik 3 tohumda ölçüldü.
+
+**Ara açı eşdeğerliği (2B'de verilen söz).** Calib pozitiflerinde drone karesi saat yönünde α döndürüldü.
+Tahmin tam olarak −α kaymalı; ölçülen sapma |φ̂(α) − (φ̂(0) − α)|, 3 tohum:
+
+| α | medyan sapma | > 5° | > 45° (çeyrek atlaması) | v0.1 yön hatası medyanı |
+|---|---|---|---|---|
+| 90°, 180°, 270° | 0,00° | %0 | %0,0–0,6 | 10,1–10,2° |
+| 45°, 135°, 315° | 1,9–2,4° | %22–28 | %8–10 | 10,2° |
+| 10° | 3,2–3,6° | %31–35 | %9 | 10,9° |
+| 20°, 30°, 200° | 4,6–5,0° | %46–50 | %10–12 | 12,2–12,6° |
+
+- 90°'nin katlarında tam (yapı gereği, 2B ile aynı). 45°'nin katlarında yaklaşık: C8 grubunun elemanı ama
+  piksel ızgarasında tam değil. Grup dışı açılarda (20°, 30°) medyan sapma ≈ 5°, yön hatası medyanı
+  10,2° → 12,6°.
+- **Kuyruk önemli:** karelerin ≈ %9–12'sinde küçük bir dönme bile (10°) tahmini > 45° atlatıyor. Bunlar
+  dağılımı çok tepeli, yani kararsız kareler. 2D'deki yanlış çeyrek kuyruğunun (%25) bir kısmı bu
+  kararsızlık; tek bir dönmüş kopyadan değil, birkaç açının ortalamasından karar vermek (test zamanı
+  dönme ortalaması) bu kareleri yumuşatabilir. Denenmedi; Faz 2 sonrası aday.
+- Gerçek çalışmada drone yönü keyfi olduğundan ilgili sayı ara açılardaki hatadır. Calib'in kendi yönleri
+  zaten keyfi; H1 (i)'deki 10,1° bunu içeriyor (0° = kare olduğu gibi).
+
+**Hız (RTX 3090, tek kare, ısınma sonrası 100 tekrar medyanı).**
+
+| hassasiyet | M1-C toplam | karo gövdesi (513 px) | kare gövdesi (257 px) | p90 | ek bellek |
+|---|---|---|---|---|---|
+| bf16 | **5,8 ms** | 3,4 ms | 1,9 ms | 6,6 ms | 0,10 GB |
+| fp32 | 12,5 ms | 9,6 ms | 2,4 ms | 12,7 ms | 0,27 GB |
+
+Ağırlıklar 4 MB. RoMa v2 `base` çağrısı 257 ms (Faz 1D), yani M1-C bir RoMa çağrısının ≈ %2'si.
+
+**Kare başına beklenen süre** (calib çağrı sayıları × 257 ms + M1-C):
+
+| satır | başarı@25 | pozitif kare | negatif kare | satır 2'ye göre hız (pozitif) |
+|---|---|---|---|---|
+| 1 RoMa 0° | 0,214 | 257 ms | 257 ms | ×4,0 |
+| 2 4 yön | 0,319 | 1.028 ms | 1.028 ms | ×1 |
+| 4a M1-C tek çağrı | 0,247 | 263 ms | 263 ms | ×3,9 |
+| 4c M1-C ardışık | 0,310 | 610 ms | 1.004 ms | **×1,7** |
+| 4d M1-C en çok 2 | 0,274 | 388 ms | 509 ms | ×2,6 |
+| 4e M1-C güvene bağlı | 0,270 | 365 ms | 607 ms | ×2,8 |
+
+Doğru karoda (çalışmadaki çoğunluk durumu), 4c satır 2 ile aynı başarıyı 1,7 kat hızlı veriyor. 4a, satır 1
+ile aynı sürede +3,3 puan veriyor.
+
+## Faz 2 özeti
+
+- **Mutlak kuzey (plan):** öğrenilemedi, şans düzeyi (2C, 2C-v2). Olumsuz sonuç olarak raporlanır (F2-8).
+- **M1-C, göreli dönme (F2-5):** calib medyan yön hatası 10,1 ± 0,2°, < 45° %75; 5,8 ms, 4 MB.
+- **H1 (ön-kayıt v2, satır 4e):** calib'de (i) eşikte, (ii) ✓, (iii) ✗. Kahin tavanı (4k) gösteriyor ki
+  (iii) RoMa v2'nin dönmeye dayanıklılığı nedeniyle hiçbir dönme kestiricisiyle ≤ 1,5 çağrıda
+  sağlanamıyor. Test kararı Faz 6'da, bu ölçütlerle.
+- **Kullanılabilir katkı:** aynı maliyette satır 1'e göre +3,3 puan (4a); satır 2 ile eşdeğer başarı
+  1,7 kat hızlı (4c).
+- MIMARI.md "Faz 2 bitti sayılır" koşulu (Hedef 2 ölçütleri) calib'de sağlanmıyor. Faz 2, H1 olumsuz ve
+  açıklanmış olarak kapatılabilir; v0.1 = `D2_olcek_rot90_s2` + satır 4c/4e politikaları.
