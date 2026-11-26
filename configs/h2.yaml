@@ -1,0 +1,26 @@
+# H2 ön-kaydı (karar F3-3, 26.11.2026) — hacim skorunun calib/test sonuçları görülmeden ÖNCE sabitlendi.
+# Ölçüt MIMARI.md "Hedef 3 / H2" ile aynı; yalnız işlemselleştirildi. Değiştirmek yeni karar ister.
+# scripts/61_m2_score.py bu dosyayı okur. Test bölgeleri (02, 03, 06) Faz 6'da.
+version: h2_v2           # F3-8 (26.11.2026): ortak etiket; h2_v1 eşleme kuralı tanımsızdı (F3-5)
+rows:
+  baseline: 4a            # M1-C en olası dönme, tek RoMa çağrısı; konum = RANSAC homografisi, skor = inlier sayısı
+  method: 5a              # aynı eşleşmeler; konum = hacim tepesi, skor = S (lojistik, 3B metrikleri)
+  secondary: [2v]         # 4 dönme, en yüksek skorlu dönme (satır 2'nin M2'li eşi) — ikincil, raporlanır
+correct: pos ∧ hata ≤ 25 m, hata ORTAK konum kestiriminden (satırın seçtiği dönmede RANSAC homografisi merkezi)
+# h2_v1: "her yöntem kendi konum kestirimiyle" → tavanlar farklıydı, eşleme kurulamadı (F3-5).
+# H2 ret skorunu sınar; hacim tepesinin konum başarısı ayrı (bilgi) satırında raporlanır: 5a-loc.
+false_accept: kabul ∧ ¬doğru  (negatif çiftler + 25 m dışı pozitifler; tüm çiftler üzerinden oran)
+threshold_matching:
+  baseline_tau: train FAR-neg ≤ 0.05 (satır 4a eşiği, Faz 2 ile aynı)
+  method_tau: kalibrasyon bölgelerinde (05, 11) başarı@25'i satır 4a'nınkine eşit ya da büyük yapan en büyük S eşiği
+  fallback: hedef yöntemin tavanını aşarsa (yalnız 2v'de olabilir) hedef = tavan, satır işaretlenir
+criteria:                  # testte; calib yalnız kuru deneme
+  far_mcnemar_alpha: 0.05  # (i) yanlış kabul göstergesi, çift başına eşleştirilmiş McNemar, satır 5a < 4a, p < 0.05
+  auroc_diff_ci_low: 0.0   # (ii) AUROC(5a) − AUROC(4a), 50 karelik blok bootstrap %95 GA alt sınırı > 0
+bootstrap: {block_frames: 50, B: 2000}
+score_model:               # S; yalnız eğitim bölmesi (01, 04, 08, 09, 10), 4 dönmenin hepsi örnek
+  kind: logistic_l2
+  C: 1.0
+  features: [log1p_support, support_frac, rho, spread_m, entropy_bits, log1p_sum_c, frac_dropped]
+  target: doğru, hacim tepesiyle (h2_v1'deki gibi; h2_v2'de değiştirilmedi, F3-8)
+ablation_single: [log1p_support, rho, entropy_bits]   # tek-metrik skorlar (MIMARI 3B), alt satır
