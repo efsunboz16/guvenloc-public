@@ -186,3 +186,24 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-26T02:41:36,52_m1_train.py,49fd69844ed7,0,04bcc06,calib,m1_median_err_0,50.8724,"±1.4977 seeds=[0, 1, 2] lr=0.003 epochs=60"
 2026-11-26T02:41:36,52_m1_train.py,49fd69844ed7,0,04bcc06,calib,m1_acc10_0,0.1123,"±0.0031 seeds=[0, 1, 2] lr=0.003 epochs=60"
 2026-11-26T02:41:36,52_m1_train.py,49fd69844ed7,0,04bcc06,calib,m1_median_err_all,51.0753,"±2.1803 seeds=[0, 1, 2] lr=0.003 epochs=60"
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4a_success@25,0.25306,model=C5_pencere
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4a_far_neg,0.06732,model=C5_pencere
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4a_calls_mean,1.0,model=C5_pencere
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4b_success@25,0.28316,model=C5_pencere
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4b_far_neg,0.06634,model=C5_pencere
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4b_calls_mean,2.0,model=C5_pencere
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4c_success@25,0.31609,model=C5_pencere
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4c_far_neg,0.05504,model=C5_pencere
+2026-11-26T13:10:28,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4c_calls_mean,3.35152,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4a_success@25,0.25306,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4a_far_neg,0.06732,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4a_calls_mean,1.0,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4b_success@25,0.28316,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4b_far_neg,0.06634,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4b_calls_mean,2.0,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4c_success@25,0.31609,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4c_far_neg,0.05504,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4c_calls_mean,3.35152,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4d_success@25,0.28222,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4d_far_neg,0.06634,model=C5_pencere
+2026-11-26T13:11:16,56_m1c_roma.py,a5ff25e7d6c4,0,6af6446,calib,row4d_calls_mean,1.7918,model=C5_pencere

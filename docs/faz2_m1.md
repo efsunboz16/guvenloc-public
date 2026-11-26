@@ -196,3 +196,40 @@ yetmedi). Uydu karosu döndürülmez/maskelenmez; renk oynatması var, ölçek o
 
 Sonraki iyileştirme adayları: eğitimde daha çok karo (karesi başına 2 → 5+), tohum ortalaması, uydu tarafına
 ölçek oynatması, pencere boyutunu bölge irtifasına göre ayarlamak (karo/ayak izi oranı 2,6–3,7).
+
+## 2D. M1-C → RoMa bağlama (satır 4), önbellekten simülasyon — `scripts/56_m1c_roma.py`
+
+Yeni RoMa çağrısı yok: Faz 1F'de her calib çifti × 4 dönme için çıkarılan RoMa özellikleri
+(`results/faz1/baselines/feats_v1_calib_px5.csv`) kullanıldı. M1-C (C5 kayan pencere, gerçek karo) her calib çifti
+için (1.063 pozitif + 2.035 zor/kolay negatif; negatif karolar `data/m1/calib_pairs_513.npy`) 4 dönmenin
+olasılığını verir (φ ∈ [r − 45°, r + 45°) kütlesi; önbellekte r = drone'a saat yönünde dönme). Satır 4a/4b/4d
+eşikleri eğitim negatiflerinden (FAR-neg ≤ 0,05; 4a: 4 dönme havuzu → τ = 709, 4b/4d: komşu dönme çiftlerinin
+maksimumu → τ = 1.055); 4c satır 2 eşiğini (1.462) kullanır. Calib'de ayar yapılmadı. GA %95, 1.000 tekrar.
+
+| satır | yöntem | RoMa çağrısı/kare (poz/neg) | başarı@25 [GA] | başarı@50 | FAR-neg |
+|---|---|---|---|---|---|
+| 1 | RoMa 0° | 1 | 0,214 [0,176; 0,252] | 0,412 | 0,068 |
+| 2 | 4 yön + en çok inlier | 4 | **0,319** [0,280; 0,361] | 0,575 | 0,055 |
+| 3 | 4 yön + en düşük entropi | 4 | 0,163 | 0,313 | 0,063 |
+| 4a | M1-C tek çağrı | 1 | 0,253 [0,208; 0,301] | 0,466 | 0,067 |
+| 4b | M1-C ilk 2 dönme | 2 | 0,283 | 0,516 | 0,066 |
+| **4c** | M1-C ardışık, τ₂ geçince dur | 3,35 (2,32/3,89) | **0,316** [0,275; 0,361] | 0,572 | 0,055 |
+| **4d** | M1-C ardışık, en çok 2 | **1,79 (1,48/1,96)** | 0,282 [0,239; 0,331] | 0,513 | 0,066 |
+
+McNemar (başarı@25, pozitifler, Holm): 4a > 1 (79 vs 37, p = 2,4e-4); 4d > 1 (103 vs 30, p = 5,8e-10);
+4d < 2 (9 vs 48, p = 4,6e-7); **4c ≈ 2 (5 vs 8, p = 0,58)**; 4a < 2 (p = 5e-14).
+
+- **Aynı başarı, daha az çağrı (4c):** satır 2 ile istatistiksel olarak aynı başarı; pozitif karede 4 → 2,32
+  çağrı (−%42). Reddedilen kareler (negatiflerin çoğu, pozitiflerin ~%36'sı) yine 4 çağrı yapıyor → genel
+  ortalama 3,35. Çalışma sırasında karelerin çoğu pozitif (doğru karo) olduğundan gerçek kazanç 2,3'e yakın.
+- **Bütçe ≤ 2 (4d):** pozitifte 1,48 çağrı (öneri hedefi ≤ 1,5), başarı 0,282: satır 1'den +6,8 puan,
+  satır 2'den −3,7 puan.
+- **Tek çağrı (4a):** satır 1'den anlamlı iyi (+3,9 puan), aynı maliyet.
+- Bölgeler tutarlı (05 ve 11'de aynı sıra). FAR-neg: eğitimde seçilen eşikler calib'de 0,055–0,068 (satır 1
+  ve 2'deki kaymayla aynı düzey).
+- **Henüz ölçülmedi:** M1-C'nin kendi süresi (513 px karo + 257 px kare, 1 M parametre) — RoMa çağrısına
+  göre küçük olmalı, 2E'de ölçülecek. Tek tohum.
+
+Sonuç: M1-C, RoMa çağrı sayısı–başarı eğrisini satır 1–2 arasında içeriden geçiriyor: aynı başarıda ~%40
+daha az çağrı (4c) ya da hedef bütçede (≤ 1,5 çağrı) satır 1'e göre anlamlı kazanç (4d). Satır 2'nin
+başarısını ≤ 1,5 çağrıda yakalamak için M1-C'nin < 45° oranının (%74) artması gerek.
