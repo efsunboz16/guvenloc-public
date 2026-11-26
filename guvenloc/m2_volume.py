@@ -106,8 +106,10 @@ def splat(mc: torch.Tensor, w: torch.Tensor, sig: torch.Tensor, ny: int, nx: int
 
 @torch.no_grad()
 def build_volume(u, v, c, Sigma_B, Sigma_A, scale_s: float, drone_wh, tile_px: int, mpp: float,
-                 cfg: VolumeCfg = VolumeCfg(), theta_center: float | None = None, device="cuda") -> dict:
-    """Ham (normalize edilmemiş) ince hacim + ızgara bilgisi. Girdi numpy (önbellek alanları)."""
+                 cfg: VolumeCfg = VolumeCfg(), theta_center: float | None = None, device="cuda",
+                 density: bool = False) -> dict:
+    """Ham (normalize edilmemiş) ince hacim + ızgara bilgisi. Girdi numpy (önbellek alanları).
+    density=True: aynı ızgarada ağırlıksız (c = 1) oy hacmi de döner ("dens"; 3D inceltici girdisi)."""
     dev = torch.device(device)
     u_t = torch.as_tensor(np.asarray(u, np.float32), device=dev)
     v_t = torch.as_tensor(np.asarray(v, np.float32), device=dev)
@@ -119,12 +121,13 @@ def build_volume(u, v, c, Sigma_B, Sigma_A, scale_s: float, drone_wh, tile_px: i
     n = math.ceil(tile_px / cell_px)
     u0 = torch.tensor([(drone_wh[0] - 1) / 2, (drone_wh[1] - 1) / 2], device=dev)
 
-    def vol_for(thetas, sigma0_m):
+    def vol_for(thetas, sigma0_m, w=None):
+        w = c_t if w is None else w
         sig = torch.sqrt(var_px / cell_px ** 2 + (sigma0_m / cfg.cell_m) ** 2)
         keep = sig <= cfg.sigma_cap_m / cfg.cell_m
         # karo pikseli p (merkez tamsayı) → hücre koordinatı: hücre j = [j·cell_px − ½, (j+1)·cell_px − ½)
         mc = (candidates(u_t[keep], v_t[keep], scale_s, u0, thetas) + 0.5) / cell_px - 0.5
-        return splat(mc, c_t[keep], sig[keep], n, n, cfg.n_bins), float(1 - keep.float().mean())
+        return splat(mc, w[keep], sig[keep], n, n, cfg.n_bins), float(1 - keep.float().mean())
 
     if theta_center is None:
         th_c = torch.arange(0, 360, cfg.coarse_step_deg, device=dev)
@@ -135,8 +138,23 @@ def build_volume(u, v, c, Sigma_B, Sigma_A, scale_s: float, drone_wh, tile_px: i
         t0, half = float(theta_center), cfg.m1_half_deg
     th_f = t0 + torch.arange(-half, half + 1e-6, cfg.fine_step_deg, device=dev)
     vf, dropped = vol_for(th_f, cfg.sigma0_m)
-    return {"vol": vf, "thetas": th_f % 360, "cell_px": cell_px, "n": n, "mpp": mpp, "cfg": cfg,
-            "sum_c": float(c_t.sum()), "n_matches": len(c_t), "frac_dropped": dropped}
+    out = {"vol": vf, "thetas": th_f % 360, "cell_px": cell_px, "n": n, "mpp": mpp, "cfg": cfg,
+           "sum_c": float(c_t.sum()), "n_matches": len(c_t), "frac_dropped": dropped}
+    if density:
+        out["dens"] = vol_for(th_f, cfg.sigma0_m, torch.ones_like(c_t))[0]
+    return out
+
+
+def crop(vol: torch.Tensor, cy: int, cx: int, half: int) -> torch.Tensor:
+    """(T, Y, X) → (T, 2·half, 2·half), merkez hücre (cy, cx) = indeks (half, half); taşan kısım 0."""
+    T, ny, nx = vol.shape
+    out = vol.new_zeros(T, 2 * half, 2 * half)
+    y0, x0 = cy - half, cx - half
+    ys, xs = max(0, y0), max(0, x0)
+    ye, xe = min(ny, y0 + 2 * half), min(nx, x0 + 2 * half)
+    if ye > ys and xe > xs:
+        out[:, ys - y0:ye - y0, xs - x0:xe - x0] = vol[:, ys:ye, xs:xe]
+    return out
 
 
 def _quad(a_m, a_0, a_p) -> float:

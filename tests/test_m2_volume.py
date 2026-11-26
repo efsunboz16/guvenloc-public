@@ -57,3 +57,11 @@ def test_splat_conserves_mass():
     mc = torch.tensor([[[20.3, 30.7], [50.0, 50.0]]], device=DEV)
     vol = V.splat(mc, torch.tensor([1.0, 2.0], device=DEV), torch.tensor([1.5, 3.0], device=DEV), 100, 100, 4)
     assert abs(float(vol.sum()) - 3.0) < 1e-3
+
+
+def test_crop_centers_and_pads():
+    vol = torch.arange(2 * 10 * 10, dtype=torch.float32).view(2, 10, 10)
+    c = V.crop(vol, 1, 8, 3)
+    assert c.shape == (2, 6, 6)
+    assert float(c[0, 3, 3]) == float(vol[0, 1, 8])
+    assert float(c[0, 0, 0]) == 0.0          # y < 0 dolgusu
