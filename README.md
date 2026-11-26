@@ -58,6 +58,17 @@ Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
   Ayrıntı ve komutlar: [docs/faz1_tekrarlama.md](docs/faz1_tekrarlama.md),
   [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
 
+- **Faz 2** (`v0.1`): M1-C göreli dönme (C8 eşdeğer, birleşim + TTA). Ayrıntı: [docs/faz2_m1.md](docs/faz2_m1.md).
+- **Faz 3** (`v0.2`): oylama hacmi v0, ret skoru S (h2_v3). Ayrıntı: [docs/faz3_m2.md](docs/faz3_m2.md).
+- **Faz 4** (`v0.3`): split conformal (`guvenloc/m3_conformal.py`), H3 ön-kaydı `configs/h3.yaml`, uçtan uca hat
+  `guvenloc/pipeline.py`:
+  ```
+  python scripts/67_m3_pipeline.py --export    # S + τ, q̂ → results/faz4/m3/m3_params_h3_v1.json
+  python scripts/67_m3_pipeline.py --e2e 100   # canlı M1-C + RoMa, önbellekle tutarlılık testi
+  ```
+  Girdi: drone karesi (RGB), kuzey-yukarı uydu karosu, `scale_s`, karo kenarı (m), M1-C dönme olasılıkları.
+  Çıktı: `Decision{xy, latlon, theta, sigma_hat, score, accept, radius_m}`. Ayrıntı: [docs/faz4_m3.md](docs/faz4_m3.md).
+
 Veri, önbellek ve sonuç dosyaları `.gitignore` ile dışarıda tutulur (`results/runs.csv` hariç);
 veri lisansları doğrulanmadan paylaşılmaz.
 

@@ -100,3 +100,21 @@ Denetim 1 (RoMa'sız): çevrimdışı calib öznitelik satırları → `Localize
 Canlı hat önbellekli hatla aynı kararı veriyor (RoMa `seed` ile belirlenimci); enlem/boylam çıktısı piksel hatasıyla 0,6 m
 içinde. Faz 4'ün "bitti" ölçütü (H3) test bölgelerinde → Faz 6.
 
+## Faz 4 özeti (kapanış 26.11.2026, `v0.3`)
+
+- **Split conformal (4A):** `guvenloc/m3_conformal.py` (τ, q̂, Mondrian σ̂ dilimleri). Sentetik testte FAR-neg ve
+  kabul koşullu kapsama hedefte (200 × 10.000; `tests/test_m3_coverage.py`).
+- **H3 ön-kaydı (F4-1):** `configs/h3.yaml` h3_v1, satır 6 = h2_v3 skoru S + σ̂ = spread_m, kalibrasyon 05+11.
+  Ölçütler (FAR-neg ≤ 0,05; kapsama genel ve zor çeyrekte ≥ 0,88) yalnız test bölgelerinde, Faz 6'da.
+- **Kuru denemeler (4B–4F):** 05+11 → 04 üç ölçütte de ✓. Tek bölgeden kalibrasyonda FAR taşınmıyor
+  (11 → 05 FAR-neg 0,227): negatiflerin sahte inlier düzeyi bölgeye bağlı.
+- **Tuzak normalizasyonu (F4-4, F4-5):** FAR kaymasını yaklaşık üçte bire indiriyor (ort. sapma 0,086 → 0,026),
+  ama AUROC −0,033 ve doğru konumların ≈ %27'si reddediliyor. Önceden yazılan kural geçmedi; ham S kaldı (F4-6).
+- **Uçtan uca hat (4G, F4-7):** `guvenloc/pipeline.py`. 100 karelik canlı test çevrimdışı hatla birebir
+  (dönme ve kabul uyuşması 1,000), 0,48 s/çift.
+- **Açık risk:** test bölgelerinde FAR-neg > 0,05 olabilir (eğitim bölgelerinde bölge-dışarıda ham S ile
+  FAR 0,012–0,243). Faz 6'da h3_v1 ve `m3_params_h3_v1.json` ile aynen koşulacak; sonuç ne olursa raporlanır.
+- **Sonraki faza:** M4 (zamansal füzyon) tek kare kararını `Decision` olarak alır; σ̂ ve yarıçap füzyonun girdisi.
+
+Kararlar F4-1…F4-7. Test bölgelerine (02, 03, 06) dokunulmadı.
+
