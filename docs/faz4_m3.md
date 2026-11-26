@@ -11,6 +11,7 @@
 | F4-4 | **Tuzak karo normalizasyonu, benzetim** (`scripts/65_m3_decoy.py`): kare başına sahte eşleşme düzeyi bilinen yanlış bir karoyla ölçülür; S_norm = S − S(tuzak), inlier_norm = log1p(n) − log1p(n_tuzak). Benzetimde tuzak = komşu karenin easy0 çifti (karenin üç çiftinde de aynı). Seçim yalnız eğitim bölgelerinde, bölge-dışarıda; kural sonuçtan önce yazıldı: ort. \|FAR − α\| ve en büyük FAR birlikte düşmeli, AUROC kaybı ≤ 0,005. **Sonuç: kuralı geçen yok → ham S kalır** | F4-3'teki FAR kayması (05 ≫ 11) eğitim bölgeleri arasında da var: ham S'de FAR 0,012–0,243 |
 | F4-5 | **Gerçek tuzak çiftleri** (`scripts/66_m3_decoy_pairs.py`, `cache/decoy_v1`): her kare × başka bölgeden rastgele karo (komşu karenin easy0 konumu), aynı karede, 4 dönme; train + calib (test Faz 6'da). Aynı aileler, aynı seçim kuralı (F4-4), yalnız tuzak kaynağı değişti. Sonuçtan önce commit edildi | Benzetimde AUROC kaybının olası kaynağı tuzağın başka kareden gelmesi (karenin kendi sahte eşleşme düzeyini değil komşusununkini ölçüyor). Dağıtımdaki kurulum zaten aynı kare; maliyet +1 RoMa çağrısı/kare (≈ 257 ms) |
 | F4-6 | **Tuzak hattı kapandı, ham S kalır** (F4-5 sonucu, kural değiştirilmeden): gerçek tuzakta da kuralı geçen yok. h3_v1 ön-kaydı olduğu gibi Faz 6'ya gider; tuzak normalizasyonu ikincil bulgu olarak raporlanır, H3 ölçütleri ve skor değişmez | S_norm FAR'ı yine düzeltiyor (ort. sapma 0,086 → 0,026, en büyük 0,243 → 0,097) ama AUROC 0,959 → 0,926 ve doğru pozitif kabulü 0,991 → 0,724. Benzetimle neredeyse aynı: AUROC kaybı tuzağın kaynağından değil, normalizasyonun kendisinden (tuzak skoru gürültüsü farka ekleniyor). Testte (02, 03, 06) FAR-neg > 0,05 riski açık kalır |
+| F4-7 | **4G hat parametreleri sabitlendi** (`scripts/67_m3_pipeline.py --export` → `docs/sonuclar/faz4/m3_params_h3_v1.json`): S = h2_v3 lojistik (eğitim), τ = −4,761 (n⁻ 2035), q̂ = 20,67 (n⁺ kabul 618), 05+11 calib, satır 6. Faz 6 testi bu dosyayla, yeniden kalibrasyon yok | h3_v1 ön-kaydının (F4-1) doğrudan uygulaması; entropi NaN dolgusu eğitim en büyüğü (calib'de NaN yok) |
 | F4-3 | Kuru denemeler (karar değil): 05 → 11, 11 → 05, 05+11 → 04 (S 04 dışarıda bırakılarak yeniden eğitilir; 04 M1-C eğitiminde yok) | Test açılmadan bölge kaymasının büyüklüğünü görmek (MIMARI risk tablosu, Faz 4) |
 
 ## 4A. Sentetik doğrulama — `guvenloc/m3_conformal.py`, `tests/test_m3_coverage.py`
@@ -75,4 +76,27 @@ Aynı kurulum (eğitim bölgeleri, bölge-dışarıda, satır 2 dönmesi); tuzak
 Benzetim ile gerçek tuzak sonuçları birbirine çok yakın: düzeltme etkisi ve ayırt edicilik kaybı tuzağın nereden geldiğine
 bağlı değil. Ödünleşim açık: tuzak, bölgeler arası FAR taşınmasını yaklaşık üçte bire indiriyor, karşılığında doğru konumların
 yaklaşık %27'si reddediliyor.
+
+## 4G. Uçtan uca hat — `guvenloc/pipeline.py` (`docs/sonuclar/faz4/e2e.md`)
+
+`Localizer.localize(frame, tile, scale_s, tile_size_m, rot_probs) -> Decision{xy, latlon, theta, sigma_hat, score, accept,
+radius_m, rot, n_inliers}`. Akış: M1-C birleşimi (+TTA, `56.probs_arrays`) → en olası dönme → RoMa v2 (tek çağrı) →
+RANSAC + oylama hacmi → S → conformal. M1-C ağı pakete taşınmadı (eğitim betiklerine bağlı); `rot_probs` dışarıdan verilir.
+
+Denetim 1 (RoMa'sız): çevrimdışı calib öznitelik satırları → `Localizer.decide`: en büyük |ΔS| = 6·10⁻¹⁵, kabul ve yarıçap
+%100 aynı. Denetim 2 (canlı, 100 kare = 05 ve 11'den eşit aralıklı, 289 çift; değerlendirme değil, τ/q̂ aynı veriden):
+
+| ölçü | değer |
+|---|---|
+| dönme uyuşması (canlı M1-C vs 4a) | 1,000 |
+| kabul uyuşması | 1,000 |
+| \|ΔS\| medyan / %95 | 0,0000 / 0,0003 |
+| hacim tepesi kayması | 0,00 m |
+| FAR-neg canlı / çevrimdışı | 0,037 / 0,037 |
+| pozitif kabul / kapsama | 0,490 / 0,898 |
+| konum hatası medyan (kabul ∧ pozitif) | 33,0 m |
+| süre / çift (karo + M1 + RoMa/hacim) | 0,48 s (0,14 + 0,04 + 0,29) |
+
+Canlı hat önbellekli hatla aynı kararı veriyor (RoMa `seed` ile belirlenimci); enlem/boylam çıktısı piksel hatasıyla 0,6 m
+içinde. Faz 4'ün "bitti" ölçütü (H3) test bölgelerinde → Faz 6.
 

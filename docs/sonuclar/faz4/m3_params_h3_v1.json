@@ -1,0 +1,92 @@
+{
+  "version": "h3_v1",
+  "h2_version": "h2_v3",
+  "m1_model": "D2_olcek_rot90+D2_olcek_rot90_s1+D2_olcek_rot90_s2@tta",
+  "alpha": 0.05,
+  "beta": 0.1,
+  "calibration_regions": [
+    "05",
+    "11"
+  ],
+  "score_model": {
+    "features": [
+      "log1p_support",
+      "support_frac",
+      "rho",
+      "spread_m",
+      "entropy_bits",
+      "log1p_sum_c",
+      "frac_dropped",
+      "log1p_inliers"
+    ],
+    "w": [
+      -8.032346968282349,
+      4.255566535641566,
+      -0.6465761729378626,
+      -2.0861959633315017,
+      0.7134081588150667,
+      0.6123662163471472,
+      -2.6187887763881306,
+      0.08740706958371142,
+      2.0390473937019564
+    ],
+    "mu": [
+      3.37332012197716,
+      0.17281071436076814,
+      0.5652014145163367,
+      14.91893795521363,
+      17.082217024973627,
+      5.575440000639142,
+      0.021385116440374493,
+      2.759116572047033
+    ],
+    "sd": [
+      2.0189265528602607,
+      0.24930849494914434,
+      0.28626141713268316,
+      3.793310794448953,
+      1.964019063602619,
+      1.4416977604854182,
+      0.02133963335770173,
+      3.248389407703216
+    ]
+  },
+  "entropy_fill": 21.27851676940918,
+  "tau": -4.76079774750633,
+  "q": [
+    20.673310694121675
+  ],
+  "edges": [],
+  "n_neg": 2035,
+  "n_pos_acc": [
+    618
+  ],
+  "sigma_floor_m": 2.0,
+  "ransac_px": 5.0,
+  "volume_cfg": {
+    "cell_m": 2.0,
+    "sigma0_m": 4.0,
+    "sigma0_coarse_m": 12.0,
+    "coarse_step_deg": 5.0,
+    "fine_half_deg": 6.0,
+    "fine_step_deg": 1.0,
+    "m1_half_deg": 15.0,
+    "sigma_cap_m": 30.0,
+    "n_bins": 6,
+    "spread_radius_m": 50.0,
+    "nms_radius_m": 50.0,
+    "support_radius_m": 25.0,
+    "sigma_scale": 0.9272
+  },
+  "romav2": {
+    "setting": "base",
+    "n_matches": 10000,
+    "sigma_scale_matcher": 1.0
+  },
+  "check": {
+    "max_abs_dS": 5.551115123125783e-15,
+    "n_entropy_nan": 0,
+    "accept_agree": 1.0,
+    "radius_agree": 1.0
+  }
+}
