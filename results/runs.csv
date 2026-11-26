@@ -437,3 +437,5 @@ timestamp,script,config_hash,seed,git_commit,split,metric_name,value,notes
 2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 05+11,row6_far_neg,0.04914,
 2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 05+11,row6_coverage,0.90291,
 2026-11-26T19:31:13,64_m3_conformal.py,0d25f5c085d4,0,0015cfd,05+11 → 05+11,row6_coverage_hard,0.77419,
+2026-11-26T21:00:18,30_build_cache.py,49fd69844ed7,0,bd49a3e,"calib,train",sec_per_file,0.268,setting=base seq=False n=10000 shard=0/1
+2026-11-26T22:00:41,67_m3_pipeline.py,0d25f5c085d4,0,02e12c3,e2e,accept_agree,1.0,
