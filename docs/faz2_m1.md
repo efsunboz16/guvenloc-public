@@ -169,3 +169,30 @@ Koşu ≈ 1,5 sa.
 karesi karonun küçük bir parçası olur ve küresel ortalama betimleyici zayıflar. Sıradaki deney: gerçek karo
 boyutu (`tile_size_for`, adaptive) ile aynı modeli sınamak; gerekirse uydu dalında uzaysal maksimum
 (drone betimleyicisini karo konumları üzerinde kaydırma) eklemek. Tasarım değişikliği danışman onayına bağlı.
+
+### 2C-C (devam). Gerçek karo boyutu: calib 11,8°, sınırda
+
+`python scripts/54_m1c_prep.py --gercek` (val/eval: pairs_v1 pozitif karosunun kendisi — ayak izi köşegeni +
+400 m ≈ 3× merkez karesi, merkez kayması ≤ 200 m, medyan 142 m; eğitim: o karo + aynı kuralla 1 rastgele;
+513 px, 7.321 karo) → `python scripts/55_m1c_train.py --veri gercek --epochs 20 --batch 32` (64 bellek
+yetmedi). Uydu karosu döndürülmez/maskelenmez; renk oynatması var, ölçek oynatması yok. İzleme
+`scripts/m1_izle.py --cg`. Koşu ≈ 2,5 sa.
+
+| yapılandırma | en iyi epoch | val 04 (12 açı) | val < 45° | calib (0°) | 05 | 11 | calib < 10° | calib < 45° |
+|---|---|---|---|---|---|---|---|---|
+| C4 küresel ortalama | 12 | 10,7° | %73 | 11,6° | 13,8° | 8,7° | %46 | %72 |
+| **C5 kayan pencere (5 hücre) — val'e göre seçilen** | 5 | **10,2°** | %77 | **11,8°** | 18,7° | 5,7° | %46 | %74 |
+
+- Kolay kuruluma göre (calib 7,7°) belirgin düşüş ama hâlâ mutlak kuzeyin (43–84°) çok önünde; calib medyanı
+  hedefin (≤ 10°) biraz üstünde. Kayan pencere küçük bir kazanç (val < 45° %73 → %77), medyanda fark yok.
+- Doğrulama eğrisi gürültülü (C4: epoch 9–20 arası 10,7–14,7°; C5 en iyisine 5. epoch'ta ulaşıyor) →
+  tohum varyansı ölçülmeli; tek tohum.
+- **Güven (`results/faz2/m1/m1c_gercek_guven.json`):** tahmin ±45° penceresindeki olasılık kütlesi güven
+  ölçüsü olarak kullanıldı. C5, calib'de en güvenli %50: < 45° %85,5, medyan 9,5°; en güvenli %80: < 45° %79,5.
+  Güven kuyruğu ayırıyor ama zayıf: tek çağrıya güvenmek her güven düzeyinde %15+ hatalı dönme demek.
+- **2D için sonuç:** M1'in en olası dönmesiyle RoMa'yı çağırıp, RoMa reddederse kalan dönmelere düşmek
+  (ardışık strateji) beklenen çağrıyı ≈ 1 + 0,26 × 3 ≈ 1,8'e indirir (RoMa'nın doğru dönmede de reddettiği
+  kareler hariç) — satır 2'nin 4 çağrısına karşı. Hedef ≤ 1,5 için M1'in < 45° oranı ≈ %83+ olmalı.
+
+Sonraki iyileştirme adayları: eğitimde daha çok karo (karesi başına 2 → 5+), tohum ortalaması, uydu tarafına
+ölçek oynatması, pencere boyutunu bölge irtifasına göre ayarlamak (karo/ayak izi oranı 2,6–3,7).
