@@ -2,6 +2,12 @@
 
   python scripts/52_m1_train.py all                 # lr taraması (tohum 0) → seçim → tohum 1, 2 → calib
   python scripts/52_m1_train.py run --lr 1e-3 --seed 0
+  python scripts/52_m1_train.py ab                  # öneri A/B kısa deneyleri (tohum 0) → m1_ab.json
+
+ab modu (docs/faz2_m1.md 2C-v2): A = daha sert düzenleme (güçlü renk/ölçek/bulanıklık oynatma, gri ton,
+küçük ağ, doğrulamada erken durdurma); B = eğitime kuzey-yukarı uydu kırpıntıları (φ = 0,
+scripts/53_m1_sat_prep.py; yalnız eğitim bölgeleri). Yapılandırma seçimi yalnız val 04'e göre; calib her
+yapılandırma için TEŞHİS amaçlı raporlanır.
 
 Veri: data/m1/frames_321.npy + labels_v2.csv. Eğitim yalnız m1_role == train (01, 08, 09, 10); seçim
 m1_role == val (04); değerlendirme m1_role == eval (calib 05, 11; etiketler ham Phi1). Test bölgeleri yok.
@@ -17,6 +23,7 @@ import json
 import math
 import sys
 import time
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import numpy as np
@@ -36,6 +43,33 @@ SEEDS = [0, 1, 2]
 EPOCHS = 60
 BATCH = 64
 EVAL_ANGLES = [30.0 * k for k in range(12)]
+MEAN = (0.485, 0.456, 0.406)
+STD = (0.229, 0.224, 0.225)
+
+
+@dataclass(frozen=True)
+class Cfg:
+    """Eğitim yapılandırması. Varsayılanlar = v1 (docs/faz2_m1.md 2C)."""
+    name: str = "v1"
+    widths: tuple[int, ...] = (16, 32, 64, 96, 128)
+    aug: str = "light"          # light: parlaklık/kontrast ±0,2 | strong: + doygunluk, kanal kazancı, ölçek, bulanıklık
+    gray: bool = False          # girdiyi gri tona çevir (renk/mevsim ipucunu kapat)
+    sat_frac: float = 0.0       # yığının bu oranı uydu kırpıntısı (φ = 0)
+    early_stop: bool = False    # en iyi val (12 açı medyanı) durumunu geri yükle
+    eval_every: int = 10
+    weight_decay: float = 1e-4
+
+
+AB_CONFIGS = [
+    Cfg("v1_es", early_stop=True, eval_every=5),
+    Cfg("A1_sert", aug="strong", early_stop=True, eval_every=5),
+    Cfg("A2_sert_gri", aug="strong", gray=True, early_stop=True, eval_every=5),
+    Cfg("A3_sert_gri_kucuk", widths=(8, 16, 32, 48, 64), aug="strong", gray=True, early_stop=True,
+        eval_every=5, weight_decay=1e-3),
+    Cfg("B1_sert_uydu50", aug="strong", sat_frac=0.5, early_stop=True, eval_every=5),
+    Cfg("B2_sert_gri_uydu50", aug="strong", gray=True, sat_frac=0.5, early_stop=True, eval_every=5),
+    Cfg("B3_yalniz_uydu", aug="strong", sat_frac=1.0, early_stop=True, eval_every=5),
+]
 
 
 def load_data(device):
@@ -44,41 +78,66 @@ def load_data(device):
     phi = torch.tensor(lab.phi_corr.to_numpy(), dtype=torch.float32, device=device)
     roles = {r: torch.tensor(np.flatnonzero(lab.m1_role.to_numpy() == r), device=device)
              for r in ("train", "val", "eval")}
-    return lab, frames, phi, roles
+    sat_p = Path("data/m1/sat_321.npy")
+    sat = torch.from_numpy(np.load(sat_p)).to(device) if sat_p.exists() else None
+    return lab, frames, phi, roles, sat
 
 
-def make_batch(frames, idx, alpha_cw, train: bool):
-    x = M.normalize(frames[idx]) if not train else frames[idx].permute(0, 3, 1, 2).float() / 255.0
-    if train:  # hafif renk oynatma (parlaklık/kontrast), sonra normalize
-        b = 1 + 0.2 * (torch.rand(len(idx), 1, 1, 1, device=x.device) * 2 - 1)
-        c = 1 + 0.2 * (torch.rand(len(idx), 1, 1, 1, device=x.device) * 2 - 1)
+def _gauss_blur(x: torch.Tensor, sigma: float = 1.0) -> torch.Tensor:
+    k = torch.arange(-2, 3, device=x.device, dtype=x.dtype)
+    w = torch.exp(-0.5 * (k / sigma) ** 2)
+    w = w / w.sum()
+    C = x.shape[1]
+    x = F.conv2d(x, w.view(1, 1, 1, 5).repeat(C, 1, 1, 1), padding=(0, 2), groups=C)
+    return F.conv2d(x, w.view(1, 1, 5, 1).repeat(C, 1, 1, 1), padding=(2, 0), groups=C)
+
+
+def make_batch(imgs_uint8, alpha_cw, train: bool, cfg: Cfg = Cfg()):
+    """(B,H,W,3) uint8 → döndürülmüş, maskeli, normalize (B,3,257,257)."""
+    x = imgs_uint8.permute(0, 3, 1, 2).float() / 255.0
+    B, dev = len(x), x.device
+    zoom = None
+
+    def u(lo, hi, *shape):
+        return lo + (hi - lo) * torch.rand(B, *shape, device=dev)
+
+    if train:
+        amp = 0.2 if cfg.aug == "light" else 0.4
         m = x.mean(dim=(1, 2, 3), keepdim=True)
-        x = ((x - m) * c + m) * b
+        x = ((x - m) * u(1 - amp, 1 + amp, 1, 1, 1) + m) * u(1 - amp, 1 + amp, 1, 1, 1)
+        if cfg.aug == "strong":
+            g = x.mean(1, keepdim=True)
+            x = g + (x - g) * u(0.5, 1.5, 1, 1, 1)               # doygunluk
+            x = x * u(0.9, 1.1, 3, 1, 1)                         # kanal kazancı (renk sıcaklığı)
+            blur = (torch.rand(B, device=dev) < 0.3).view(B, 1, 1, 1)
+            x = torch.where(blur, _gauss_blur(x).float(), x)   # autocast altında conv bf16 döner
+            zoom = torch.exp(u(math.log(0.8), math.log(1.25)))
         x = x.clamp(0, 1)
-        mean = torch.tensor([0.485, 0.456, 0.406], device=x.device).view(1, 3, 1, 1)
-        std = torch.tensor([0.229, 0.224, 0.225], device=x.device).view(1, 3, 1, 1)
-        x = (x - mean) / std
-    return M.rotate_cw(x, alpha_cw, out_size=M.IN_SIZE)
+    if cfg.gray:
+        x = (0.299 * x[:, :1] + 0.587 * x[:, 1:2] + 0.114 * x[:, 2:3]).expand(-1, 3, -1, -1)
+    mean = torch.tensor(MEAN, device=dev).view(1, 3, 1, 1)
+    std = torch.tensor(STD, device=dev).view(1, 3, 1, 1)
+    return M.rotate_cw((x - mean) / std, alpha_cw, out_size=M.IN_SIZE, zoom=zoom)
 
 
 @torch.no_grad()
-def predict(net, frames, idx, alpha_cw: float) -> torch.Tensor:
+def predict(net, frames, idx, alpha_cw: float, cfg: Cfg = Cfg()) -> torch.Tensor:
     net.eval()
     out = []
     for i in range(0, len(idx), 128):
         j = idx[i:i + 128]
         a = torch.full((len(j),), alpha_cw, device=frames.device)
         with torch.autocast("cuda", dtype=torch.bfloat16):
-            logits = net(make_batch(frames, j, a, train=False)).float()
+            logits = net(make_batch(frames[j], a, train=False, cfg=cfg)).float()
         out.append(M.predict_deg(logits))
     return torch.cat(out)
 
 
-def evaluate(net, frames, phi, idx, lab=None) -> dict:
+def evaluate(net, frames, phi, idx, lab=None, cfg: Cfg = Cfg()) -> dict:
     errs = {}
     preds = {}
     for a in EVAL_ANGLES:
-        p = predict(net, frames, idx, a)
+        p = predict(net, frames, idx, a, cfg)
         preds[a] = p
         errs[a] = M.angular_error_deg(p, torch.remainder(phi[idx] - a, 360.0)).cpu().numpy()
     allv = np.concatenate(list(errs.values()))
@@ -91,7 +150,7 @@ def evaluate(net, frames, phi, idx, lab=None) -> dict:
     # eşdeğerlik tutarlılığı (etiketsiz): θ̂(R_α I) + α ile θ̂(I) farkı
     eq = {}
     for a in (45.0, 20.0, 90.0):
-        p = predict(net, frames, idx, a)
+        p = predict(net, frames, idx, a, cfg)
         eq[f"{a:g}"] = float(np.median(M.angular_error_deg(p + a, preds[0.0]).cpu().numpy()))
     res["equiv_median_dev"] = eq
     if lab is not None:
@@ -100,52 +159,95 @@ def evaluate(net, frames, phi, idx, lab=None) -> dict:
     return res
 
 
-def train_run(lr: float, seed: int, data, epochs: int = EPOCHS, save: bool = True) -> dict:
-    lab, frames, phi, roles = data
+def train_run(lr: float, seed: int, data, epochs: int = EPOCHS, save: bool = True, cfg: Cfg = Cfg(),
+              tag: str | None = None) -> dict:
+    lab, frames, phi, roles, sat = data
+    if cfg.sat_frac > 0 and sat is None:
+        raise FileNotFoundError("data/m1/sat_321.npy yok → önce scripts/53_m1_sat_prep.py")
     torch.manual_seed(seed)
     np.random.seed(seed)
     dev = frames.device
-    net = M.C8Canon().to(dev)
-    opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=1e-4)
+    net = M.C8Canon(widths=cfg.widths).to(dev)
+    opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=cfg.weight_decay)
     tr = roles["train"]
     steps_per_epoch = math.ceil(len(tr) / BATCH)
+    n_sat = round(cfg.sat_frac * BATCH)
     total = epochs * steps_per_epoch
     warm = max(1, min(2 * steps_per_epoch, total // 5))
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda s: (s + 1) / warm if s < warm else 0.5 * (1 + math.cos(math.pi * (s - warm) / (total - warm))))
     g = torch.Generator(device=dev).manual_seed(seed)
     hist = []
+    best = (float("inf"), 0, None)
+    label = tag or f"lr {lr:g} tohum {seed}"
     t0 = time.time()
     for ep in range(epochs):
         net.train()
         perm = tr[torch.randperm(len(tr), generator=g, device=dev)]
         tot = 0.0
         for i in range(steps_per_epoch):
-            idx = perm[i * BATCH:(i + 1) * BATCH]
-            alpha = torch.rand(len(idx), generator=g, device=dev) * 360.0
-            target = M.soft_targets(torch.remainder(phi[idx] - alpha, 360.0), sigma_bins=1.0)
+            idx = perm[i * (BATCH - n_sat):(i + 1) * (BATCH - n_sat)] if n_sat < BATCH else perm[:0]
+            imgs, phis = frames[idx], phi[idx]
+            if n_sat:
+                js = torch.randint(len(sat), (n_sat,), generator=g, device=dev)
+                imgs = torch.cat([imgs, sat[js]])
+                phis = torch.cat([phis, torch.zeros(n_sat, device=dev)])
+            alpha = torch.rand(len(imgs), generator=g, device=dev) * 360.0
+            target = M.soft_targets(torch.remainder(phis - alpha, 360.0), sigma_bins=1.0)
             with torch.autocast("cuda", dtype=torch.bfloat16):
-                logits = net(make_batch(frames, idx, alpha, train=True)).float()
+                logits = net(make_batch(imgs, alpha, train=True, cfg=cfg)).float()
             loss = -(target * F.log_softmax(logits, 1)).sum(1).mean()
             opt.zero_grad(set_to_none=True)
             loss.backward()
             opt.step()
             sched.step()
             tot += float(loss)
-        if (ep + 1) % 10 == 0 or ep == epochs - 1:
-            v = evaluate(net, frames, phi, roles["val"])
+        if (ep + 1) % cfg.eval_every == 0 or ep == epochs - 1:
+            v = evaluate(net, frames, phi, roles["val"], cfg=cfg)
             hist.append({"epoch": ep + 1, "loss": tot / steps_per_epoch, "val_median_err_all": v["median_err_all"],
                          "val_median_err_0": v["median_err_0"]})
-            print(f"  lr {lr:g} tohum {seed} epoch {ep + 1}: kayıp {tot / steps_per_epoch:.3f}, "
+            if cfg.early_stop and v["median_err_all"] < best[0]:
+                best = (v["median_err_all"], ep + 1,
+                        {k: t.detach().clone() for k, t in net.state_dict().items()})
+            print(f"  {label} epoch {ep + 1}: kayıp {tot / steps_per_epoch:.3f}, "
                   f"val medyan hata (12 açı) {v['median_err_all']:.2f}°, (0°) {v['median_err_0']:.2f}° "
                   f"[{time.time() - t0:.0f} s]", flush=True)
-    res = {"lr": lr, "seed": seed, "epochs": epochs, "n_params": net.n_params(), "history": hist,
-           "val": evaluate(net, frames, phi, roles["val"], lab), "sec": round(time.time() - t0, 1)}
+    if cfg.early_stop and best[2] is not None:
+        net.load_state_dict(best[2])
+    res = {"lr": lr, "seed": seed, "epochs": epochs, "cfg": asdict(cfg), "n_params": net.n_params(),
+           "history": hist, "best_epoch": best[1] if cfg.early_stop else epochs,
+           "val": evaluate(net, frames, phi, roles["val"], lab, cfg=cfg), "sec": round(time.time() - t0, 1)}
     if save:
         MODELS.mkdir(parents=True, exist_ok=True)
         torch.save({"state_dict": net.state_dict(), "lr": lr, "seed": seed, "epochs": epochs,
-                    "widths": (16, 32, 64, 96, 128)}, MODELS / f"m1_lr{lr:g}_seed{seed}.pt")
+                    "widths": cfg.widths, "cfg": asdict(cfg)}, MODELS / f"m1_{cfg.name}_lr{lr:g}_seed{seed}.pt")
     res["_net"] = net
+    return res
+
+
+def run_ab(data, lr: float, epochs: int, only: list[str] | None) -> dict:
+    """Öneri A/B kısa deneyleri: tohum 0, sabit lr; seçim val 04'te, calib teşhis."""
+    lab, frames, phi, roles, _ = data
+    out_p = OUT / "m1_ab.json"
+    res = json.loads(out_p.read_text(encoding="utf-8")) if out_p.exists() else {}
+    for cfg in AB_CONFIGS:
+        if only and cfg.name not in only:
+            continue
+        print(f"deney {cfg.name} başlıyor: {asdict(cfg)}", flush=True)
+        r = train_run(lr, 0, data, epochs, cfg=cfg, tag=f"deney {cfg.name}")
+        net = r.pop("_net")
+        r["calib"] = evaluate(net, frames, phi, roles["eval"], lab, cfg=cfg)
+        res[cfg.name] = r
+        print(f"deney {cfg.name} bitti: en iyi epoch {r['best_epoch']}, val {r['val']['median_err_all']:.1f}° "
+              f"(04), calib {r['calib']['median_err_0']:.1f}° (05: "
+              f"{r['calib']['by_region_median_err_0']['05']:.1f}°, 11: "
+              f"{r['calib']['by_region_median_err_0']['11']:.1f}°), calib ≤10° oranı "
+              f"{r['calib']['acc10_0']:.3f}", flush=True)
+        out_p.write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
+        del net
+        torch.cuda.empty_cache()
+    best = min(res, key=lambda k: res[k]["val"]["median_err_all"])
+    print(f"val'e göre en iyi yapılandırma: {best} ({res[best]['val']['median_err_all']:.1f}°)", flush=True)
     return res
 
 
@@ -153,16 +255,21 @@ def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["all", "run"])
+    ap.add_argument("cmd", choices=["all", "run", "ab"])
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--epochs", type=int, default=EPOCHS)
     ap.add_argument("--config", type=Path, default=Path("configs/base.yaml"))
+    ap.add_argument("--only", nargs="*", help="ab: yalnız bu yapılandırmalar")
     a = ap.parse_args()
     cfg = yaml.safe_load(a.config.read_text(encoding="utf-8"))
     torch.backends.cudnn.benchmark = True
     data = load_data("cuda")
     OUT.mkdir(parents=True, exist_ok=True)
+
+    if a.cmd == "ab":
+        run_ab(data, a.lr, a.epochs, a.only)
+        return 0
 
     if a.cmd == "run":
         r = train_run(a.lr, a.seed, data, a.epochs)
@@ -186,7 +293,7 @@ def main() -> int:
         r = train_run(best, s, data, a.epochs)
         runs[s] = (r, r.pop("_net"))
     # 3) calib değerlendirmesi
-    lab, frames, phi, roles = data
+    lab, frames, phi, roles, _ = data
     ev = {s: evaluate(net, frames, phi, roles["eval"], lab) for s, (_, net) in runs.items()}
     keys = ["median_err_0", "acc10_0", "acc20_0", "acc45_0", "median_err_all", "acc10_all"]
     summ = {k: [float(np.mean([ev[s][k] for s in SEEDS])), float(np.std([ev[s][k] for s in SEEDS]))] for k in keys}

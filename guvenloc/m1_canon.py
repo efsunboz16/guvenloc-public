@@ -50,13 +50,17 @@ def circular_mask(size: int, device=None) -> torch.Tensor:
     return (((yy - c) ** 2 + (xx - c) ** 2) <= (size / 2) ** 2).float()
 
 
-def rotate_cw(x: torch.Tensor, angle_cw_deg: torch.Tensor, out_size: int | None = None) -> torch.Tensor:
+def rotate_cw(x: torch.Tensor, angle_cw_deg: torch.Tensor, out_size: int | None = None,
+              zoom: torch.Tensor | None = None) -> torch.Tensor:
     """(B,C,H,W) görüntüleri merkez etrafında SAAT YÖNÜNDE döndürür (bilineer), isteğe bağlı yeniden
-    boyutlandırır ve dairesel maske uygular."""
+    boyutlandırır ve dairesel maske uygular. zoom > 1 içeriği büyütür (ölçek oynatma)."""
     B, _, H, _ = x.shape
     out = out_size or H
     a = torch.deg2rad(angle_cw_deg.to(x.dtype)).view(B)
     c, s = torch.cos(a), torch.sin(a)
+    if zoom is not None:
+        z = zoom.to(x.dtype).view(B)
+        c, s = c / z, s / z
     # affine_grid çıktı noktasını girdiye eşler (x sağ, y aşağı): içeriği saat yönünde α döndürmek için
     # girdi = R(−α)·çıktı (rotate_cw(·, 90) == rot90 saat yönü, testli)
     theta = torch.stack([torch.stack([c, s, torch.zeros_like(c)], 1),

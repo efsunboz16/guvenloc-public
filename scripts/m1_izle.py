@@ -2,6 +2,7 @@
 
   python scripts/m1_izle.py          # 5 s'de bir yenilenir, Ctrl+C ile çıkılır
   python scripts/m1_izle.py --once
+  python scripts/m1_izle.py --ab     # öneri A/B deneyleri (52_m1_train.py ab, logs/m1_ab.log)
 """
 from __future__ import annotations
 
@@ -24,6 +25,11 @@ EPOCHS = 60
 PLAN = [("3e-04", 0), ("0.001", 0), ("0.003", 0), ("seçilen", 1), ("seçilen", 2)]
 LINE = re.compile(r"lr (\S+) tohum (\d+) epoch (\d+): kayıp ([\d.]+), val medyan hata \(12 açı\) ([\d.]+)°, "
                   r"\(0°\) ([\d.]+)° \[(\d+) s\]")
+AB_LINE = re.compile(r"deney (\S+) epoch (\d+): kayıp ([\d.]+), val medyan hata \(12 açı\) ([\d.]+)°, "
+                     r"\(0°\) ([\d.]+)° \[(\d+) s\]")
+AB_PLAN = ["v1_es", "A1_sert", "A2_sert_gri", "A3_sert_gri_kucuk", "B1_sert_uydu50", "B2_sert_gri_uydu50",
+           "B3_yalniz_uydu"]
+AB = {"on": False, "epochs": 40}
 TARGET = 10.0
 BLOCKS = "▁▂▃▄▅▆▇█"
 
@@ -37,7 +43,16 @@ def parse():
     chosen, tail, done, summary = None, [], None, []
     if LOG.exists():
         for ln in LOG.read_text(encoding="utf-8", errors="replace").splitlines():
-            m = LINE.search(ln)
+            m = AB_LINE.search(ln) if AB["on"] else None
+            if m:
+                name, ep, loss, vall, v0, sec = m.groups()
+                runs.setdefault((name, 0), []).append((int(ep), float(loss), float(vall), float(v0), int(sec)))
+                if ln.strip():
+                    tail.append(ln.strip())
+                continue
+            if AB["on"] and (" bitti:" in ln or ln.startswith("val'e göre")):
+                summary.append(ln.strip())
+            m = None if AB["on"] else LINE.search(ln)
             if m:
                 lr, seed, ep, loss, vall, v0, sec = m.groups()
                 runs.setdefault((lr_key(lr), int(seed)), []).append(
@@ -78,16 +93,24 @@ def alive() -> bool:
 def render() -> Group:
     runs, chosen, tail, done, summary = parse()
     keys = list(runs)
+    plan = [(n, 0) for n in AB_PLAN] if AB["on"] else PLAN
+    n_ep = AB["epochs"] if AB["on"] else EPOCHS
+    if AB["on"]:
+        keys = [k for k in plan if k in runs]
     t = Table(expand=True, box=None, header_style="bold")
-    for c in ("koşu", "ilerleme", "son val hata (12 açı)", "0°", "seyir (her 10 epoch, 0–90°)"):
+    for c in ("koşu", "ilerleme", "son val hata (12 açı)", "0°", "seyir (0–90°)"):
         t.add_column(c)
-    for i, (lr, seed) in enumerate(PLAN):
-        key = keys[i] if i < len(keys) else None
-        name = f"lr {lr} · tohum {seed}" if key is None else f"lr {key[0]} · tohum {key[1]}"
+    for i, (lr, seed) in enumerate(plan):
+        if AB["on"]:
+            key = (lr, 0) if (lr, 0) in runs else None
+            name = lr
+        else:
+            key = keys[i] if i < len(keys) else None
+            name = f"lr {lr} · tohum {seed}" if key is None else f"lr {key[0]} · tohum {key[1]}"
         hist = runs.get(key, []) if key else []
         ep = hist[-1][0] if hist else 0
         bar = Table.grid()
-        bar.add_row(ProgressBar(total=EPOCHS, completed=ep, width=20), f" {ep}/{EPOCHS}")
+        bar.add_row(ProgressBar(total=n_ep, completed=ep, width=20), f" {ep}/{n_ep}")
         if hist:
             v = hist[-1][2]
             col = "green" if v <= TARGET else ("yellow" if v <= 30 else "red")
@@ -101,15 +124,17 @@ def render() -> Group:
     if allv:
         best = min(allv)
     status = ("bitti (kod " + done + ")") if done is not None else ("çalışıyor" if alive() else "çalışmıyor")
-    head = Text.assemble(("Modül 1 eğitimi  ", "bold"), ("● " + status, "green" if alive() or done == "0" else "red"),
+    head = Text.assemble(("Modül 1 A/B deneyleri  " if AB["on"] else "Modül 1 eğitimi  ", "bold"), ("● " + status, "green" if alive() or done == "0" else "red"),
                          f"   {time.strftime('%H:%M:%S')}   {gpu()}\n",
                          f"Hedef: calib medyan yön hatası ≤ {TARGET:g}°. ",
-                         (f"En iyi val şimdiye kadar: {best[0]:.1f}° (lr {best[1][0]}, tohum {best[1][1]})" if best else ""))
+                         (f"En iyi val şimdiye kadar: {best[0]:.1f}° ({best[1][0]}"
+                          + ("" if AB["on"] else f", tohum {best[1][1]}") + ")" if best else ""))
     parts = [Panel(head, border_style="cyan"), Panel(t, title="koşular (doğrulama: bölge 04)", border_style="blue")]
     if chosen:
         parts.append(Panel(chosen, title="öğrenme oranı seçimi", border_style="magenta"))
     if summary:
-        parts.append(Panel("\n".join(summary), title="calib sonucu (3 tohum)", border_style="green"))
+        parts.append(Panel("\n".join(summary), title="biten deneyler (calib teşhis)" if AB["on"]
+                           else "calib sonucu (3 tohum)", border_style="green"))
     parts.append(Panel("\n".join(tail), title="son satırlar", border_style="dim"))
     return Group(*parts)
 
@@ -117,7 +142,13 @@ def render() -> Group:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--once", action="store_true")
+    ap.add_argument("--ab", action="store_true", help="A/B deneylerini izle (logs/m1_ab.log)")
+    ap.add_argument("--epochs", type=int, default=40)
     a = ap.parse_args()
+    if a.ab:
+        global LOG
+        LOG = ROOT / "logs/m1_ab.log"
+        AB.update(on=True, epochs=a.epochs)
     con = Console()
     if a.once:
         con.print(render())
