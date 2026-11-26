@@ -17,8 +17,9 @@
 | F2-6 | **H1 ölçütleri değişmedi**, yalnız işlemselleştirildi ve test öncesi `configs/h1.yaml`'a ön-kaydedildi: (i) M1-C medyan yön hatası ≤ 10° (pozitif çiftler, 0°); (ii) doğru karoda kare başına ortalama RoMa çağrısı ≤ 1,5; (iii) başarı@25 farkı (satır 4 − satır 2) için 50 karelik blok bootstrap %95 GA alt sınırı > −0,03 (eşdeğersizlik payı 3 puan). Üçü birden | Modül değişti diye başarı ölçütünü değiştirmek hedefi sonuca göre kaydırmak olurdu. "Anlamlı biçimde düşük değil" McNemar p ≥ 0,05 olarak okunursa düşük güç ödüllendirilir → açık bir pay (δ = 0,03) ile eşdeğersizlik testi |
 | F2-7 | Ana tabloda **satır 4 = 4d** (M1-C ardışık, en çok 2 dönme; H1 bu satırda sınanır); **4c** (kabul edilince dur, en çok 4) ikincil çalışma noktası olarak aynı tabloda | 4d önerideki çağrı bütçesine uyan politika; 4c "aynı başarı, daha az çağrı" sonucunu gösterir. İkisi de calib görülmeden tanımlandı, eşikleri eğitimden |
 | F2-8 | "Tek dik bakışlı kareden mutlak kuzey bu veriyle (4 eğitim uçuşu) öğrenilemiyor" bulgusu raporda H1 altında **olumsuz sonuç** olarak yer alır (2C, 2C-v2 tabloları, şans düzeyi karşılaştırması) | Olumsuz sonuç bilgi taşıyor ve C'ye geçişin gerekçesi |
+| F2-9 | v0.1 M1-C modeli = **D2_olcek_rot90** (karesi başına 4 karo, uydu ölçek U(0,85; 1,18) + 90° dönme oynatması), tohum **s2** (val 04 en iyi, 8,8°); calib sonuçları 3 tohum ortalaması ± ss ile raporlanır | Seçim ön-kayıtlı kurala göre (val 04, 12 açı medyanı). Calib'de C5'in 4d başarısı biraz daha yüksek (0,282 vs 0,270 ± 0,007) ama calib'e göre seçmek ön-kaydı bozar |
 
-Kararlar F2-5…F2-8 kullanıcı onayıyla alındı (26.11); danışmana not ile bildirildi.
+Kararlar F2-5…F2-9 kullanıcı onayıyla alındı (26.11); danışmana not ile bildirildi.
 
 ## 2A. Etiketler ve etiket gürültüsü (`scripts/50_m1_labels.py`)
 
@@ -249,3 +250,48 @@ başarısını ≤ 1,5 çağrıda yakalamak için M1-C'nin < 45° oranının (%7
 Satır 4d'de: (i) yön hatası 11,9° ✗; (ii) 1,48 çağrı ✓; (iii) GA alt sınırı −0,051 ✗ → **H1 calib'de sağlanmıyor**.
 4d'nin açığı M1-C'nin < 45° oranından (%74) geliyor; iyileştirme turu (karesi başına 4 karo, uydu ölçek/90°
 oynatması, 3 tohum) bunu hedefliyor. Test kararı Faz 6'da, bu ölçütlerle.
+
+### 2D (devam). İyileştirme turu (v2): yön hatası düştü, RoMa başarısı değişmedi
+
+`python scripts/54_m1c_prep.py --gercek --ek 3` (eğitim karesi başına 4 karo, 12.841 karo, CPU'da tutuluyor) →
+`scripts/55_m1c_train.py --veri gercek4` (`CONFIGS_V2`, 12 epoch, batch 32), zincir `logs/m1c_v2_zincir.sh`:
+aşama 1 D1/D2 tohum 0 → val'e göre seçilen yapılandırma tohum 1, 2. Sonra her tohum için `56_m1c_roma.py`.
+
+| yapılandırma | tohum | val 04 (12 açı) | calib (0°) | 05 | 11 | calib < 10° | calib < 45° |
+|---|---|---|---|---|---|---|---|
+| C5 (önceki, 2 karo) | 0 | 10,2° | 11,8° | 18,7° | 5,7° | %46 | %74 |
+| D1 ölçek | 0 | 10,4° | 13,4° | 18,7° | 9,5° | %43 | %64 |
+| **D2 ölçek + 90° (seçilen)** | 0 | 9,4° | 9,8° | 15,0° | 6,3° | %50 | %75 |
+| D2 | 1 | 8,9° | 10,3° | 13,3° | 7,0° | %49 | %75 |
+| D2 | 2 | **8,8°** | 10,2° | 16,1° | 6,2° | %49 | %76 |
+| **D2, 3 tohum** | | 9,0 ± 0,3° | 10,1 ± 0,3° | | | %50 | %75 |
+
+Satır 4, calib (RoMa önbelleği; `results/faz2/m1/roma_row4_D2_olcek_rot90*_calib.md`), D2 3 tohum ortalaması ± ss:
+
+| | C5 | D2 (3 tohum) |
+|---|---|---|
+| M1-C medyan yön hatası (pozitif çiftler) | 11,9° | **10,1 ± 0,2°** (9,9 / 10,3 / 10,2) |
+| M1-C < 45° (pozitif) | %74,0 | %75,2 ± 0,6 |
+| 4a başarı@25 (1 çağrı) | 0,253 | 0,248 ± 0,008 |
+| 4c başarı@25 (2,35 çağrı/poz) | 0,316 | 0,311 ± 0,001 |
+| 4d başarı@25 (1,49 çağrı/poz) | 0,282 | 0,270 ± 0,007 |
+| 4d − satır 2, GA alt sınırı | −0,051 | −0,079 / −0,060 / −0,061 |
+| 4c − satır 2 [GA] | −0,003 [−0,008; +0,005] | −0,008 [−0,017; +0,001] (her tohumda benzer) |
+
+H1 (satır 4d, `configs/h1.yaml`): (i) 9,9° ✓ / 10,3° ✗ / 10,2° ✗ — eşikte; (ii) 1,49 ✓ (üç tohumda);
+(iii) ✗ (üç tohumda). **H1 calib'de sağlanmıyor.**
+
+- **Yön hatası ≠ RoMa başarısı.** Medyan 1,8° düştü ama RoMa başarısı yerinde: RoMa dört 90° dönmeden biriyle
+  çağrılıyor ve kendi içinde ±45°'ye kadar dönmeyi tolere ediyor; başarıyı belirleyen M1-C'nin **doğru çeyreği
+  seçme oranı** (< 45°), o da %74 → %75'te kaldı. Medyanı iyileştiren oynatmalar zaten doğru çeyrekteki
+  kareleri keskinleştirdi, yanlış çeyrekteki %25'lik kuyruğu küçültmedi.
+- 4d'nin satır 2'ye açığı (≈ 4,5–5 puan) tamamen bu kuyruk: 4d 2 çağrıda duruyor, M1-C'nin ilk iki tahmini
+  dışında kalan doğru dönmeyi bulamıyor. 4c (kabul edilene kadar devam) satır 2 ile eşdeğer kalıyor.
+- Tohum varyansı küçük (4c ± 0,001, 4d ± 0,007): sonuç tek tohumun şansı değil.
+- Calib'de C5 4d'de biraz daha iyi, ama model seçimi ön-kayıt gereği val'e göre (F2-9).
+
+Sonuç: M1-C'yi daha da keskinleştirmek H1 (iii)'ü kurtarmaz; açığı kapatacak şey yanlış çeyrek kuyruğu.
+İki yol: (a) M1-C'nin çeyrek doğruluğunu hedefleyen kayıp/veri (ör. 90°-sınıflandırma başlığı, daha çok bölge),
+(b) güvene bağlı bütçe (M1-C emin değilse 3.–4. dönmeye izin; ortalama çağrıyı ≤ 1,5'te tutacak eşik
+eğitim/val'den seçilir). (b) yeni bir politika olduğundan H1 satırını değiştirmez; ancak ön-kayıt güncellemesi
+(yeni karar) ile ve testten önce satır 4 yapılabilir.
