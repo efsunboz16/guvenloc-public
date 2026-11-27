@@ -221,3 +221,15 @@ eşleşme): artık r = v − H(u) (karo pikseli), m = rᵀ Σ_B⁻¹ r; Gauss NL
 - [x] C4 hedefinin kaynağı: REDI-Match (Ge vd., 2026), 576×576; aynı çözünürlükte fark 5,49 → 1,91 (ölçüldü)
 - [x] PR #2 → `main`, `v0.0` etiketi (26.11)
 - [x] Danışmana tek sayfalık özet hazırlandı (26.11)
+
+## Ek: RoMa v2 tek çift ölçümleri (Faz 0, eski README'den taşındı)
+
+Sentetik çift, `scripts/01_roma_single_pair.py`:
+
+| Ayar | çözünürlük (lr/hr) | GPU | süre/çift | en yüksek bellek | köşe hatası |
+|---|---|---|---|---|---|
+| mega1500 / wxbs | 800 / 1024 | **RTX 3090 (sunucu, 25.11)** | **0,54 s** | 7,1 GB | 0,32 px |
+| precise | 800 / 1280 | RTX 5060 Laptop 8 GB (23.11) | 3,7 s | 10,4 GB (8 GB'ı aşar) | 0,31 px |
+| mega1500 / wxbs | 800 / 1024 | RTX 5060 Laptop 8 GB | 2,1 s | 7,1 GB | 0,32 px |
+| base | 640 | RTX 5060 Laptop 8 GB | 0,31 s | 3,4 GB | 0,34 px |
+| fast | 512 | RTX 5060 Laptop 8 GB | 0,20 s | 2,6 GB | 0,33 px |

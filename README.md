@@ -1,94 +1,85 @@
 # GüvenLoc
 
-Drone görüntülerini uydu haritalarıyla eşleştirerek konum ve yön tahmini yapan
-araştırma projesi (TÜBİTAK 2209-A). Hat: M1-C kuzey kanonikleştirici → donuk RoMa v2 → M2 oylama hacmi ve ret skoru →
-M3 split conformal kabul/ret ve güven dairesi → M4 parçacık filtresi.
+**Drone karesinden uydu haritasında konum ve yön — ve sistemin ne zaman emin olmadığını söyleyen bir güven ölçüsü.**
 
-**Test sonuçları (UAV-VisLoc 02 + 03 + 06, ön-kayıtlı, tek sefer — [docs/faz6_test.md](docs/faz6_test.md)):**
-H4 ✓ filtre medyan hatayı 208 → 28 m indiriyor (−%86,5, kapsama 0,906); H1 ✗ (M1-C test yön hatası 82°), H2 ✗,
-H3 ✗ (FAR-neg 0,088, kapsama 0,875). Satır 7 başarı@25 0,451, 684 ms/kare, en çok 3,6 GB GPU.
+TÜBİTAK 2209-A araştırma projesi · [UAV-VisLoc](https://github.com/IntelliSensing/UAV-VisLoc) veri kümesi · MIT lisanslı kod
 
-## Başlangıç
+![Mod 2 — uçuş oynatıcısı](docs/gorseller/mod2_ucus.jpg)
 
-Projenin mimarisi, fazları, ekip rolleri ve çalışma kuralları
-[MIMARI.md](MIMARI.md) dosyasında açıklanmıştır.
+*Prototipte bir test uçuşu (bölge 02, kare 761). Beyaz: GPS yörüngesi; mavi: parçacık filtresinin kestirimi ve güven
+dairesi; açık mavi noktalar: parçacıklar. Bu karede filtre hatası 17,7 m.*
 
-### Ekip geliştirme akışı
+## Ne yapıyor?
 
-1. `main` dalını güncel tutun.
-2. Her iş için `faz<N>/<kisa-ad>` biçiminde dal açın.
-3. Değişiklikleri Pull Request üzerinden gönderin.
-4. CI yeşil olmadan birleştirmeyin (tek geliştirici; ikinci kişi incelemesi aranmaz — MIMARI §3.1).
+GPS olmadan uçan bir drone'un kamerasındaki kareyi, kuzeyi yukarı bakan uydu görüntüsüyle eşleştirip drone'un nerede
+olduğunu ve hangi yöne baktığını bulur. Her adım bir modül:
 
-## Çalışma ortamı
+| Adım | Modül | Ne yapar |
+|---|---|---|
+| 1 | **M1-C** — yön tahmini | Drone karesinin uyduya göre kabaca kaç derece döndüğünü (0/90/180/270°) tahmin eder, eşleştiriciyi doğru açıyla çağırır |
+| 2 | **RoMa v2** — eşleştirici | Drone karesiyle uydu karosu arasında yoğun nokta eşleşmeleri bulur (önceden eğitilmiş, değiştirilmeden kullanılır) |
+| 3 | **M2** — oylama hacmi | Eşleşmelerden konum ve yön için bir olasılık haritası kurar; tepe noktası tahmin, yayılımı belirsizlik olur |
+| 4 | **M3** — conformal kabul/ret | Skor eşiğin altındaysa "eşleşme yok" der; kabul edilen her tahmine %90 hedefli bir güven dairesi çizer |
+| 5 | **M4** — parçacık filtresi | Ardışık kareler arasındaki hareketi kullanarak tek kare hatalarını süzer, yörüngeyi düzgünleştirir |
 
-Bütün işler (önbellek, tekrarlama, eğitim, değerlendirme) **üniversite sunucusunda**, makinenin başında yapılır:
-RTX 3090 24 GB, Ubuntu 22.04. Veri, önbellek ve sonuçlar yalnızca orada durur.
+## Sonuçlar
 
-## Kurulum (sunucu, Linux, Python 3.12)
+Dört hipotez veriye bakılmadan önce ölçütleriyle kaydedildi ve test bölgelerinde (02, 03, 06) **yalnızca bir kez**
+değerlendirildi; ölçütler sonradan değiştirilmedi. Ayrıntı: [docs/faz6_test.md](docs/faz6_test.md).
+
+| Hipotez | Ölçüt | Test sonucu | |
+|---|---|---|---|
+| **H4** filtre | medyan hatada ≥ %20 azalma, kapsama ≥ 0,88 | **208 → 28 m (−%86,5)**, kapsama 0,906 | ✓ |
+| **H1** yön tahmini | medyan yön hatası ≤ 10° | 82,4° (kalibrasyonda 8,9°) | ✗ |
+| **H2** ret skoru | inlier sayısı skoruna göre daha az yanlış kabul | daha fazla yanlış kabul | ✗ |
+| **H3** conformal | yanlış kabul ≤ 0,05, kapsama ≥ 0,88 | 0,088 ve 0,875 | ✗ |
+
+Ablasyon (test, 2.177 pozitif kare; tam tablo [ablation_test.md](docs/sonuclar/faz6/ablation_test.md)):
+
+| Sistem | Başarı (≤ 25 m, kabul edilmiş) | Medyan hata | Eşleştirici çağrısı/kare |
+|---|---|---|---|
+| RoMa v2 + RANSAC (taban) | 0,352 | 298 m | 1 |
+| 4 yönü dene, en iyisini seç | 0,399 | 37 m | 4 |
+| + M1-C yön tahmini | 0,377 | 120 m | 2,05 |
+| + M2 + M3 (tek kare, güvenli) | 0,352 | 208 m | 1 |
+| **+ M4 filtre (tam sistem)** | **0,451** | **28 m** | 1 |
+
+Hız (RTX 3090): tam sistem ≈ 684 ms/kare, en çok **3,6 GB GPU belleği** — 8 GB'lık bir kartta çalışır.
+
+## Demo
 
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
-pip install -r requirements.txt
-python scripts/00_check_env.py
-python scripts/01_roma_single_pair.py --setting mega1500
+python app/app.py            # http://127.0.0.1:7860 — ilk açılış ≈ 10 s
 ```
 
-İlk çalıştırma RoMa v2 ağırlıklarını (~1 GB) ve DINOv3 kodunu `~/.cache/torch/hub` altına indirir.
-Windows'ta: `py -3.12 -m venv .venv` ve `.\.venv\Scripts\Activate.ps1` (RTX 50 serisi için de cu128 şart).
-Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
+Uzak bir sunucuda çalışıyorsa: `ssh -L 7860:127.0.0.1:7860 kullanici@sunucu`, sonra tarayıcıda aynı adres.
 
-### Tek çift ölçümleri (sentetik çift)
+**Mod 1 — tek kare:** bölge ve kare seç (ya da kendi drone görüntünü yükle), *Konumlandır*'a bas. Uydu karosunda
+tahmin, yön oku, güven dairesi ve GPS konumu çizilir.
 
-| Ayar | çözünürlük (lr/hr) | GPU | süre/çift | en yüksek bellek | köşe hatası |
-|---|---|---|---|---|---|
-| mega1500 / wxbs | 800 / 1024 | **RTX 3090 (sunucu, 25.11)** | **0,54 s** | 7,1 GB | 0,32 px |
-| precise | 800 / 1280 | RTX 5060 Laptop 8 GB (23.11) | 3,7 s | 10,4 GB (8 GB'ı aşar) | 0,31 px |
-| mega1500 / wxbs | 800 / 1024 | RTX 5060 Laptop 8 GB | 2,1 s | 7,1 GB | 0,32 px |
-| base | 640 | RTX 5060 Laptop 8 GB | 0,31 s | 3,4 GB | 0,34 px |
-| fast | 512 | RTX 5060 Laptop 8 GB | 0,20 s | 2,6 GB | 0,33 px |
+| Kabul: hata 5 m, GPS dairenin içinde | Ret: tahmin 758 m uzakta, sistem "eşleşme yok" diyor |
+|---|---|
+| ![Mod 1 — kabul](docs/gorseller/mod1_kabul.jpg) | ![Mod 1 — ret](docs/gorseller/mod1_ret.jpg) |
 
-## Durum
+**Mod 2 — uçuş:** bölge seç, *Uçuşu yükle*, *▶ Oynat*. Haritada GPS ve filtre yörüngesi, parçacık bulutu, güven
+dairesi ve uydu eşleştirmesinin atlandığı kareler görünür (yukarıdaki görsel).
 
-- **Faz 0** tamam (ortam, RoMa v2 tek çift testi; 25.11'de sunucuda da doğrulandı). Hassasiyet birimi (0.4)
-  Faz 1'de çözüldü.
-- **Faz 1** (`faz1/altyapi`, PR #2): veri doğrulama, coğrafi altyapı, bölge ayrımı + çiftler, `matcher.py` +
-  önbellek, metrikler/istatistik, WxBS tekrarlaması tamam. Sunucuda (25–26.11): MegaDepth-1500 makaleyle ±0,2
-  içinde (62,98 / 76,96 / 86,55), C4 58,94 (hedef 53,45 Ge vd. 2026'da 576×576'da; fark çözünürlükten), tam önbellek `cache/v1` (86.620 dosya),
-  taban çizgisi tablosu `cache/v1` ile (satır 2 başarı@25 0,319), K1 kapandı (GT = CSV).
-  `sigma_scale` = 0,9272 (eğitim, NLL). Kalan: `v0.0`. Kılavuz: [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
-  **Özet, sorunlar ve bekleyen kararlar: [docs/faz1_durum.md](docs/faz1_durum.md).**
-  Ayrıntı ve komutlar: [docs/faz1_tekrarlama.md](docs/faz1_tekrarlama.md),
-  [docs/faz1_kalan_isler.md](docs/faz1_kalan_isler.md).
+<sub>Ekran görüntülerindeki drone kareleri ve uydu haritaları UAV-VisLoc veri kümesindendir (Xu vd., 2024; uydu
+haritaları Google Maps kaynaklı) ve yalnız tanıtım amacıyla, atıfla gösterilmiştir.</sub>
 
-- **Faz 2** (`v0.1`): M1-C göreli dönme (C8 eşdeğer, birleşim + TTA). Ayrıntı: [docs/faz2_m1.md](docs/faz2_m1.md).
-- **Faz 3** (`v0.2`): oylama hacmi v0, ret skoru S (h2_v3). Ayrıntı: [docs/faz3_m2.md](docs/faz3_m2.md).
-- **Faz 4** (`v0.3`): split conformal (`guvenloc/m3_conformal.py`), H3 ön-kaydı `configs/h3.yaml`, uçtan uca hat
-  `guvenloc/pipeline.py`:
-  ```
-  python scripts/67_m3_pipeline.py --export    # S + τ, q̂ → results/faz4/m3/m3_params_h3_v1.json
-  python scripts/67_m3_pipeline.py --e2e 100   # canlı M1-C + RoMa, önbellekle tutarlılık testi
-  ```
-  Girdi: drone karesi (RGB), kuzey-yukarı uydu karosu, `scale_s`, karo kenarı (m), M1-C dönme olasılıkları.
-  Çıktı: `Decision{xy, latlon, theta, sigma_hat, score, accept, radius_m}`. Ayrıntı: [docs/faz4_m3.md](docs/faz4_m3.md).
+## Kurulum
 
-- **Faz 5** (`faz5/m4`): parçacık filtresi `guvenloc/m4_filter.py`, H4 ön-kaydı `configs/h4.yaml`:
-  ```
-  python scripts/70_m4_sequences.py && python scripts/71_m4_measure.py   # diziler, kare ölçümleri
-  python scripts/72_m4_filter.py --tune --dry --gamma --traj               # ayar (eğitim), kuru deneme + γ (calib)
-  python scripts/73_m4_figures.py; python scripts/m4_izle_web.py           # görseller, izleme paneli :8765
-  ```
-  Ayrıntı: [docs/faz5_m4.md](docs/faz5_m4.md).
+Linux, Python 3.12, CUDA'lı NVIDIA GPU (≥ 8 GB önerilir).
 
-- **Faz 6** (`faz6/test`): test sonuçları ve ablasyon [docs/faz6_test.md](docs/faz6_test.md); prototip:
-  ```
-  python app/app.py          # Gradio, http://127.0.0.1:7860 (Mod 1 tek kare, Mod 2 uçuş)
-  ```
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
+pip install -r requirements.txt
+python scripts/00_check_env.py                         # ortam denetimi
+python -m pytest -q                                    # testler
+```
 
-Veri, önbellek ve sonuç dosyaları `.gitignore` ile dışarıda tutulur (`results/runs.csv` hariç); sonuç
-kopyaları `docs/sonuclar/` altındadır.
+İlk çalıştırma RoMa v2 ağırlıklarını (≈ 1 GB) ve DINOv3 kodunu `~/.cache/torch/hub` altına indirir.
 
 ## Veri ve sürüm paketi
 
@@ -115,7 +106,7 @@ Paketi açtıysanız M1 eğitimini (Faz 2) atlayabilirsiniz; çift listesi de pa
 | 4 M3 | `python scripts/64_m3_conformal.py`; `66_m3_decoy_pairs.py` + önbellek; `65_m3_decoy.py --real`; `67_m3_pipeline.py --export` | [docs/faz4_m3.md](docs/faz4_m3.md) |
 | 5 M4 | `python scripts/70_m4_sequences.py`; `71_m4_measure.py`; `72_m4_filter.py --tune --dry --gamma --traj`; `73_m4_figures.py` | [docs/faz5_m4.md](docs/faz5_m4.md) |
 | 6 test | `python scripts/80_final_prep.py`; `python scripts/81_freeze.py`; `python scripts/90_ablation.py --final` | [docs/faz6_test.md](docs/faz6_test.md) |
-| 6 hız | `python scripts/91_speed.py --n 60` | `results/faz6/speed.md` |
+| 6 hız | `python scripts/91_speed.py --n 60` | [speed.md](docs/sonuclar/faz6/speed.md) |
 
 **Test adımı hakkında:** `90_ablation.py --final`, `configs/final_manifest.json`'daki sha256'larla dondurulmuş
 girdileri doğrular ve her değerlendirmeden sonra kilit bırakır (`guvenloc/final_guard.py`, F6-1). Kendi makinenizde
@@ -125,8 +116,34 @@ test bölgelerine dokunmadan denemek için: `python scripts/90_ablation.py --reh
 
 Testler: `python -m pytest -q` (GPU testleri CI'da atlanır).
 
-## Lisans
+## Depo yapısı
 
-Kod **MIT** ([LICENSE](LICENSE)). Veri kümesi, RoMa v2 ve DINOv3 bu depoda dağıtılmaz, kendi koşullarıyla edinilir;
-ayrıntı ve atıf: [THIRD_PARTY.md](THIRD_PARTY.md). UAV-VisLoc'un lisansı belirtilmediği için depoda ve sürüm paketinde
-veri kümesinden hiçbir görüntü yoktur; M1 ağırlıkları ve meta veri yalnız araştırma amaçlıdır (F6-6).
+```
+guvenloc/      kütüphane: veri okuma, coğrafya, eşleştirici, M1–M4, uçtan uca hat (pipeline.py)
+scripts/       numaralı betikler — numara sırası çalıştırma sırasıdır (10 veri … 90 ablasyon)
+app/           Gradio prototipi
+configs/       bölge ayrımı, ön-kayıtlı hipotezler (h1–h4.yaml), test dondurma manifesti
+docs/          faz raporları ve kararlar; docs/sonuclar/ sonuç tablolarının kopyaları
+tests/         pytest
+```
+
+## Belgeler
+
+| | Belge | Sürüm |
+|---|---|---|
+| Mimari, fazlar, kurallar | [MIMARI.md](MIMARI.md), modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) | |
+| Faz 1 — veri, eşleştirici, önbellek, taban çizgileri | [faz1_durum.md](docs/faz1_durum.md), [faz1_tekrarlama.md](docs/faz1_tekrarlama.md) | v0.0 |
+| Faz 2 — M1-C yön tahmini | [faz2_m1.md](docs/faz2_m1.md) | v0.1 |
+| Faz 3 — M2 oylama hacmi, ret skoru | [faz3_m2.md](docs/faz3_m2.md) | v0.2 |
+| Faz 4 — M3 conformal, uçtan uca hat | [faz4_m3.md](docs/faz4_m3.md) | v0.3 |
+| Faz 5 — M4 parçacık filtresi | [faz5_m4.md](docs/faz5_m4.md) | v0.4 |
+| Faz 6 — test, ablasyon, hız, prototip, açık kaynak | [faz6_test.md](docs/faz6_test.md) | v1.0 |
+
+Her faz belgesinde karar tablosu (F*x*-*y*: ne, neden) ve sonuç tabloları var.
+
+## Lisans ve atıf
+
+Kod **MIT** ([LICENSE](LICENSE)); atıf bilgisi [CITATION.cff](CITATION.cff). Veri kümesi, RoMa v2 ve DINOv3 bu depoda
+dağıtılmaz, kendi koşullarıyla edinilir: [THIRD_PARTY.md](THIRD_PARTY.md). UAV-VisLoc'un lisansı belirtilmediği için
+depoda veri kümesinden yalnız yukarıdaki tanıtım ekran görüntüleri vardır; M1 ağırlıkları ve meta veri yalnız
+araştırma amaçlıdır (F6-6).
