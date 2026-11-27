@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "Bu yazılımı kullanırsanız lütfen aşağıdaki gibi atıf yapın; veri kümesi için THIRD_PARTY.md'deki UAV-VisLoc atfı."
+title: "GüvenLoc: drone karesinden uydu haritasında güvenilir konum (TÜBİTAK 2209-A)"
+version: "1.0"
+date-released: 2026-11-27
+license: MIT
+repository-code: "https://github.com/efsunboz16/guvenloc"
+authors:
+  - name: "GüvenLoc proje ekibi"

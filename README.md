@@ -1,7 +1,12 @@
 # GüvenLoc
 
 Drone görüntülerini uydu haritalarıyla eşleştirerek konum ve yön tahmini yapan
-araştırma projesi.
+araştırma projesi (TÜBİTAK 2209-A). Hat: M1-C kuzey kanonikleştirici → donuk RoMa v2 → M2 oylama hacmi ve ret skoru →
+M3 split conformal kabul/ret ve güven dairesi → M4 parçacık filtresi.
+
+**Test sonuçları (UAV-VisLoc 02 + 03 + 06, ön-kayıtlı, tek sefer — [docs/faz6_test.md](docs/faz6_test.md)):**
+H4 ✓ filtre medyan hatayı 208 → 28 m indiriyor (−%86,5, kapsama 0,906); H1 ✗ (M1-C test yön hatası 82°), H2 ✗,
+H3 ✗ (FAR-neg 0,088, kapsama 0,875). Satır 7 başarı@25 0,451, 684 ms/kare, en çok 3,6 GB GPU.
 
 ## Başlangıç
 
@@ -82,10 +87,45 @@ Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
   python app/app.py          # Gradio, http://127.0.0.1:7860 (Mod 1 tek kare, Mod 2 uçuş)
   ```
 
-Veri, önbellek ve sonuç dosyaları `.gitignore` ile dışarıda tutulur (`results/runs.csv` hariç);
-veri lisansları doğrulanmadan paylaşılmaz.
+Veri, önbellek ve sonuç dosyaları `.gitignore` ile dışarıda tutulur (`results/runs.csv` hariç); sonuç
+kopyaları `docs/sonuclar/` altındadır.
+
+## Veri ve sürüm paketi
+
+1. **UAV-VisLoc** (16,4 GB, Google Drive sürümü): `bash scripts/10_download_data.sh` yönergesiyle
+   `data/UAV_VisLoc_dataset/` altına; doğrulama `python scripts/11_verify_data.py data/UAV_VisLoc_dataset --expect-frames 6774 --expect-maps 11 --checksums`.
+2. **Sürüm paketi** `guvenloc-v1.0-paket.tar.gz` (GitHub Release eki, ≈ 145 MB; görüntü içermez): M1-C ağırlıkları,
+   çift listesi, M1 etiketleri, M3 parametreleri. `python scripts/95_release.py --unpack guvenloc-v1.0-paket.tar.gz`
+   sha256'ları doğrular ve dosyaları yerlerine koyar. Paket bu depodan `python scripts/95_release.py` ile üretilir.
+
+## Tabloları yeniden üretme
+
+Sıra önemlidir (her adım öncekinin çıktısını okur). Ağır adımların süresi RTX 3090'da verilmiştir.
+Paketi açtıysanız M1 eğitimini (Faz 2) atlayabilirsiniz; çift listesi de pakettekiyle aynıdır.
+
+| Faz | Komut | Çıktı / tablo |
+|---|---|---|
+| 1 veri | `python scripts/14_make_pairs.py data/UAV_VisLoc_dataset` | `data/pairs/pairs_v1.csv` (sha256 `docs/checksums/`) |
+| 1 tekrarlama | `python scripts/20_repro_mega1500.py --data data/megadepth --seeds 0 1 2 3 4` (`--c4` ile C4); `python scripts/21_repro_wxbs.py --seeds 0 1 2 3 4` | [docs/faz1_tekrarlama.md](docs/faz1_tekrarlama.md) |
+| 1 önbellek | `python scripts/30_build_cache.py data/UAV_VisLoc_dataset --split {train,calib,test}` ve `--seq`; `python scripts/31_verify_cache.py cache/v1` (≈ 10 saat) | `cache/v1` (RoMa v2 eşleşmeleri) |
+| 1 taban çizgisi | `python scripts/40_baselines.py feats --cache cache/v1 --split train --ransac-px 3 5 8` (ve calib), `select`, `eval --split calib`; `python scripts/42_sigma_scale.py --cache cache/v1` | satır 1–3, `configs/baselines.yaml` |
+| 2 M1 | `python scripts/50_m1_labels.py --cache cache/v1`; `51_m1_prep.py`; `54_m1c_prep.py --gercek --ek 3`; `bash scripts/55_m1c_v2_zincir.sh` (`55_m1c_train.py --veri gercek4 --epochs 12 --batch 32`, sonra `--only D2_olcek_rot90 --seeds 1 2`); her tohum için `56_m1c_roma.py --model D2_olcek_rot90[_s1,_s2] --sec`; `57_m1c_2e.py`; `58_m1c_ens.py` | [docs/faz2_m1.md](docs/faz2_m1.md) |
+| 3 M2 | `python scripts/60_m2_features.py --splits train calib`; `python scripts/61_m2_score.py` | [docs/faz3_m2.md](docs/faz3_m2.md) |
+| 4 M3 | `python scripts/64_m3_conformal.py`; `66_m3_decoy_pairs.py` + önbellek; `65_m3_decoy.py --real`; `67_m3_pipeline.py --export` | [docs/faz4_m3.md](docs/faz4_m3.md) |
+| 5 M4 | `python scripts/70_m4_sequences.py`; `71_m4_measure.py`; `72_m4_filter.py --tune --dry --gamma --traj`; `73_m4_figures.py` | [docs/faz5_m4.md](docs/faz5_m4.md) |
+| 6 test | `python scripts/80_final_prep.py`; `python scripts/81_freeze.py`; `python scripts/90_ablation.py --final` | [docs/faz6_test.md](docs/faz6_test.md) |
+| 6 hız | `python scripts/91_speed.py --n 60` | `results/faz6/speed.md` |
+
+**Test adımı hakkında:** `90_ablation.py --final`, `configs/final_manifest.json`'daki sha256'larla dondurulmuş
+girdileri doğrular ve her değerlendirmeden sonra kilit bırakır (`guvenloc/final_guard.py`, F6-1). Kendi makinenizde
+yeniden ürettiğiniz ara dosyalar bayt düzeyinde aynı olmayabilir; bu durumda önce `81_freeze.py` ile kendi
+manifestinizi yazın. Bizim manifestimiz pakette `params/final_manifest.json` olarak durur. Aynı tablo kodunu
+test bölgelerine dokunmadan denemek için: `python scripts/90_ablation.py --rehearse` (calib).
+
+Testler: `python -m pytest -q` (GPU testleri CI'da atlanır).
 
 ## Lisans
 
-Lisans kararı, veri setlerinin ve kullanılan modellerin lisans koşulları
-incelendikten sonra verilecektir.
+Kod **MIT** ([LICENSE](LICENSE)). Veri kümesi, RoMa v2 ve DINOv3 bu depoda dağıtılmaz, kendi koşullarıyla edinilir;
+ayrıntı ve atıf: [THIRD_PARTY.md](THIRD_PARTY.md). UAV-VisLoc'un lisansı belirtilmediği için depoda ve sürüm paketinde
+veri kümesinden hiçbir görüntü yoktur; M1 ağırlıkları ve meta veri yalnız araştırma amaçlıdır (F6-6).

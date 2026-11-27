@@ -37,3 +37,6 @@ Thumbs.db
 
 # Uzun koşuların günlükleri
 logs/
+
+# Sürüm paketi (scripts/95_release.py; GitHub Release eki olarak yayımlanır)
+dist/

@@ -12,6 +12,7 @@ Test bölgeleri 02, 03, 06 (6.525 çift, 2.177 pozitif kare). Ön-kayıtlar: `co
 | F6-3 | **Ablasyon tanımları (testten önce):** satır 4 = 4e (H1 satırı); satır 5 = M1-C 4a dönmesi, konum hacim tepesi, skor S, eşik h2 calib eşlemesi; satır 6 = aynı konum, kabul S > τ (conformal), yarıçap q̂σ̂; satır 7 = filtre, yalnız pozitif kareler (negatif çift kavramı yok). Başarı@k = kabul ∧ hata ≤ k; medyan hata tüm pozitiflerde kabulden bağımsız; AUROC skor ~ (pozitif ∧ hata ≤ 25 m, satırın kendi konumu). Ardışık satırlar 2–1, 3–2, 4–2, 5–4, 6–5, 7–6: McNemar + Wilcoxon, 12 test birlikte Holm. Kırılımlar: arazi, irtifa (eğitim+calib AGL üçte birlik sınırları), yön (en yakın ana yön), bölge | Satır tanımları MIMARI 6A'yı izler; H2'nin ortak etiketi (RANSAC merkezi) ret skorunu sınar, ablasyonun satır 5'i ise M2'nin konumunu kullanır (ikisi ayrı raporlanır) |
 | F6-4 | **Test bir kez koşuldu (27.11, `scripts/90_ablation.py --final`), kilitler yerinde; sonuçlar olduğu gibi raporlanır.** Koşudan sonra M1-C'nin test yön hatası (82,4°) calib'e (8,9°) göre şüpheli bulundu ve kod yolu ayrıca denetlendi: test olasılıkları bağımsız canlı yoldan (`67.M1Live`, 4G'de calib'de %100 uyuşan) 12 çiftte yeniden hesaplandı, sonuçlar birebir aynı → kod hatası yok, yeniden koşu yok | F6-1: kilit yalnız kod hatasında açılır; hata bulunmadı |
 | F6-5 | **Prototip tasarımı (6C):** Gradio 6.32, `app/` (hesap `core.py`, arayüz `app.py`), yalnız 127.0.0.1. Mod 1 canlı hat (M1-C → RoMa → M2 → M3, `pipeline.Localizer`, h3_v1 parametreleri); karo = seçilen karenin veri kümesindeki pozitif uydu karosu (yüklenen görüntü de bu karoyla eşleştirilir; serbest konumdan karo arama kapsam dışı). Mod 2 filtreyi önceden hesaplanmış kare ölçümleriyle (71/80) dondurulmuş ayar, κ ve γ ile canlı koşar (bölge başına < 1 s) | Karo arama (konum önceliğinden karo seçimi) projenin kapsamında değil: bütün deneyler pozitif karo protokolüyle; prototip aynı protokolü gösteriyor |
+| F6-6 | **Açık kaynak kapsamı (6D):** kod MIT; UAV-VisLoc'un lisansı belirtilmemiş (GitHub deposunda lisans yok, README yalnız atıf istiyor; arXiv'deki CC0 makale metnini kapsar, veriyi değil; uydu haritaları Google Maps kaynaklı) → depoda ve sürüm paketinde veri kümesinden **hiçbir piksel yok** (görüntü, karo, kırpıntı, `data/m1/*.npy`, `cache/`); paylaşılan: dosya adı listeleri ve bizim türettiğimiz geometri/etiketler (`pairs_v1`, `decoy_v1`, `labels_v2`, `split.yaml`), M1-C ağırlıkları (sıfırdan eğitilmiş, yalnız tensör + cfg), M3 parametreleri, dondurma manifesti; hepsi "yalnız araştırma amaçlı, UAV-VisLoc'a atıfla". RoMa v2 (MIT) ve DINOv3 (Meta DINOv3 License) dağıtılmaz, çalışma anında indirilir. Yazarlara bilgi/izin e-postası taslağı `docs/uav_visloc_eposta.md`; ağırlıklar ve meta veri yanıt gelene kadar da bu kapsamla yayımlanabilir, yazarlar itiraz ederse paket geri çekilir | MIMARI 6D: "lisans koşulları kontrol edilir; gerekirse yazarlara danışılır". Lisanssız veride görüntüyü yeniden dağıtmak riskli, dosya adı listesi ve türetilmiş sayılar alandaki yaygın uygulama (MIMARI 1C: "açık kaynak paylaşılacak olan bu dosyadır, görüntüler değil") |
 
 ## 6A. Test sonuçları (`docs/sonuclar/faz6/`)
 
@@ -91,4 +92,19 @@ python app/app.py          # http://127.0.0.1:7860 — RoMa v2 base, ≈ 3,6 GB 
   ve filtre yörüngesi, parçacık bulutu, κ·yayılım güven dairesi, tek kare tahminleri (M3 kabul/ret), uydu eşleştirmesi
   atlanan kareler (γ = 50 m); tablo: kare ve birikimli hata, atlanan oran, kabul oranı, kapsama, sıfırlamalar.
 - Uç noktalar `gradio_client` ile denendi (`/run_single`, `/load_flight`, `/tick`). Demo videosu bu arayüzden kaydedilir.
+
+## 6D. Açık kaynak paketi
+
+- **Kod:** `LICENSE` (MIT), `THIRD_PARTY.md` (veri ve model lisansları, UAV-VisLoc atfı), `CITATION.cff`.
+- **README:** test sonuçları özeti, veri edinme, sürüm paketi, bütün tabloları sırayla üreten komutlar (Faz 1–6) ve
+  test adımının dondurma/kilit notu (dışarıda yeniden üretimde kendi `81_freeze.py` manifestiyle).
+- **Sürüm paketi** `python scripts/95_release.py` → `dist/guvenloc-v1.0-paket.tar.gz` (144,7 MB, 14 dosya + README,
+  LICENSE, SHA256SUMS): `weights/` M1-C × 3 + q seçimleri, `meta/` split, pairs_v1, decoy_v1, M1 etiketleri, etiket
+  düzeltmesi, `params/` M3 parametreleri + manifest. Betik her dosyayı denetler (görüntü/dizi uzantısı yok, ağırlıkta
+  yalnız `state_dict/lr/cfg/sat_pool`, yerel yol yok); `--unpack` sha256'ları doğrulayıp dosyaları depo yerlerine
+  koyar (geri açma denendi, manifest bozulmadı). GitHub Release eki olarak yüklenir (`.pt` ve `data/` git'te yok).
+- **Önbellek üretimi:** `scripts/30_build_cache.py` + `31_verify_cache.py` (README tablosu). M1-C eğitim zinciri
+  `scripts/55_m1c_v2_zincir.sh`.
+- **Kalan (dışa dönük, kullanıcı onayıyla):** depoyu herkese açmak, `v1.0` etiketi + Release eki, yazarlara e-posta.
+  Herkese açmadan önce: git geçmişindeki commit e-posta adresleri görünür olur (kod içinde sır/anahtar taraması temiz).
 
