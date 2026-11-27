@@ -69,6 +69,14 @@ Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
   Girdi: drone karesi (RGB), kuzey-yukarı uydu karosu, `scale_s`, karo kenarı (m), M1-C dönme olasılıkları.
   Çıktı: `Decision{xy, latlon, theta, sigma_hat, score, accept, radius_m}`. Ayrıntı: [docs/faz4_m3.md](docs/faz4_m3.md).
 
+- **Faz 5** (`faz5/m4`): parçacık filtresi `guvenloc/m4_filter.py`, H4 ön-kaydı `configs/h4.yaml`:
+  ```
+  python scripts/70_m4_sequences.py && python scripts/71_m4_measure.py   # diziler, kare ölçümleri
+  python scripts/72_m4_filter.py --tune --dry --gamma --traj               # ayar (eğitim), kuru deneme + γ (calib)
+  python scripts/73_m4_figures.py; python scripts/m4_izle_web.py           # görseller, izleme paneli :8765
+  ```
+  Ayrıntı: [docs/faz5_m4.md](docs/faz5_m4.md).
+
 Veri, önbellek ve sonuç dosyaları `.gitignore` ile dışarıda tutulur (`results/runs.csv` hariç);
 veri lisansları doğrulanmadan paylaşılmaz.
 

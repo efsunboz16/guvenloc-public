@@ -45,6 +45,8 @@ def steps() -> list[dict]:
     meas = sorted(R5.glob("meas_*.npz"))
     tune = jload(R5 / "tune.json")
     dry = jload(R5 / "h4_dry.json")
+    gm = jload(R5 / "gamma.json")
+    pngs = sorted((ROOT / "results/faz5").glob("*.png"))
     return [
         {"id": "5A", "name": "Uçuş dizileri, drone↔drone hareket", "done": (R5 / "seq_summary.json").exists(),
          "detail": "70_m4_sequences.py"},
@@ -54,8 +56,10 @@ def steps() -> list[dict]:
          "detail": f"{len(tune['grid'])} ayar denendi" if tune else "72 --tune"},
         {"id": "5B·3", "name": "H4 kuru denemesi (calib)", "done": dry is not None, "detail": "72 --dry"},
         {"id": "5C", "name": "γ eşikli uydu eşleştirmesi", "done": (R5 / "gamma.json").exists(),
-         "detail": "sırada"},
-        {"id": "5D", "name": "Görseller (yörünge, bulut)", "done": any(R5.glob("*.png")), "detail": "sırada"},
+         "detail": f"γ = {gm['selected']} m, atlanan {next(x for x in gm['grid'] if x['gamma'] == gm['selected'])['skip_rate']:.0%}"
+         if gm else "72 --gamma"},
+        {"id": "5D", "name": "Görseller (yörünge, bulut)", "done": bool(pngs),
+         "detail": f"{len(pngs)} görsel (73_m4_figures.py)" if pngs else "73_m4_figures.py"},
         {"id": "F6", "name": "Test (02, 03, 06), tek sefer", "done": False, "detail": "Faz 6"},
     ]
 

@@ -2,6 +2,7 @@
 
   python scripts/72_m4_filter.py --tune     # eğitim bölgeleri (01, 04, 08, 09, 10): ızgara → results/faz5/m4/tune.json
   python scripts/72_m4_filter.py --dry      # seçilen ayarla calib (05, 11): satır 6 / 7 / 7-noupd / 7-cv, κ
+  python scripts/72_m4_filter.py --gamma    # 5C: γ eşikli uydu eşleştirmesi, calib (F5-6) → gamma.md / .json
   python scripts/72_m4_filter.py --traj     # seçilen ayarla eğitim + calib yörüngeleri → traj.csv (izleme paneli)
   (test bölgeleri 02, 03, 06: Faz 6, tek sefer — bu betik reddeder)
 
@@ -75,12 +76,13 @@ def load_region(rid: str, params: dict) -> dict:
             "q": float(params["q"][0])}
 
 
-def run(R: dict, cfg: F.FilterCfg, mode: str = "7") -> pd.DataFrame:
-    """mode: 7 (plan), 7-noupd (M3 reddinde de güncelle), 7-cv (sabit hız; drone↔drone eşleşmesi kullanılmaz)."""
+def run(R: dict, cfg: F.FilterCfg, mode: str = "7", gamma: float = 0.0, snaps: dict | None = None) -> pd.DataFrame:
+    """mode: 7 (plan), 7-noupd (M3 reddinde de güncelle), 7-cv (sabit hız; drone↔drone eşleşmesi kullanılmaz).
+    gamma (5C, F5-6): tahminden sonra yayılım (ağırlıklı RMS, m) ≤ γ ise uydu eşleştirmesi yapılmaz (matched = False)."""
     d, pf = R["d"], F.ParticleFilter(cfg)
     rows, prev = [], []
     for k, r in enumerate(d.itertuples()):
-        acc, reset = bool(r.accept), False
+        acc, reset, matched = bool(r.accept), False, True
         if pf.started:
             mv = R["motion"][k]
             if mode == "7-cv" or mv is None:                # B planı: son iki filtre kestiriminden hız
@@ -90,10 +92,12 @@ def run(R: dict, cfg: F.FilterCfg, mode: str = "7") -> pd.DataFrame:
                     pf.predict_en(0.0, 0.0, 0.0)
             else:
                 pf.predict(*mv)
+            if gamma > 0 and pf.estimate()["std_m"] <= gamma:
+                matched, acc = False, False                 # uydu eşleştirmesi atlandı: yalnız tahmin
             if acc and np.isfinite(R["single"][k][0]) and pf.explains(R["meas"][k]) < cfg.reset_lik:
                 pf.init(*R["single"][k], R["q"] * r.sigma_hat, r.theta)      # sensör sıfırlaması
                 reset = True
-            elif acc or mode == "7-noupd":
+            elif acc or (mode == "7-noupd" and matched):
                 pf.update(R["meas"][k], r.theta if acc else None)
             est = pf.estimate()
             xy, spread, started = (est["e"], est["n"]), est["spread_q90_m"], True
@@ -104,9 +108,11 @@ def run(R: dict, cfg: F.FilterCfg, mode: str = "7") -> pd.DataFrame:
         else:
             xy, spread, started = tuple(R["single"][k]), np.nan, False
         prev.append(xy)
+        if snaps is not None and r.num in snaps and pf.started:   # 5D: parçacık bulutu anlık görüntüsü
+            snaps[r.num] = (pf.x[:, :2].copy(), pf.w.copy())
         g = R["gt"][k]
         rows.append({"region": r.region, "num": r.num, "accept": acc, "started": started,
-                     "reset": reset,
+                     "reset": reset, "matched": matched,
                      "err6": float(np.hypot(*(R["single"][k] - g))), "err7": float(np.hypot(xy[0] - g[0], xy[1] - g[1])),
                      "spread": spread, "radius6": R["q"] * r.sigma_hat,
                      "e6": float(R["single"][k][0]), "n6": float(R["single"][k][1]), "e7": float(xy[0]),
@@ -203,6 +209,49 @@ def dry(params: dict, h4: dict) -> int:
     return 0
 
 
+GAMMAS = [0, 25, 50, 75, 100, 150, 200, 300, 500]
+
+
+def gamma_sweep(params: dict, h4: dict) -> int:
+    """5C (F5-6): γ ızgarası calib'de; κ = F5-5 (h4_dry.json havuz), ayar tune.json. Kural: med ≤ 1,05 × med(γ=0)
+    ve kapsama ≥ 0,88 olan en büyük γ."""
+    cfg = F.FilterCfg(**json.loads((OUT / "tune.json").read_text(encoding="utf-8"))["selected"])
+    kappa = json.loads((OUT / "h4_dry.json").read_text(encoding="utf-8"))["7"]["pooled_in_sample"]["kappa"]
+    regs = {r: load_region(r, params) for r in h4["calibration_regions"]}
+    res = []
+    for gm in GAMMAS:
+        df = pd.concat([run(R, cfg, "7", float(gm)) for R in regs.values()], ignore_index=True)
+        s = df[df.started]
+        res.append({"gamma": gm, "med7": float(df.err7.median()), "med6": float(df.err6.median()),
+                    "match_rate": float(df.matched.mean()), "skip_rate": float(1 - df.matched.mean()),
+                    "coverage7": float((s.err7 <= kappa * s.spread).mean()),
+                    "succ25": float((df.err7 <= 25).mean()), "succ50": float((df.err7 <= 50).mean()),
+                    "per_region": {r: {"med7": float(g.err7.median()), "skip": float(1 - g.matched.mean())}
+                                   for r, g in df.groupby("region")}})
+        print(f"γ = {gm}: medyan {res[-1]['med7']:.1f} m, atlanan {res[-1]['skip_rate']:.3f}, "
+              f"kapsama {res[-1]['coverage7']:.3f}", flush=True)
+    base = res[0]["med7"]
+    ok = [x for x in res if x["med7"] <= 1.05 * base and x["coverage7"] >= h4["criteria"]["coverage_min"]]
+    sel = max(ok, key=lambda x: x["gamma"])["gamma"] if ok else 0
+    L = ["# Faz 5C — γ eşikli uydu eşleştirmesi (calib 05 + 11), F5-6", "",
+         (f"Filtre ayarı `tune.json`, κ = {kappa:.2f} (F5-5). Tahminden sonra yayılım ≤ γ → uydu eşleştirmesi yok. "
+         "Kural: medyan ≤ 1,05 × medyan(γ = 0) ve kapsama ≥ 0,88 olan en büyük γ."), "",
+         "| γ (m) | uydu eşleştirmesi | atlanan | medyan hata | başarı@25 | başarı@50 | kapsama | 05 / 11 medyan | kural |",
+         "|---|---|---|---|---|---|---|---|---|"]
+    for x in res:
+        ok_x = x["med7"] <= 1.05 * base and x["coverage7"] >= h4["criteria"]["coverage_min"]
+        pr = x["per_region"]
+        L.append(f"| {x['gamma']} | {x['match_rate']:.3f} | {x['skip_rate']:.3f} | {x['med7']:.1f} m | {x['succ25']:.3f} | "
+                 f"{x['succ50']:.3f} | {x['coverage7']:.3f} | {pr['05']['med7']:.0f} / {pr['11']['med7']:.0f} m | "
+                 f"{'✓' if ok_x else '✗'}{' **seçilen**' if x['gamma'] == sel else ''} |")
+    L += ["", f"Tek kare (satır 6) medyanı {res[0]['med6']:.1f} m. **Seçilen γ = {sel} m.**"]
+    (OUT / "gamma.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+    (OUT / "gamma.json").write_text(json.dumps({"selected": sel, "kappa": kappa, "grid": res}, indent=2,
+                                               ensure_ascii=False), encoding="utf-8")
+    print("\n".join(L))
+    return 0
+
+
 def traj(params: dict, h4: dict) -> None:
     cfg = F.FilterCfg(**json.loads((OUT / "tune.json").read_text(encoding="utf-8"))["selected"])
     regs = h4["tuning_regions"] + h4["calibration_regions"]
@@ -218,11 +267,14 @@ def main() -> int:
     ap.add_argument("--tune", action="store_true")
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--traj", action="store_true")
+    ap.add_argument("--gamma", action="store_true")
     a = ap.parse_args()
     h4 = yaml.safe_load(Path("configs/h4.yaml").read_text(encoding="utf-8"))
     params = json.loads(Path("results/faz4/m3/m3_params_h3_v1.json").read_text(encoding="utf-8"))
     if a.tune:
         tune(params, h4)
+    if a.gamma:
+        return gamma_sweep(params, h4)
     if a.traj:
         traj(params, h4)
     if a.dry:
