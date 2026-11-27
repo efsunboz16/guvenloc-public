@@ -1,0 +1,12 @@
+# Faz 6 — test değerlendirmesi, ablasyon, hız, prototip, açık kaynak
+
+Test bölgeleri 02, 03, 06 (6.525 çift, 2.177 pozitif kare). Ön-kayıtlar: `configs/h1.yaml` (h1_v3), `h2.yaml` (h2_v3),
+`h3.yaml` (h3_v1), `h4.yaml` (h4_v1). Bu belge test sonuçlarından ÖNCE başlatıldı; F6-1…F6-3 testten önce commit edildi.
+
+## Kararlar (27.11)
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| F6-1 | **Test protokolü: hazırla → dondur → tek sefer.** (1) `scripts/80_final_prep.py` test girdilerini etiket özetlemeden üretir (RANSAC/hacim öznitelikleri, M1-C olasılıkları, drone↔drone hareket, filtre ölçümleri); (2) `scripts/81_freeze.py` değerlendirmeyi etkileyen her dosyanın sha256'sını `configs/final_manifest.json`'a yazar, commit edilir; (3) `scripts/90_ablation.py --final` H1 (56) → H2 (61) → H3 (64) → H4 (72) → ablasyonu sırayla koşar. Her adım `guvenloc/final_guard` ile manifesti doğrular ve kilit bırakır; ikinci koşu reddedilir. Kilidi elle silmek ancak kod hatası için, gerekçesi buraya karar olarak yazılarak | MIMARI 6A: "final_eval yalnızca bu fazda ve tek sefer, dondurulmuş config ile". Kilit, testi görüp ayar değiştirip yeniden koşmayı mekanik olarak engeller |
+| F6-2 | **Test kodu calib'de prova edildi ve birebir doğrulandı (testten önce).** Teste genişletilen betikler calib'de eski sonuçları aynen üretiyor: 56 (H1) karar dosyası bayt bayt aynı; 61 (H2) 117 alanın hepsi aynı; 64 (H3) `--rehearse` 05+11 → 05+11 satır 6 aynı; 72 (H4) `--rehearse` satır 7 ve 7-γ Faz 5 calib ile aynı. Testte eşikler/parametreler calib ve eğitimden gelir, testte hiçbir şey seçilmez: satır 1–3 τ eğitim, 4e q val 04, 5a ve 2v τ calib'de 4a başarısına eşlenmiş (h2), M3 τ/q̂ calib (F4-7), M4 ayar eğitim, κ ve γ calib (F5-5, F5-7) | Testte tek koşu hakkı olduğundan kod yolu önceden doğrulanmalıydı |
+| F6-3 | **Ablasyon tanımları (testten önce):** satır 4 = 4e (H1 satırı); satır 5 = M1-C 4a dönmesi, konum hacim tepesi, skor S, eşik h2 calib eşlemesi; satır 6 = aynı konum, kabul S > τ (conformal), yarıçap q̂σ̂; satır 7 = filtre, yalnız pozitif kareler (negatif çift kavramı yok). Başarı@k = kabul ∧ hata ≤ k; medyan hata tüm pozitiflerde kabulden bağımsız; AUROC skor ~ (pozitif ∧ hata ≤ 25 m, satırın kendi konumu). Ardışık satırlar 2–1, 3–2, 4–2, 5–4, 6–5, 7–6: McNemar + Wilcoxon, 12 test birlikte Holm. Kırılımlar: arazi, irtifa (eğitim+calib AGL üçte birlik sınırları), yön (en yakın ana yön), bölge | Satır tanımları MIMARI 6A'yı izler; H2'nin ortak etiketi (RANSAC merkezi) ret skorunu sınar, ablasyonun satır 5'i ise M2'nin konumunu kullanır (ikisi ayrı raporlanır) |

@@ -3,6 +3,7 @@
   python scripts/72_m4_filter.py --tune     # eğitim bölgeleri (01, 04, 08, 09, 10): ızgara → results/faz5/m4/tune.json
   python scripts/72_m4_filter.py --dry      # seçilen ayarla calib (05, 11): satır 6 / 7 / 7-noupd / 7-cv, κ
   python scripts/72_m4_filter.py --gamma    # 5C: γ eşikli uydu eşleştirmesi, calib (F5-6) → gamma.md / .json
+  python scripts/72_m4_filter.py --final    # Faz 6: test (02, 03, 06), tek sefer
   python scripts/72_m4_filter.py --traj     # seçilen ayarla eğitim + calib yörüngeleri → traj.csv (izleme paneli)
   (test bölgeleri 02, 03, 06: Faz 6, tek sefer — bu betik reddeder)
 
@@ -38,12 +39,13 @@ GRID = {"lik_power": [0.5, 1.0, 2.0], "sigma_pos_rate": [0.1, 0.2, 0.3], "eps": 
 ODO_WIN, ODO_LO, ODO_HI = 5, 0.5, 2.0       # F5-3: odometri kapısı (adım uzunluğu son 5 iyi adımın medyanına göre)
 
 
-def load_region(rid: str, params: dict) -> dict:
-    if rid in TEST:
+def load_region(rid: str, params: dict, final: bool = False) -> dict:
+    if rid in TEST and not final:
         sys.exit("test bölgeleri Faz 6'da (h4.yaml)")
     d = pd.read_csv(OUT / f"meas_{rid}.csv", dtype={"region": str}).sort_values("num").reset_index(drop=True)
     P = np.load(OUT / f"meas_{rid}.npz")["P"]
-    seq = pd.read_csv(OUT / "seq_stats.csv", dtype={"region": str})
+    seq = pd.read_csv(Path("results/faz6/prep/seq_motion_test.csv") if rid in TEST else OUT / "seq_stats.csv",
+                      dtype={"region": str})
     seq = seq[seq.region == rid].set_index("t1")
     lat0, lon0 = float(d.tile_lat[0]), float(d.tile_lon[0])
     ge, gn = F.enu(lat0, lon0, d.drone_lat, d.drone_lon)
@@ -252,6 +254,60 @@ def gamma_sweep(params: dict, h4: dict) -> int:
     return 0
 
 
+def final(params: dict, h4: dict, rehearse: bool = False) -> int:
+    """H4 TEST (02, 03, 06): tune.json ayarı, tohum 0, κ (F5-5) ve γ (F5-7) sabit; yeniden ayar yok.
+    rehearse: aynı kod calib bölgelerinde, koruyucusuz, results/faz6/rehearsal/ (kod doğrulaması)."""
+    from guvenloc import final_guard
+    if not rehearse:
+        final_guard.check("72_h4")
+    cfg = F.FilterCfg(**json.loads((OUT / "tune.json").read_text(encoding="utf-8"))["selected"])
+    kappa = json.loads((OUT / "h4_dry.json").read_text(encoding="utf-8"))["7"]["pooled_in_sample"]["kappa"]
+    gamma = float(json.loads((OUT / "gamma.json").read_text(encoding="utf-8"))["selected"])
+    regs = {r: load_region(r, params, final=True)
+            for r in (h4["calibration_regions"] if rehearse else sorted(TEST))}
+    fo = Path("results/faz6/rehearsal" if rehearse else "results/faz6/final")
+    fo.mkdir(parents=True, exist_ok=True)
+    crit = h4["criteria"]
+    res = {}
+    for mode, gm in (("7", 0.0), ("7-noupd", 0.0), ("7-cv", 0.0), ("7-γ", gamma)):
+        dfs = {r: run(R, cfg, "7" if mode == "7-γ" else mode, gm) for r, R in regs.items()}
+        df = pd.concat(dfs.values(), ignore_index=True)
+        df.to_csv(fo / f"h4_test_{mode}.csv", index=False)
+        res[mode] = {"pooled": summarize(df, kappa) | {"skip_rate": float(1 - df.matched.mean())}}
+        for r, g in dfs.items():
+            res[mode][r] = summarize(g, kappa) | {"skip_rate": float(1 - g.matched.mean())}
+    v = res["7"]["pooled"]
+    h4res = {"reduction": v["reduction"], "wilcoxon_p": v["wilcoxon_p"], "coverage": v["coverage7"],
+             "i": v["reduction"] >= crit["median_reduction_min"] and v["wilcoxon_p"] < crit["wilcoxon_p_max"],
+             "ii": v["coverage7"] >= crit["coverage_min"]}
+    h4res["H4"] = bool(h4res["i"] and h4res["ii"])
+    L = [f"# Faz 6 — H4 {'PROVA (calib)' if rehearse else 'TEST (02, 03, 06)'}, `configs/h4.yaml`", "",
+         f"Filtre ayarı `tune.json` (tohum 0), κ = {kappa:.2f} (F5-5), γ = {gamma:.0f} m (F5-7, satır 7-γ). Tek sefer.", "",
+         ("| satır | değerlendirme | n | med6 | med7 | azalma [GA] | Wilcoxon p | başarı@25 6/7 | başarı@50 6/7 | "
+         "kapsama 7 | yarıçap medyan | atlanan | H4 (i) (ii) |"), "|---|" + "---|" * 12]
+    for mode, blocks in res.items():
+        for key, x in blocks.items():
+            ok = (x["reduction"] >= crit["median_reduction_min"] and x["wilcoxon_p"] < crit["wilcoxon_p_max"],
+                  x["coverage7"] >= crit["coverage_min"])
+            L.append(f"| {mode} | {key} | {x['n']} | {x['med6']:.1f} | {x['med7']:.1f} | {x['reduction']:.3f} "
+                     f"[{x['reduction_ci'][0]:.3f}, {x['reduction_ci'][1]:.3f}] | {x['wilcoxon_p']:.1e} | "
+                     f"{x['succ25'][0]:.3f}/{x['succ25'][1]:.3f} | {x['succ50'][0]:.3f}/{x['succ50'][1]:.3f} | "
+                     f"{x['coverage7']:.3f} | {x['radius7_median']:.0f} m | {x['skip_rate']:.3f} | "
+                     + " ".join("✓" if o else "✗" for o in ok) + " |")
+    L += ["", (f"**H4 {'sağlandı' if h4res['H4'] else 'sağlanmadı'}** (satır 7, havuz): (i) azalma "
+          f"{h4res['reduction']:.3f} ≥ {crit['median_reduction_min']} ve p = {h4res['wilcoxon_p']:.1e} < "
+          f"{crit['wilcoxon_p_max']} {'✓' if h4res['i'] else '✗'}; (ii) kapsama {h4res['coverage']:.3f} ≥ "
+          f"{crit['coverage_min']} {'✓' if h4res['ii'] else '✗'}.")]
+    (fo / "h4_test.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+    (fo / "h4_test.json").write_text(json.dumps({"results": res, "h4": h4res, "kappa": kappa, "gamma": gamma},
+                                                indent=2, ensure_ascii=False, default=float), encoding="utf-8")
+    print("\n".join(L))
+    if not rehearse:
+        log_run("72_m4_filter.py", Path("configs/h4.yaml"), 0, "test", "row7_reduction", round(h4res["reduction"], 5))
+        final_guard.done("72_h4")
+    return 0
+
+
 def traj(params: dict, h4: dict) -> None:
     cfg = F.FilterCfg(**json.loads((OUT / "tune.json").read_text(encoding="utf-8"))["selected"])
     regs = h4["tuning_regions"] + h4["calibration_regions"]
@@ -268,11 +324,15 @@ def main() -> int:
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--traj", action="store_true")
     ap.add_argument("--gamma", action="store_true")
+    ap.add_argument("--final", action="store_true", help="Faz 6: test bölgeleri, tek sefer (final_guard)")
+    ap.add_argument("--rehearse", action="store_true", help="--final kodunu calib'de dene (koruyucusuz)")
     a = ap.parse_args()
     h4 = yaml.safe_load(Path("configs/h4.yaml").read_text(encoding="utf-8"))
     params = json.loads(Path("results/faz4/m3/m3_params_h3_v1.json").read_text(encoding="utf-8"))
     if a.tune:
         tune(params, h4)
+    if a.final or a.rehearse:
+        return final(params, h4, rehearse=a.rehearse)
     if a.gamma:
         return gamma_sweep(params, h4)
     if a.traj:

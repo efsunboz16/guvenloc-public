@@ -68,6 +68,13 @@ def main() -> int:
     pairs = pd.read_csv("data/pairs/pairs_v1.csv", dtype={"region": str, "tile_region": str}).set_index("pair_id")
     d = frame_table(h2, h3, pairs)
     assert not TEST & set(d.region)
+    measure(d, pairs, params, verbose=True)
+    return 0
+
+
+def measure(d: pd.DataFrame, pairs: pd.DataFrame, params: dict, verbose: bool) -> None:
+    """Kare tablosu (pozitif çiftler, seçilen dönme, S, ölçümler) → meas_<bölge>.npz/.csv.
+    verbose=False (Faz 6 testi): hata özeti yazdırılmaz."""
     d = d.drop(columns=[c for c in ("tile_size_m", "tile_px", "gt_x", "gt_y", "label") if c in d]).join(
         pairs[["drone_path", "tile_lat", "tile_lon", "tile_size_m", "tile_px", "scale_s", "gt_x", "gt_y",
                "drone_lat", "drone_lon", "drone_m_per_px", "gt_heading", "terrain"]], on="pair_id")
@@ -93,9 +100,9 @@ def main() -> int:
                             P=np.stack([np.pad(x, ((0, m - x.shape[0]), (0, m - x.shape[1]))) for x in Ps]))
         g = g.assign(cell_m=vcfg.cell_m * POOL)
         g.drop(columns=[c for c in g.columns if c.startswith("block")]).to_csv(OUT / f"meas_{rid}.csv", index=False)
-        print(f"{rid}: {len(g)} kare, P {Ps[0].shape}, {time.time() - t0:.0f} s; kabul {g.accept.mean():.3f}, "
-              f"tek kare medyan hata {g.err_m.median():.0f} m", flush=True)
-    return 0
+        print(f"{rid}: {len(g)} kare, P {Ps[0].shape}, {time.time() - t0:.0f} s"
+              + (f"; kabul {g.accept.mean():.3f}, tek kare medyan hata {g.err_m.median():.0f} m" if verbose else ""),
+              flush=True)
 
 
 if __name__ == "__main__":

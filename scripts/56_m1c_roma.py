@@ -77,6 +77,30 @@ def tiles_for(pairs: pd.DataFrame, path: Path) -> np.ndarray:
     return arr
 
 
+def frames_for(drone_paths: pd.Series) -> tuple[np.ndarray, np.ndarray]:
+    """51_m1_prep ile aynı ön işleme (JPEG 1/4 + merkez kare 321) labels_v2 dışındaki kareler için;
+    data/m1/frames_321_extra.npy + .csv'de önbelleklenir. Dönüş: (kareler, pairs sırasındaki indeksler)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    import cv2
+    arr_p, idx_p = Path("data/m1/frames_321_extra.npy"), Path("data/m1/frames_321_extra.csv")
+    have = pd.read_csv(idx_p).drone_path.tolist() if idx_p.exists() else []
+    arr = np.load(arr_p) if arr_p.exists() else np.zeros((0, 321, 321, 3), np.uint8)
+    new = sorted(set(drone_paths) - set(have))
+    if new:
+        def load(rel):
+            im = cv2.imread(str(DATA / rel), cv2.IMREAD_REDUCED_COLOR_4)
+            if im is None:
+                raise FileNotFoundError(rel)
+            return M.prep_square(im, 321)
+        with ThreadPoolExecutor(8) as ex:
+            arr = np.concatenate([arr, np.stack(list(ex.map(load, new)))])
+        have += new
+        np.save(arr_p, arr)
+        pd.DataFrame({"drone_path": have}).to_csv(idx_p, index=False)
+    return arr, pd.Series(np.arange(len(have)), index=have)[drone_paths].to_numpy()
+
+
 TTA_DEG = (0.0, 10.0, 20.0, 30.0)     # F2-11: C8 eşdeğer ağda 45°'nin katları yapı gereği aynı; ara açılar farklı örnekleme
 
 
@@ -101,8 +125,11 @@ def m1_rot_probs(model: str, pairs: pd.DataFrame, tiles: np.ndarray) -> np.ndarr
     angles = TTA_DEG if tta else (0.0,)
     nets = [_net(n) for n in names]
     lab = pd.read_csv("data/m1/labels_v2.csv", dtype={"region": str})
-    frames = np.load("data/m1/frames_321.npy", mmap_mode="r")
-    fidx = pd.Series(np.arange(len(lab)), index=lab.drone_path)[pairs.drone_path].to_numpy()
+    if pairs.drone_path.isin(lab.drone_path).all():
+        frames = np.load("data/m1/frames_321.npy", mmap_mode="r")
+        fidx = pd.Series(np.arange(len(lab)), index=lab.drone_path)[pairs.drone_path].to_numpy()
+    else:                                         # Faz 6: test kareleri frames_321'de yok → aynı ön işleme, önbellekli
+        frames, fidx = frames_for(pairs.drone_path)
     probs, phis = [], []
     for i in range(0, len(pairs), 64):
         d = torch.from_numpy(np.ascontiguousarray(frames[fidx[i:i + 64]])).cuda()
@@ -209,6 +236,8 @@ def main() -> int:
     ap.add_argument("--model", default="C5_pencere")
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--sec", action="store_true", help="4e'nin q'sunu val 04'te seç, calib'e dokunma")
+    ap.add_argument("--split", default="calib", choices=["calib", "test"],
+                    help="test: Faz 6, tek sefer, dondurulmuş manifest (guvenloc/final_guard)")
     a = ap.parse_args()
     cfg = yaml.safe_load(Path("configs/base.yaml").read_text(encoding="utf-8"))
     sel = yaml.safe_load(Path("configs/baselines.yaml").read_text(encoding="utf-8"))
@@ -223,12 +252,18 @@ def main() -> int:
         sys.exit(f"{qfile} yok: önce --sec ile q seçilmeli (val 04)")
     q_e = float(json.loads(qfile.read_text(encoding="utf-8"))["selected"]["q"])
     pairs_all = pd.read_csv("data/pairs/pairs_v1.csv", dtype={"region": str, "tile_region": str})
-    feats = pd.read_csv("results/faz1/baselines/feats_v1_calib_px5.csv")
+    out_dir = OUT
+    if a.split == "test":
+        from guvenloc import final_guard
+        final_guard.check("56_h1")
+        out_dir = Path("results/faz6/final")
+        out_dir.mkdir(parents=True, exist_ok=True)
+    feats = pd.read_csv(f"results/faz1/baselines/feats_v1_{a.split}_px5.csv")
     base = B40.evaluate_rows(feats, pairs_all, taus_b)            # satır 1–3 (aynı çiftler)
     pids = sorted(base.pair_id.unique())
     pairs = pairs_all.set_index("pair_id").loc[pids].reset_index()
 
-    tiles = tiles_for(pairs, Path("data/m1/calib_pairs_513.npy"))
+    tiles = tiles_for(pairs, Path(f"data/m1/{a.split}_pairs_513.npy"))
     probs, phi_hat = m1_rot_probs(a.model, pairs, tiles)
     taus = train_taus(alpha, taus_b[2])
     tk = tau_k(taus)
@@ -319,8 +354,8 @@ def main() -> int:
              "4a": "M1-C tek çağrı", "4b": "M1-C ilk 2 dönme", "4c": "M1-C ardışık (τ₂ ile dur)",
              "4d": "M1-C ardışık, en çok 2", "4e": f"M1-C güvene bağlı bütçe (q = {q_e})",
              "4k": "kahin dönme, en çok 2 (tavan)"}
-    tag = f"{a.model}_calib"
-    lines = [f"# Satır 4 (M1-C → RoMa) — calib, model `{a.model}`", "",
+    tag = f"{a.model}_{a.split}"
+    lines = [f"# Satır 4 (M1-C → RoMa) — {a.split}, model `{a.model}`", "",
              (f"Eşikler: satır 1–3 {taus_b}; satır 4 {taus} (eğitim negatifleri, FAR-neg ≤ {alpha}). "
              f"M1-C pozitiflerde medyan yön hatası {np.median(m1_err):.1f}°, < 45° %{100 * (m1_err <= 45).mean():.1f}. "
              f"GA %95, {B} tekrar, {B40.BLOCK} karelik bloklar."), "",
@@ -343,7 +378,8 @@ def main() -> int:
               f"(ii) çağrı/pozitif kare {h1res['calls_per_pos_frame']:.2f} ≤ {crit['calls_per_pos_frame_max']} → "
               f"{'✓' if h1res['ii'] else '✗'}; (iii) GA alt sınırı {diffs[r4][1]:+.3f} > "
               f"−{crit['noninferiority_margin']} → {'✓' if h1res['iii'] else '✗'}. "
-              f"**H1 {'sağlandı' if h1res['H1'] else 'sağlanmadı'}** (calib; karar testte verilir).")]
+              f"**H1 {'sağlandı' if h1res['H1'] else 'sağlanmadı'}** "
+              + ("(calib; karar testte verilir)." if a.split == "calib" else "(TEST, Faz 6, tek sefer)."))]
     lines += ["", "Bölge kırılımı (başarı@25 · çağrı/kare):", "", "| bölge | " + " | ".join(names) + " |",
               "|---|" + "---|" * len(names)]
     for reg, gg in allr[allr.is_pos].groupby("region"):
@@ -352,10 +388,10 @@ def main() -> int:
             x = gg[gg.row == row]
             cells.append(f"{(x.accept & (x.err_m <= 25)).mean():.3f} · {x.calls.mean():.2f}")
         lines.append(f"| {reg} | " + " | ".join(cells) + " |")
-    md = OUT / f"roma_row4_{tag}.md"
+    md = out_dir / f"roma_row4_{tag}.md"
     md.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    allr.to_csv(OUT / f"roma_row4_decisions_{tag}.csv", index=False)
-    (OUT / f"roma_row4_{tag}.json").write_text(json.dumps(
+    allr.to_csv(out_dir / f"roma_row4_decisions_{tag}.csv", index=False)
+    (out_dir / f"roma_row4_{tag}.json").write_text(json.dumps(
         {"taus": taus, "q_4e": q_e, "taus_baseline": taus_b, "summary": summ,
          "mcnemar": [{"a": i, "b": j, **t, "p_holm": float(pa)} for (i, j), t, pa in zip(comps, tests, padj, strict=True)],
          "m1_median_err": float(np.median(m1_err)), "m1_acc45": float((m1_err <= 45).mean()),
@@ -364,8 +400,10 @@ def main() -> int:
     print("\n".join(lines))
     for row in ("4a", "4b", "4c", "4d", "4e"):
         for k in ("success@25", "far_neg", "calls_mean"):
-            log_run("56_m1c_roma.py", Path("configs/baselines.yaml"), seed, "calib", f"row{row}_{k}",
+            log_run("56_m1c_roma.py", Path("configs/baselines.yaml"), seed, a.split, f"row{row}_{k}",
                     round(float(summ[row][k]), 5), notes=f"model={a.model}")
+    if a.split == "test":
+        final_guard.done("56_h1")
     return 0
 
 

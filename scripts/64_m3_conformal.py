@@ -1,7 +1,7 @@
 """Faz 4 – Modül 3 split conformal: H3 kuru denemeleri (bölge kayması), `configs/h3.yaml`.
 
   python scripts/64_m3_conformal.py            # dry_runs (05→11, 11→05, 05+11→04) + calib içi tam uyum
-  (test bölgeleri 02, 03, 06: Faz 6, tek sefer — bu betik reddeder)
+  python scripts/64_m3_conformal.py --final    # Faz 6: 05+11 → test (02, 03, 06), tek sefer (guvenloc/final_guard)
 
 Satır 6 = satır 5a (h2_v3 skoru S, M1-C en olası dönme, hacim tepesi, σ̂ = spread_m) + conformal (τ, q̂).
 04 için S, 04 dışarıda bırakılarak yeniden eğitilir; dönme M1-C birleşiminin 04 tahmininden (04 M1-C eğitiminde yok).
@@ -96,11 +96,76 @@ def run_pair(fit_d: pd.DataFrame, ev_d: pd.DataFrame, h3: dict) -> dict:
     return out
 
 
+def final(h3: dict, h2: dict, rehearse: bool = False) -> int:
+    """H3 TEST: kalibrasyon 05+11 (calib, 4a dönmesi) → değerlendirme 02+03+06 (test, M1-C 4a dönmesi, Faz 6 56 kararı)."""
+    from guvenloc import final_guard
+    if not rehearse:
+        final_guard.check("64_h3")
+    out = Path("results/faz6/rehearsal" if rehearse else "results/faz6/final")
+    pairs_all = pd.read_csv("data/pairs/pairs_v1.csv", dtype={"region": str, "tile_region": str})
+    pairs = pairs_all.set_index("pair_id")
+    feats, model = h2["score_model"]["features"], h3["system"]["m1_model"]
+    tr, ca, te = (S61.load_split(s, pairs) for s in ("train", "calib", "calib" if rehearse else "test"))
+    sm = fit_S(tr, h2)
+    ca["S"] = S61.predict(sm, S61.feat_matrix(ca, feats))
+    te["S"] = S61.predict(sm, S61.feat_matrix(te, feats))
+    dec_c = pd.read_csv(S61.M1_DECISIONS.format(model=model))
+    dec_t = pd.read_csv(S61.M1_DECISIONS.format(model=model) if rehearse
+                        else out / f"roma_row4_decisions_{model}_test.csv")
+    ca_f = frame_rows(ca, dec_c[dec_c.row == "4a"].set_index("pair_id").rot)
+    te_f = frame_rows(te, dec_t[dec_t.row == "4a"].set_index("pair_id").rot)
+    ca_f = ca_f[ca_f.region.isin(h3["calibration_regions"])].join(pairs[["terrain", "agl_m"]], on="pair_id")
+    te_f = te_f.join(pairs[["terrain", "agl_m"]], on="pair_id")
+    res = {"05+11 → test": run_pair(ca_f, te_f, h3)}
+    for r in sorted(te_f.region.unique()):
+        res[f"05+11 → {r}"] = run_pair(ca_f, te_f[te_f.region == r], h3)
+    crit = h3["criteria"]
+    v = res["05+11 → test"][h3["rows"]["main"]]
+    h3res = {"far_neg": v["far_neg"], "coverage": v["coverage"], "coverage_hard": v["coverage_hard"],
+             "i": v["far_neg"] <= crit["far_neg_max"], "ii": v["coverage"] >= crit["coverage_min"],
+             "iii": v["coverage_hard"] >= crit["coverage_hard_min"]}
+    h3res["H3"] = bool(h3res["i"] and h3res["ii"] and h3res["iii"])
+    lines = [f"# Faz 6 — H3 {'PROVA (calib)' if rehearse else 'TEST (02, 03, 06)'}, `configs/h3.yaml` {h3['version']}", "",
+             f"Kalibrasyon 05+11 (calib), değerlendirme test; α = {h3['alpha']}, β = {h3['beta']}. Tek sefer.", ""]
+    for key, rows in res.items():
+        lines += [f"## {key}", "", ("| satır | FAR-neg [GA] | kabul (poz.) | kapsama [GA] | zor çeyrek [GA] | "
+                  "yarıçap medyan / ort. | ölçütler |"), "|---|---|---|---|---|---|---|"]
+        for row, x in rows.items():
+            ok = (x["far_neg"] <= crit["far_neg_max"], x["coverage"] >= crit["coverage_min"],
+                  x["coverage_hard"] >= crit["coverage_hard_min"])
+            lines.append(f"| {row} | {x['far_neg']:.3f} [{x['far_neg_cp'][0]:.3f}, {x['far_neg_cp'][1]:.3f}] | "
+                         f"{x['accept_pos']:.3f} | {x['coverage']:.3f} [{x['coverage_cp'][0]:.3f}, "
+                         f"{x['coverage_cp'][1]:.3f}] (n {x['n_pos_acc']}) | {x['coverage_hard']:.3f} "
+                         f"[{x['coverage_hard_cp'][0]:.3f}, {x['coverage_hard_cp'][1]:.3f}] | "
+                         f"{x['radius_median_m']:.0f} / {x['radius_mean_m']:.0f} m | "
+                         + " ".join("✓" if o else "✗" for o in ok) + " |")
+        lines += ["", "Arazi (satır 6): " + "; ".join(
+            f"{t}: FAR-neg {x['far_neg']:.3f}, kapsama {x['coverage']:.3f} (n {x['n_pos_acc']})"
+            for t, x in rows["6"]["terrain"].items()), ""]
+    lines.append(f"**H3 {'sağlandı' if h3res['H3'] else 'sağlanmadı'}** (satır {h3['rows']['main']}): "
+                 f"(i) FAR-neg {h3res['far_neg']:.3f} ≤ {crit['far_neg_max']} {'✓' if h3res['i'] else '✗'}; "
+                 f"(ii) kapsama {h3res['coverage']:.3f} ≥ {crit['coverage_min']} {'✓' if h3res['ii'] else '✗'}; "
+                 f"(iii) zor çeyrek {h3res['coverage_hard']:.3f} ≥ {crit['coverage_hard_min']} "
+                 f"{'✓' if h3res['iii'] else '✗'}.")
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "h3_test.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (out / "h3_test.json").write_text(json.dumps({"results": res, "h3": h3res}, indent=2, ensure_ascii=False,
+                                                 default=float), encoding="utf-8")
+    print("\n".join(lines))
+    if not rehearse:
+        for m in ("far_neg", "coverage", "coverage_hard"):
+            log_run("64_m3_conformal.py", Path("configs/h3.yaml"), 0, "test", f"row6_{m}", round(h3res[m], 5))
+        final_guard.done("64_h3")
+    return 0
+
+
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     h3 = yaml.safe_load(Path("configs/h3.yaml").read_text(encoding="utf-8"))
     h2 = yaml.safe_load(Path("configs/h2.yaml").read_text(encoding="utf-8"))
+    if "--final" in sys.argv or "--rehearse" in sys.argv:
+        return final(h3, h2, rehearse="--rehearse" in sys.argv)
     for dr in h3["dry_runs"]:
         if TEST & set(dr["fit"] + dr["eval"]):
             sys.exit("test bölgeleri Faz 6'da (h3.yaml)")
