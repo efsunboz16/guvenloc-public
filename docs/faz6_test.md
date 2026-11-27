@@ -11,6 +11,7 @@ Test bölgeleri 02, 03, 06 (6.525 çift, 2.177 pozitif kare). Ön-kayıtlar: `co
 | F6-2 | **Test kodu calib'de prova edildi ve birebir doğrulandı (testten önce).** Teste genişletilen betikler calib'de eski sonuçları aynen üretiyor: 56 (H1) karar dosyası bayt bayt aynı; 61 (H2) 117 alanın hepsi aynı; 64 (H3) `--rehearse` 05+11 → 05+11 satır 6 aynı; 72 (H4) `--rehearse` satır 7 ve 7-γ Faz 5 calib ile aynı. Testte eşikler/parametreler calib ve eğitimden gelir, testte hiçbir şey seçilmez: satır 1–3 τ eğitim, 4e q val 04, 5a ve 2v τ calib'de 4a başarısına eşlenmiş (h2), M3 τ/q̂ calib (F4-7), M4 ayar eğitim, κ ve γ calib (F5-5, F5-7) | Testte tek koşu hakkı olduğundan kod yolu önceden doğrulanmalıydı |
 | F6-3 | **Ablasyon tanımları (testten önce):** satır 4 = 4e (H1 satırı); satır 5 = M1-C 4a dönmesi, konum hacim tepesi, skor S, eşik h2 calib eşlemesi; satır 6 = aynı konum, kabul S > τ (conformal), yarıçap q̂σ̂; satır 7 = filtre, yalnız pozitif kareler (negatif çift kavramı yok). Başarı@k = kabul ∧ hata ≤ k; medyan hata tüm pozitiflerde kabulden bağımsız; AUROC skor ~ (pozitif ∧ hata ≤ 25 m, satırın kendi konumu). Ardışık satırlar 2–1, 3–2, 4–2, 5–4, 6–5, 7–6: McNemar + Wilcoxon, 12 test birlikte Holm. Kırılımlar: arazi, irtifa (eğitim+calib AGL üçte birlik sınırları), yön (en yakın ana yön), bölge | Satır tanımları MIMARI 6A'yı izler; H2'nin ortak etiketi (RANSAC merkezi) ret skorunu sınar, ablasyonun satır 5'i ise M2'nin konumunu kullanır (ikisi ayrı raporlanır) |
 | F6-4 | **Test bir kez koşuldu (27.11, `scripts/90_ablation.py --final`), kilitler yerinde; sonuçlar olduğu gibi raporlanır.** Koşudan sonra M1-C'nin test yön hatası (82,4°) calib'e (8,9°) göre şüpheli bulundu ve kod yolu ayrıca denetlendi: test olasılıkları bağımsız canlı yoldan (`67.M1Live`, 4G'de calib'de %100 uyuşan) 12 çiftte yeniden hesaplandı, sonuçlar birebir aynı → kod hatası yok, yeniden koşu yok | F6-1: kilit yalnız kod hatasında açılır; hata bulunmadı |
+| F6-5 | **Prototip tasarımı (6C):** Gradio 6.32, `app/` (hesap `core.py`, arayüz `app.py`), yalnız 127.0.0.1. Mod 1 canlı hat (M1-C → RoMa → M2 → M3, `pipeline.Localizer`, h3_v1 parametreleri); karo = seçilen karenin veri kümesindeki pozitif uydu karosu (yüklenen görüntü de bu karoyla eşleştirilir; serbest konumdan karo arama kapsam dışı). Mod 2 filtreyi önceden hesaplanmış kare ölçümleriyle (71/80) dondurulmuş ayar, κ ve γ ile canlı koşar (bölge başına < 1 s) | Karo arama (konum önceliğinden karo seçimi) projenin kapsamında değil: bütün deneyler pozitif karo protokolüyle; prototip aynı protokolü gösteriyor |
 
 ## 6A. Test sonuçları (`docs/sonuclar/faz6/`)
 
@@ -76,4 +77,18 @@ RTX 3090, RoMa v2 `base`, 60 calib karesi, bileşen medyanları: RoMa 260 ms, uy
 4 TTA) 43 ms, hacim 53 ms, RANSAC 12 ms (CPU), drone↔drone RoMa 221 ms, filtre adımı 0,4 ms. Satır 7 ≈ 684 ms/kare
 (γ = 50 m ile 547). **En yüksek GPU belleği 3,59 GB → 8 GB'lık kartta çalışır.** M1'in çağrı tasarrufu: satır 4'te
 2,05 çağrı/kare (satır 2/3: 4) → kare başına ≈ 670 ms kazanç; ama testte bu tasarruf başarı@25'te −0,022 bedelle geliyor.
+
+## 6C. Gradio prototipi (`app/`)
+
+```
+python app/app.py          # http://127.0.0.1:7860 — RoMa v2 base, ≈ 3,6 GB GPU, ilk yükleme ≈ 10 s
+```
+
+- **Mod 1 — tek kare:** bölge + kare seç (ya da kendi drone görüntünü yükle) → uydu karosu üzerinde tahmin ve yön oku,
+  q̂·σ̂ güven dairesi (yeşil kabul / kırmızı ret), GT; tablo: enlem/boylam, yön, yarıçap, S/τ, M1-C dönme olasılıkları,
+  inlier, GT'ye hata, süre (≈ 0,5–1,6 s).
+- **Mod 2 — uçuş:** bölge seç → oynatıcı (▶/⏸, adım, harita genişliği). Uydu haritası filtre kestirimine ortalanır: GT
+  ve filtre yörüngesi, parçacık bulutu, κ·yayılım güven dairesi, tek kare tahminleri (M3 kabul/ret), uydu eşleştirmesi
+  atlanan kareler (γ = 50 m); tablo: kare ve birikimli hata, atlanan oran, kabul oranı, kapsama, sıfırlamalar.
+- Uç noktalar `gradio_client` ile denendi (`/run_single`, `/load_flight`, `/tick`). Demo videosu bu arayüzden kaydedilir.
 

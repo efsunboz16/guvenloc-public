@@ -12,6 +12,7 @@ rasterio==1.5.2
 gdown==6.5.2
 wxbs_benchmark==0.0.4      # 1D WxBS tekrarlama (kornia getirir)
 pyyaml
+gradio==6.32.0            # Faz 6C prototip (app/)
 # Faz 2 — Modül 1 (escnn). lie_learn'ün PyPI paketi numpy 1.x ile derlenmiş; numpy 2 için kaynaktan
 # derlenir (sudo apt install python3.12-dev gerekir). Sırayla, numpy/scipy sabit kalacak şekilde:
 #   pip install --no-deps "lie_learn @ git+https://github.com/AMLab-Amsterdam/lie_learn@edf012f5f60af320175d2e6269db78b984b5bfc3"

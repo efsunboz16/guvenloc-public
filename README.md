@@ -77,6 +77,11 @@ Modüller arası veri biçimleri [INTERFACES.md](INTERFACES.md) dosyasındadır.
   ```
   Ayrıntı: [docs/faz5_m4.md](docs/faz5_m4.md).
 
+- **Faz 6** (`faz6/test`): test sonuçları ve ablasyon [docs/faz6_test.md](docs/faz6_test.md); prototip:
+  ```
+  python app/app.py          # Gradio, http://127.0.0.1:7860 (Mod 1 tek kare, Mod 2 uçuş)
+  ```
+
 Veri, önbellek ve sonuç dosyaları `.gitignore` ile dışarıda tutulur (`results/runs.csv` hariç);
 veri lisansları doğrulanmadan paylaşılmaz.
 
