@@ -137,7 +137,7 @@ def main() -> int:
           f"→ 8 GB'lık kartta {'çalışır' if peak < 8 else 'ÇALIŞMAZ'}."),
           (f"M1 çağrı tasarrufu: satır 4 {calls.get('4', float('nan')):.2f} çağrı/kare, satır 2/3: 4 çağrı/kare "
           f"(RoMa başına {sat:.0f} ms → kare başına {4 * sat - rows['4']:.0f} ms kazanç, M1 maliyeti dahil)."),
-          (f"γ = {gamma['selected']} m ile uydu yolu karelerin %{100 * skip:.0f}'inde atlanır: satır 7 {rows['7']:.0f} → "
+          (f"γ = {gamma['selected']} m ile uydu yolu kalibrasyonda karelerin %{100 * skip:.0f} oranında atlanır: satır 7 {rows['7']:.0f} → "
           f"{rows['7-γ']:.0f} ms/kare.")]
     (OUT / "speed.md").write_text("\n".join(L) + "\n", encoding="utf-8")
     print("\n".join(L))

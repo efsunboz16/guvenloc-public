@@ -119,6 +119,35 @@ def traj_rows() -> dict:
     return _TRAJ["rows"]
 
 
+F6_STEPS = [("56_h1", "H1 — M1-C (satır 1–4)"), ("61_h2", "H2 — ret skoru S (satır 5)"),
+            ("64_h3", "H3 — conformal (satır 6)"), ("72_h4", "H4 — filtre (satır 7)"), ("90_ablation", "Ablasyon tablosu")]
+
+
+def faz6() -> dict:
+    locks = ROOT / "results/faz6/final/locks"
+    log = ROOT / "logs/m4_f6final.log"
+    lines = [x for x in log.read_text(encoding="utf-8", errors="replace").splitlines() if x.strip()] if log.exists() else []
+    cur = next((x[4:] for x in reversed(lines) if x.startswith("=== ")), "")
+    steps = []
+    for key, name in F6_STEPS:
+        lk = locks / f"{key}.done"
+        steps.append({"key": key, "name": name, "done": lk.exists(),
+                      "at": lk.read_text().strip() if lk.exists() else "",
+                      "running": (not lk.exists()) and (f"scripts/{key.split('_')[0]}_" in cur
+                                                         or (key == "90_ablation" and all(s["done"] for s in steps)))})
+    hyp = {}
+    for h, f in (("H1", None), ("H2", "h2_test.json"), ("H3", "h3_test.json"), ("H4", "h4_test.json")):
+        p = ROOT / "results/faz6/final" / (f or "")
+        if h == "H1":
+            p = next((ROOT / "results/faz6/final").glob("roma_row4_*_test.json"), p)
+        j = jload(p) if p.is_file() else None
+        if j:
+            hyp[h] = bool(j.get(h.lower(), {}).get(h))
+    return {"steps": steps, "tail": lines[-12:], "finished": any("F6_BITTI" in x for x in lines),
+            "error": any("Traceback" in x for x in lines), "hyp": hyp,
+            "frozen": (ROOT / "configs/final_manifest.json").exists()}
+
+
 def status() -> dict:
     tune = jload(R5 / "tune.json")
     top = sorted(tune["grid"], key=lambda x: x["med7"])[:8] if tune else []
@@ -138,7 +167,7 @@ def status() -> dict:
                       "split": split.get(r, "")}
     return {"steps": steps(), "criteria": criteria(), "dry": jload(R5 / "h4_dry.json"), "tune_top": top,
             "tune_sel": tune["selected"] if tune else None, "seq": seq, "regions": regions,
-            "decisions": decisions(), "jobs": jobs(), "gpu": gpu()}
+            "decisions": decisions(), "jobs": jobs(), "gpu": gpu(), "faz6": faz6()}
 
 
 PAGE = r"""<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -171,7 +200,9 @@ svg{display:block;width:100%}.tip{position:fixed;pointer-events:none;background:
 </style></head><body><main>
 <h1>GüvenLoc · Faz 5 — zamansal füzyon (parçacık filtresi)</h1>
 <div class="sub" id="upd">yükleniyor…</div>
-<h2>Adımlar</h2><div class="steps" id="steps"></div>
+<h2>Faz 6 — TEST koşusu (02, 03, 06; tek sefer)</h2>
+<div class="card"><div class="steps" id="f6steps"></div><div class="note" id="f6note"></div><pre id="f6tail"></pre></div>
+<h2>Faz 5 adımları</h2><div class="steps" id="steps"></div>
 <h2>H4 — calib kuru denemesi (test değil; ölçütler <code>configs/h4.yaml</code>)</h2>
 <div class="grid g4" id="h4"></div><div class="note" id="h4note"></div>
 <h2>Yörünge</h2>
@@ -196,7 +227,11 @@ const f1=x=>x==null?"–":x.toFixed(1).replace(".",","),f0=x=>x==null?"–":Math
 function showTip(e,h){tip.innerHTML=h;tip.style.display="block";const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=x+"px";tip.style.top=y+"px"}
 function hideTip(){tip.style.display="none"}
 function card(k,v,cls,sub){return `<div class="card"><div class="k">${k}</div><div class="v ${cls||""}">${v}</div>${sub?`<div class="note">${sub}</div>`:""}</div>`}
-function renderStatus(){const s=S;$("upd").textContent="Son güncelleme "+new Date().toLocaleTimeString("tr-TR")+" · yalnız okur · 5 sn'de bir";
+function renderF6(f){if(!f)return;
+ $("f6steps").innerHTML=f.steps.map(x=>`<div class="step ${x.done?"done":""}"><b>${x.key}</b><div>${x.done?"✓":x.running?"⏳":"○"} ${x.name}</div><div class="d">${x.done?"bitti "+x.at.slice(11):x.running?"çalışıyor":"sırada"}${f.hyp[x.name.slice(0,2)]!==undefined?" · "+(f.hyp[x.name.slice(0,2)]?'<span class="ok">sağlandı</span>':'<span class="no">sağlanmadı</span>'):""}</div></div>`).join("");
+ $("f6note").innerHTML=(f.frozen?"Dondurma: configs/final_manifest.json ✓ · ":"")+(f.error?'<span class="no">HATA — günlüğe bak</span>':f.finished?'<span class="ok">Test koşusu bitti</span>':"çalışıyor…");
+ $("f6tail").textContent=f.tail.join("\n")}
+function renderStatus(){const s=S;renderF6(s.faz6);$("upd").textContent="Son güncelleme "+new Date().toLocaleTimeString("tr-TR")+" · yalnız okur · 5 sn'de bir";
  $("steps").innerHTML=s.steps.map(x=>`<div class="step ${x.done?"done":""}"><b>${x.id}</b><div>${x.done?"✓":"○"} ${x.name}</div><div class="d">${x.detail}</div></div>`).join("");
  const c=s.criteria,d=s.dry&&s.dry["7"];if(d){const p=d.pooled_in_sample,a=d["kappa 05 → 11"],b=d["kappa 11 → 05"];
   const okR=p.reduction>=c.median_reduction_min,okW=p.wilcoxon_p<c.wilcoxon_p_max,okC=p.coverage7>=c.coverage_min;
