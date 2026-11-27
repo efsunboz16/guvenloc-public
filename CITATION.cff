@@ -4,6 +4,6 @@ title: "GüvenLoc: drone karesinden uydu haritasında güvenilir konum (TÜBİTA
 version: "1.0"
 date-released: 2026-11-27
 license: MIT
-repository-code: "https://github.com/efsunboz16/guvenloc"
+repository-code: "https://github.com/efsunboz16/guvenloc-public"
 authors:
   - name: "GüvenLoc proje ekibi"

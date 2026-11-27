@@ -94,7 +94,8 @@ kopyaları `docs/sonuclar/` altındadır.
 
 1. **UAV-VisLoc** (16,4 GB, Google Drive sürümü): `bash scripts/10_download_data.sh` yönergesiyle
    `data/UAV_VisLoc_dataset/` altına; doğrulama `python scripts/11_verify_data.py data/UAV_VisLoc_dataset --expect-frames 6774 --expect-maps 11 --checksums`.
-2. **Sürüm paketi** `guvenloc-v1.0-paket.tar.gz` (GitHub Release eki, ≈ 145 MB; görüntü içermez): M1-C ağırlıkları,
+2. **Sürüm paketi** `guvenloc-v1.0-paket.tar.gz` (≈ 145 MB; görüntü içermez; UAV-VisLoc yazarlarının onayından sonra
+   GitHub Release eki olarak yayımlanacak, F6-6): M1-C ağırlıkları,
    çift listesi, M1 etiketleri, M3 parametreleri. `python scripts/95_release.py --unpack guvenloc-v1.0-paket.tar.gz`
    sha256'ları doğrular ve dosyaları yerlerine koyar. Paket bu depodan `python scripts/95_release.py` ile üretilir.
 

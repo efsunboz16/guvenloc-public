@@ -38,7 +38,7 @@ ALLOWED_PT_KEYS = {"state_dict", "lr", "cfg", "sat_pool"}
 
 README = """# GüvenLoc {v} — sürüm paketi
 
-Kod: https://github.com/efsunboz16/guvenloc (MIT, `LICENSE`). Bu paket kodu değil, kodun yeniden üretim için
+Kod: https://github.com/efsunboz16/guvenloc-public (MIT, `LICENSE`). Bu paket kodu değil, kodun yeniden üretim için
 gerektirdiği ve veri kümesinden yeniden üretilmesi uzun süren dosyaları içerir. **Görüntü içermez** (F6-6).
 
 | Klasör | İçerik | Depodaki yeri |
